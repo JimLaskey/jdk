@@ -1,0 +1,793 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Frames src/jdk.compiler/share/classes/com/sun/tools/javac/parser/JavadocTokenizer.java</title>
+    <link rel="stylesheet" href="../../../../../../../../../style.css" />
+    <script type="text/javascript" src="../../../../../../../../../navigation.js"></script>
+  </head>
+<body onkeypress="keypress(event);">
+<a name="0"></a>
+<hr />
+<pre>  1 /*
+<a name="1" id="anc1"></a><span class="line-modified">  2  * Copyright (c) 2004, 2020, Oracle and/or its affiliates. All rights reserved.</span>
+  3  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
+  4  *
+  5  * This code is free software; you can redistribute it and/or modify it
+  6  * under the terms of the GNU General Public License version 2 only, as
+  7  * published by the Free Software Foundation.  Oracle designates this
+  8  * particular file as subject to the &quot;Classpath&quot; exception as provided
+  9  * by Oracle in the LICENSE file that accompanied this code.
+ 10  *
+ 11  * This code is distributed in the hope that it will be useful, but WITHOUT
+ 12  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ 13  * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+ 14  * version 2 for more details (a copy is included in the LICENSE file that
+ 15  * accompanied this code).
+ 16  *
+ 17  * You should have received a copy of the GNU General Public License version
+ 18  * 2 along with this work; if not, write to the Free Software Foundation,
+ 19  * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
+ 20  *
+ 21  * Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
+ 22  * or visit www.oracle.com if you need additional information or have any
+ 23  * questions.
+ 24  */
+ 25 
+ 26 package com.sun.tools.javac.parser;
+ 27 
+ 28 import com.sun.tools.javac.parser.Tokens.Comment;
+ 29 import com.sun.tools.javac.parser.Tokens.Comment.CommentStyle;
+ 30 import com.sun.tools.javac.util.*;
+ 31 
+<a name="2" id="anc2"></a><span class="line-modified"> 32 import java.nio.CharBuffer;</span>
+<span class="line-added"> 33 import java.util.Arrays;</span>
+ 34 import java.util.regex.Pattern;
+ 35 
+<a name="3" id="anc3"></a><span class="line-modified"> 36 /**</span>
+<span class="line-modified"> 37  * An extension to the base lexical analyzer (JavaTokenizer) that</span>
+<span class="line-modified"> 38  * captures and processes the contents of doc comments. It does</span>
+<span class="line-modified"> 39  * so by stripping the leading whitespace and comment starts from</span>
+<span class="line-modified"> 40  * each line of the Javadoc comment.</span>
+
+ 41  *
+ 42  *  &lt;p&gt;&lt;b&gt;This is NOT part of any supported API.
+ 43  *  If you write code that depends on this, you do so at your own risk.
+ 44  *  This code and its internal interfaces are subject to change or
+ 45  *  deletion without notice.&lt;/b&gt;
+ 46  */
+ 47 public class JavadocTokenizer extends JavaTokenizer {
+<a name="4" id="anc4"></a><span class="line-added"> 48     /**</span>
+<span class="line-added"> 49      * The factory that created this Scanner.</span>
+<span class="line-added"> 50      */</span>
+<span class="line-added"> 51     final ScannerFactory fac;</span>
+ 52 
+<a name="5" id="anc5"></a><span class="line-modified"> 53     /**</span>
+<span class="line-modified"> 54      * Create a tokenizer from the input character buffer. The input buffer</span>
+<span class="line-added"> 55      * content would typically be a Javadoc comment extracted by</span>
+<span class="line-added"> 56      * JavaTokenizer.</span>
+<span class="line-added"> 57      *</span>
+<span class="line-added"> 58      * @param fac  the factory which created this Scanner.</span>
+<span class="line-added"> 59      * @param cb   the input character buffer.</span>
+ 60      */
+<a name="6" id="anc6"></a><span class="line-modified"> 61     protected JavadocTokenizer(ScannerFactory fac, CharBuffer cb) {</span>
+<span class="line-modified"> 62         super(fac, cb);</span>
+<span class="line-added"> 63         this.fac = fac;</span>
+ 64     }
+ 65 
+<a name="7" id="anc7"></a><span class="line-modified"> 66     /**</span>
+<span class="line-modified"> 67      * Create a tokenizer from the input array. The input buffer</span>
+<span class="line-added"> 68      * content would typically be a Javadoc comment extracted by</span>
+<span class="line-added"> 69      * JavaTokenizer.</span>
+<span class="line-added"> 70      *</span>
+<span class="line-added"> 71      * @param fac     factory which created this Scanner</span>
+<span class="line-added"> 72      * @param array   input character array.</span>
+<span class="line-added"> 73      * @param length  length of the meaningful content in the array.</span>
+ 74      */
+<a name="8" id="anc8"></a><span class="line-modified"> 75     protected JavadocTokenizer(ScannerFactory fac, char[] array, int length) {</span>
+<span class="line-modified"> 76         super(fac, array, length);</span>
+<span class="line-added"> 77         this.fac = fac;</span>
+ 78     }
+ 79 
+ 80     @Override
+ 81     protected Comment processComment(int pos, int endPos, CommentStyle style) {
+<a name="9" id="anc9"></a><span class="line-modified"> 82         char[] buf = getRawCharacters(pos, endPos);</span>
+<span class="line-modified"> 83         return new JavadocComment(style, fac, buf, pos);</span>
+ 84     }
+ 85 
+ 86     /**
+<a name="10" id="anc10"></a><span class="line-modified"> 87      * An extension of BasicComment used to extract the relevant portion</span>
+<span class="line-modified"> 88      * of a Javadoc comment.</span>
+
+
+ 89      */
+<a name="11" id="anc11"></a><span class="line-modified"> 90     protected static class JavadocComment extends BasicComment {</span>
+<span class="line-modified"> 91         /**</span>
+<span class="line-modified"> 92          * Pattern used to detect a well formed @deprecated tag in a JaavDoc</span>
+<span class="line-modified"> 93          * comment.</span>
+<span class="line-modified"> 94          */</span>
+<span class="line-modified"> 95         private static final Pattern DEPRECATED_PATTERN =</span>
+<span class="line-modified"> 96             Pattern.compile(&quot;(?sm).*^\\s*@deprecated( |$).*&quot;);</span>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 97 
+<a name="12" id="anc12"></a><span class="line-modified"> 98         /**</span>
+<span class="line-modified"> 99          * The relevant portion of the comment that is of interest to Javadoc.</span>
+<span class="line-modified">100          * Produced by invoking scanDocComment.</span>
+<span class="line-modified">101          */</span>
+<span class="line-added">102         private String docComment = null;</span>
+103 
+<a name="13" id="anc13"></a><span class="line-added">104         /**</span>
+<span class="line-added">105          * StringBuilder used to extract the relevant portion of the Javadoc comment.</span>
+<span class="line-added">106          */</span>
+<span class="line-added">107         private StringBuilder sb;</span>
+108 
+<a name="14" id="anc14"></a><span class="line-modified">109         /**</span>
+<span class="line-added">110          * Map used to map the extracted Javadoc comment&#39;s character positions back to</span>
+<span class="line-added">111          * the original source.</span>
+<span class="line-added">112          */</span>
+<span class="line-added">113         OffsetMap offsetMap = new OffsetMap();</span>
+<span class="line-added">114 </span>
+<span class="line-added">115         JavadocComment(CommentStyle cs, ScannerFactory sf, char[] array, int offset) {</span>
+<span class="line-added">116             super( cs, sf, array, offset);</span>
+<span class="line-added">117             this.sb = new StringBuilder();</span>
+<span class="line-added">118         }</span>
+119 
+<a name="15" id="anc15"></a><span class="line-modified">120         /**</span>
+<span class="line-added">121          * Add a character to the extraction buffer.</span>
+<span class="line-added">122          *</span>
+<span class="line-added">123          * @param ch  character to add.</span>
+<span class="line-added">124          */</span>
+<span class="line-added">125         protected void put(char ch) {</span>
+<span class="line-added">126             offsetMap.add(sb.length(), offsetPosition());</span>
+<span class="line-added">127             sb.append(ch);</span>
+<span class="line-added">128         }</span>
+129 
+130         /**
+<a name="16" id="anc16"></a><span class="line-modified">131          * Add a code point to the extraction buffer.</span>
+<span class="line-modified">132          *</span>
+<span class="line-modified">133          * @param codePoint  code point to add.</span>
+<span class="line-modified">134          */</span>
+<span class="line-added">135         protected void putCodePoint(int codePoint) {</span>
+<span class="line-added">136             offsetMap.add(sb.length(), offsetPosition());</span>
+<span class="line-added">137             sb.appendCodePoint(codePoint);</span>
+<span class="line-added">138         }</span>
+139 
+<a name="17" id="anc17"></a><span class="line-modified">140         /**</span>
+<span class="line-modified">141          * Add current character or code point to the extraction buffer.</span>
+<span class="line-added">142          */</span>
+<span class="line-added">143         protected void put() {</span>
+<span class="line-added">144             if (isSurrogate()) {</span>
+<span class="line-added">145                 putCodePoint(getCodepoint());</span>
+<span class="line-added">146             } else {</span>
+<span class="line-added">147                 put(get());</span>
+<span class="line-added">148             }</span>
+149         }
+150 
+151         @Override
+152         public String getText() {
+153             if (!scanned &amp;&amp; cs == CommentStyle.JAVADOC) {
+154                 scanDocComment();
+155             }
+156             return docComment;
+157         }
+158 
+159         @Override
+160         public int getSourcePos(int pos) {
+<a name="18" id="anc18"></a><span class="line-modified">161             if (pos == Position.NOPOS) {</span>
+
+
+
+
+
+
+162                 return Position.NOPOS;
+<a name="19" id="anc19"></a><span class="line-modified">163             }</span>
+<span class="line-added">164 </span>
+<span class="line-added">165             if (pos &lt; 0 || pos &gt; docComment.length()) {</span>
+166                 throw new StringIndexOutOfBoundsException(String.valueOf(pos));
+<a name="20" id="anc20"></a>
+
+
+
+
+
+
+
+
+
+
+
+
+167             }
+<a name="21" id="anc21"></a><span class="line-modified">168 </span>
+<span class="line-added">169             return offsetMap.getSourcePos(pos);</span>
+170         }
+171 
+172         @Override
+<a name="22" id="anc22"></a>
+173         protected void scanDocComment() {
+174              try {
+175                  boolean firstLine = true;
+176 
+<a name="23" id="anc23"></a><span class="line-modified">177                  // Skip over /*</span>
+<span class="line-modified">178                  accept(&quot;/*&quot;);</span>
+
+
+179 
+<a name="24" id="anc24"></a><span class="line-modified">180                  // Consume any number of stars</span>
+<span class="line-modified">181                  skip(&#39;*&#39;);</span>
+<span class="line-modified">182 </span>
+<span class="line-modified">183                  // Is the comment in the form /**/, /***/, /****/, etc. ?</span>
+<span class="line-modified">184                  if (is(&#39;/&#39;)) {</span>
+
+185                      docComment = &quot;&quot;;
+186                      return;
+187                  }
+188 
+<a name="25" id="anc25"></a><span class="line-modified">189                  // Skip line terminator on the first line of the comment.</span>
+<span class="line-modified">190                  if (isOneOf(&#39;\n&#39;, &#39;\r&#39;)) {</span>
+<span class="line-modified">191                      accept(&#39;\r&#39;);</span>
+<span class="line-modified">192                      accept(&#39;\n&#39;);</span>
+<span class="line-modified">193                      firstLine = false;</span>
+
+
+
+
+
+
+
+194                  }
+195 
+196              outerLoop:
+<a name="26" id="anc26"></a>
+197                  // The outerLoop processes the doc comment, looping once
+198                  // for each line.  For each line, it first strips off
+199                  // whitespace, then it consumes any stars, then it
+<a name="27" id="anc27"></a><span class="line-modified">200                  // puts the rest of the line into the extraction buffer.</span>
+<span class="line-modified">201                  while (isAvailable()) {</span>
+<span class="line-modified">202                      int begin_pos = position();</span>
+<span class="line-modified">203                      // Consume  whitespace from the beginning of each line.</span>
+<span class="line-modified">204                      skipWhitespace();</span>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+205                      // Are there stars here?  If so, consume them all
+206                      // and check for the end of comment.
+<a name="28" id="anc28"></a><span class="line-modified">207                      if (is(&#39;*&#39;)) {</span>
+208                          // skip all of the stars
+<a name="29" id="anc29"></a><span class="line-modified">209                          skip(&#39;*&#39;);</span>
+
+
+210 
+211                          // check for the closing slash.
+<a name="30" id="anc30"></a><span class="line-modified">212                          if (accept(&#39;/&#39;)) {</span>
+<span class="line-modified">213                              // We&#39;re done with the Javadoc comment</span>
+
+214                              break outerLoop;
+215                          }
+<a name="31" id="anc31"></a><span class="line-modified">216                      } else if (!firstLine) {</span>
+217                          // The current line does not begin with a &#39;*&#39; so we will
+218                          // treat it as comment
+<a name="32" id="anc32"></a><span class="line-modified">219                          reset(begin_pos);</span>
+
+220                      }
+<a name="33" id="anc33"></a><span class="line-modified">221 </span>
+
+222                  textLoop:
+<a name="34" id="anc34"></a><span class="line-modified">223                      // The textLoop processes the rest of the characters</span>
+<span class="line-modified">224                      // on the line, adding them to the extraction buffer.</span>
+<span class="line-modified">225                      while (isAvailable()) {</span>
+<span class="line-modified">226                          if (accept(&quot;*/&quot;)) {</span>
+<span class="line-modified">227                              // This is the end of the comment, return</span>
+<span class="line-modified">228                              // the contents of the extraction buffer.</span>
+<span class="line-modified">229                              break outerLoop;</span>
+<span class="line-modified">230                          } else if (isOneOf(&#39;\n&#39;, &#39;\r&#39;)) {</span>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+231                              // We&#39;ve seen a newline.  Add it to our
+232                              // buffer and break out of this loop,
+233                              // starting fresh on a new line.
+<a name="35" id="anc35"></a><span class="line-modified">234                              put(&#39;\n&#39;);</span>
+<span class="line-modified">235                              accept(&#39;\r&#39;);</span>
+<span class="line-added">236                              accept(&#39;\n&#39;);</span>
+237                              break textLoop;
+<a name="36" id="anc36"></a><span class="line-modified">238                          } else if (is(&#39;\f&#39;)){</span>
+<span class="line-added">239                              next();</span>
+<span class="line-added">240                              break textLoop; // treat as end of line</span>
+<span class="line-added">241 </span>
+<span class="line-added">242                          } else {</span>
+243                              // Add the character to our buffer.
+<a name="37" id="anc37"></a><span class="line-modified">244                              put();</span>
+<span class="line-modified">245                              next();</span>
+246                          }
+247                      } // end textLoop
+248                      firstLine = false;
+249                  } // end outerLoop
+250 
+<a name="38" id="anc38"></a><span class="line-modified">251                  // If extraction buffer is not empty.</span>
+<span class="line-modified">252                  if (sb.length() &gt; 0) {</span>
+<span class="line-modified">253                      // Remove trailing asterisks.</span>
+<span class="line-modified">254                      int i = sb.length() - 1;</span>
+<span class="line-modified">255                      while (i &gt; -1 &amp;&amp; sb.charAt(i) == &#39;*&#39;) {</span>
+<span class="line-modified">256                          i--;</span>
+
+
+
+
+
+257                      }
+<a name="39" id="anc39"></a><span class="line-modified">258                      sb.setLength(i + 1) ;</span>
+259 
+260                      // Store the text of the doc comment
+<a name="40" id="anc40"></a><span class="line-modified">261                     docComment = sb.toString();</span>
+<span class="line-modified">262                  } else {</span>
+
+
+263                     docComment = &quot;&quot;;
+264                 }
+265             } finally {
+266                 scanned = true;
+<a name="41" id="anc41"></a><span class="line-modified">267 </span>
+<span class="line-modified">268                 // Check if comment contains @deprecated comment.</span>
+<span class="line-modified">269                 if (docComment != null &amp;&amp; DEPRECATED_PATTERN.matcher(docComment).matches()) {</span>
+270                     deprecatedFlag = true;
+271                 }
+272             }
+273         }
+<a name="42" id="anc42"></a>
+
+
+
+274     }
+275 
+<a name="43" id="anc43"></a><span class="line-added">276     /**</span>
+<span class="line-added">277      * Build a map for translating between line numbers and positions in the input.</span>
+<span class="line-added">278      * Overridden to expand tabs.</span>
+<span class="line-added">279      *</span>
+<span class="line-added">280      * @return a LineMap</span>
+<span class="line-added">281      */</span>
+282     @Override
+283     public Position.LineMap getLineMap() {
+<a name="44" id="anc44"></a><span class="line-modified">284         char[] buf = getRawCharacters();</span>
+285         return Position.makeLineMap(buf, buf.length, true);
+286     }
+<a name="45" id="anc45"></a><span class="line-added">287 </span>
+<span class="line-added">288     /**</span>
+<span class="line-added">289      * Build an int table to mapping positions in extracted Javadoc comment</span>
+<span class="line-added">290      * to positions in the JavaTokenizer source buffer.</span>
+<span class="line-added">291      *</span>
+<span class="line-added">292      * The array is organized as a series of pairs of integers: the first</span>
+<span class="line-added">293      * number in each pair specifies a position in the comment text,</span>
+<span class="line-added">294      * the second number in each pair specifies the corresponding position</span>
+<span class="line-added">295      * in the source buffer. The pairs are sorted in ascending order.</span>
+<span class="line-added">296      *</span>
+<span class="line-added">297      * Since the mapping function is generally continuous, with successive</span>
+<span class="line-added">298      * positions in the string corresponding to successive positions in the</span>
+<span class="line-added">299      * source buffer, the table only needs to record discontinuities in</span>
+<span class="line-added">300      * the mapping. The values of intermediate positions can be inferred.</span>
+<span class="line-added">301      *</span>
+<span class="line-added">302      * Discontinuities may occur in a number of places: when a newline</span>
+<span class="line-added">303      * is followed by whitespace and asterisks (which are ignored),</span>
+<span class="line-added">304      * when a tab is expanded into spaces, and when unicode escapes</span>
+<span class="line-added">305      * are used in the source buffer.</span>
+<span class="line-added">306      *</span>
+<span class="line-added">307      * Thus, to find the source position of any position, p, in the comment</span>
+<span class="line-added">308      * string, find the index, i, of the pair whose string offset</span>
+<span class="line-added">309      * ({@code map[i + SB_OFFSET] }) is closest to but not greater than p. Then,</span>
+<span class="line-added">310      * {@code sourcePos(p) = map[i + POS_OFFSET] + (p - map[i + SB_OFFSET]) }.</span>
+<span class="line-added">311      */</span>
+<span class="line-added">312     static class OffsetMap {</span>
+<span class="line-added">313         /**</span>
+<span class="line-added">314          * map entry offset for comment offset member of pair.</span>
+<span class="line-added">315          */</span>
+<span class="line-added">316         private static final int SB_OFFSET = 0;</span>
+<span class="line-added">317 </span>
+<span class="line-added">318         /**</span>
+<span class="line-added">319          * map entry offset of input offset member of pair.</span>
+<span class="line-added">320          */</span>
+<span class="line-added">321         private static final int POS_OFFSET = 1;</span>
+<span class="line-added">322 </span>
+<span class="line-added">323         /**</span>
+<span class="line-added">324          * Number of elements in each entry.</span>
+<span class="line-added">325          */</span>
+<span class="line-added">326         private static final int NOFFSETS = 2;</span>
+<span class="line-added">327 </span>
+<span class="line-added">328         /**</span>
+<span class="line-added">329          * Array storing entries in map.</span>
+<span class="line-added">330          */</span>
+<span class="line-added">331         private int[] map;</span>
+<span class="line-added">332 </span>
+<span class="line-added">333         /**</span>
+<span class="line-added">334          * Logical size of map (number of valid entries.)</span>
+<span class="line-added">335          */</span>
+<span class="line-added">336         private int size;</span>
+<span class="line-added">337 </span>
+<span class="line-added">338         /**</span>
+<span class="line-added">339          * Constructor.</span>
+<span class="line-added">340          */</span>
+<span class="line-added">341         OffsetMap() {</span>
+<span class="line-added">342             this.map = new int[128];</span>
+<span class="line-added">343             this.size = 0;</span>
+<span class="line-added">344         }</span>
+<span class="line-added">345 </span>
+<span class="line-added">346         /**</span>
+<span class="line-added">347          * Returns true if it is worthwhile adding the entry pair to the map. That is</span>
+<span class="line-added">348          * if there is a change in relative offset.</span>
+<span class="line-added">349          *</span>
+<span class="line-added">350          * @param sbOffset  comment offset member of pair.</span>
+<span class="line-added">351          * @param posOffet  input offset member of pair.</span>
+<span class="line-added">352          *</span>
+<span class="line-added">353          * @return true if it is worthwhile adding the entry pair.</span>
+<span class="line-added">354          */</span>
+<span class="line-added">355         boolean shouldAdd(int sbOffset, int posOffet) {</span>
+<span class="line-added">356             return sbOffset - lastSBOffset() != posOffet - lastPosOffset();</span>
+<span class="line-added">357         }</span>
+<span class="line-added">358 </span>
+<span class="line-added">359         /**</span>
+<span class="line-added">360          * Adds entry pair if worthwhile.</span>
+<span class="line-added">361          *</span>
+<span class="line-added">362          * @param sbOffset  comment offset member of pair.</span>
+<span class="line-added">363          * @param posOffet  input offset member of pair.</span>
+<span class="line-added">364          */</span>
+<span class="line-added">365         void add(int sbOffset, int posOffet) {</span>
+<span class="line-added">366             if (size == 0 || shouldAdd(sbOffset, posOffet)) {</span>
+<span class="line-added">367                 ensure(NOFFSETS);</span>
+<span class="line-added">368                 map[size + SB_OFFSET] = sbOffset;</span>
+<span class="line-added">369                 map[size + POS_OFFSET] = posOffet;</span>
+<span class="line-added">370                 size += NOFFSETS;</span>
+<span class="line-added">371             }</span>
+<span class="line-added">372         }</span>
+<span class="line-added">373 </span>
+<span class="line-added">374         /**</span>
+<span class="line-added">375          * Returns the previous comment offset.</span>
+<span class="line-added">376          *</span>
+<span class="line-added">377          * @return the previous comment offset.</span>
+<span class="line-added">378          */</span>
+<span class="line-added">379         private int lastSBOffset() {</span>
+<span class="line-added">380             return size == 0 ? 0 : map[size - NOFFSETS + SB_OFFSET];</span>
+<span class="line-added">381         }</span>
+<span class="line-added">382 </span>
+<span class="line-added">383         /**</span>
+<span class="line-added">384          * Returns the previous input offset.</span>
+<span class="line-added">385          *</span>
+<span class="line-added">386          * @return the previous input offset.</span>
+<span class="line-added">387          */</span>
+<span class="line-added">388         private int lastPosOffset() {</span>
+<span class="line-added">389             return size == 0 ? 0 : map[size - NOFFSETS + POS_OFFSET];</span>
+<span class="line-added">390         }</span>
+<span class="line-added">391 </span>
+<span class="line-added">392         /**</span>
+<span class="line-added">393          * Ensures there is enough space for a new entry.</span>
+<span class="line-added">394          *</span>
+<span class="line-added">395          * @param need  number of array slots needed.</span>
+<span class="line-added">396          */</span>
+<span class="line-added">397         private void ensure(int need) {</span>
+<span class="line-added">398             need += size;</span>
+<span class="line-added">399             int grow = map.length;</span>
+<span class="line-added">400 </span>
+<span class="line-added">401             while (need &gt; grow) {</span>
+<span class="line-added">402                 grow &lt;&lt;= 1;</span>
+<span class="line-added">403             }</span>
+<span class="line-added">404 </span>
+<span class="line-added">405             // Handle overflow.</span>
+<span class="line-added">406             if (grow &lt; map.length) {</span>
+<span class="line-added">407                 throw new IndexOutOfBoundsException();</span>
+<span class="line-added">408             } else if (grow != map.length) {</span>
+<span class="line-added">409                 map = Arrays.copyOf(map, grow);</span>
+<span class="line-added">410             }</span>
+<span class="line-added">411         }</span>
+<span class="line-added">412 </span>
+<span class="line-added">413         /**</span>
+<span class="line-added">414          * Binary search to find the entry for which the string index is less</span>
+<span class="line-added">415          * than pos. Since the map is a list of pairs of integers we must make</span>
+<span class="line-added">416          * sure the index is always NOFFSETS scaled. If we find an exact match</span>
+<span class="line-added">417          * for pos, the other item in the pair gives the source pos; otherwise,</span>
+<span class="line-added">418          * compute the source position relative to the best match found in the</span>
+<span class="line-added">419          * array.</span>
+<span class="line-added">420          */</span>
+<span class="line-added">421         int getSourcePos(int pos) {</span>
+<span class="line-added">422             if (size == 0) {</span>
+<span class="line-added">423                 return Position.NOPOS;</span>
+<span class="line-added">424             }</span>
+<span class="line-added">425 </span>
+<span class="line-added">426             int start = 0;</span>
+<span class="line-added">427             int end = size / NOFFSETS;</span>
+<span class="line-added">428 </span>
+<span class="line-added">429             while (start &lt; end - NOFFSETS) {</span>
+<span class="line-added">430                 // find an index midway between start and end</span>
+<span class="line-added">431                 int index = (start + end) / 2;</span>
+<span class="line-added">432                 int indexScaled = index * NOFFSETS;</span>
+<span class="line-added">433 </span>
+<span class="line-added">434                 if (map[indexScaled + SB_OFFSET] &lt; pos) {</span>
+<span class="line-added">435                     start = index;</span>
+<span class="line-added">436                 } else if (map[indexScaled + SB_OFFSET] == pos) {</span>
+<span class="line-added">437                     return map[indexScaled + POS_OFFSET];</span>
+<span class="line-added">438                 } else {</span>
+<span class="line-added">439                     end = index;</span>
+<span class="line-added">440                 }</span>
+<span class="line-added">441             }</span>
+<span class="line-added">442 </span>
+<span class="line-added">443             int startScaled = start * NOFFSETS;</span>
+<span class="line-added">444 </span>
+<span class="line-added">445             return map[startScaled + POS_OFFSET] + (pos - map[startScaled + SB_OFFSET]);</span>
+<span class="line-added">446         }</span>
+<span class="line-added">447     }</span>
+448 }
+<a name="46" id="anc46"></a><b style="font-size: large; color: red">--- EOF ---</b>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</pre>
+<input id="eof" value="46" type="hidden" />
+</body>
+</html>

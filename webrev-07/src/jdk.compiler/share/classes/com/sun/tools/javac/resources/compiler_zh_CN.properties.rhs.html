@@ -1,0 +1,2739 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Frames src/jdk.compiler/share/classes/com/sun/tools/javac/resources/compiler_zh_CN.properties</title>
+    <link rel="stylesheet" href="../../../../../../../../../style.css" />
+    <script type="text/javascript" src="../../../../../../../../../navigation.js"></script>
+  </head>
+<body onkeypress="keypress(event);">
+<a name="0"></a>
+<hr />
+<pre>   1 #
+   2 # Copyright (c) 1999, 2020, Oracle and/or its affiliates. All rights reserved.
+   3 # DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
+   4 #
+   5 # This code is free software; you can redistribute it and/or modify it
+   6 # under the terms of the GNU General Public License version 2 only, as
+   7 # published by the Free Software Foundation.  Oracle designates this
+   8 # particular file as subject to the &quot;Classpath&quot; exception as provided
+   9 # by Oracle in the LICENSE file that accompanied this code.
+  10 #
+  11 # This code is distributed in the hope that it will be useful, but WITHOUT
+  12 # ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+  13 # FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+  14 # version 2 for more details (a copy is included in the LICENSE file that
+  15 # accompanied this code).
+  16 #
+  17 # You should have received a copy of the GNU General Public License version
+  18 # 2 along with this work; if not, write to the Free Software Foundation,
+  19 # Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
+  20 #
+  21 # Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
+  22 # or visit www.oracle.com if you need additional information or have any
+  23 # questions.
+  24 #
+  25 
+  26 # Messages in this file which use &quot;placeholders&quot; for values (e.g. {0}, {1})
+  27 # are preceded by a stylized comment describing the type of the corresponding
+  28 # values.
+  29 # The simple types currently in use are:
+  30 #
+  31 # annotation        annotation compound
+  32 # boolean           true or false
+  33 # diagnostic        a sub-message; see compiler.misc.*
+  34 # fragment          similar to &#39;message segment&#39;, but with more specific type
+  35 # modifier          a Java modifier; e.g. public, private, protected
+  36 # file              a file URL
+  37 # file object       a file URL - similar to &#39;file&#39; but typically used for source/class files, hence more specific
+  38 # flag              a Flags.Flag instance
+  39 # name              a name, typically a Java identifier
+  40 # number            an integer
+  41 # option name       the name of a command line option
+  42 # path              a path
+  43 # profile           a profile name
+  44 # source            a source version number, such as 1.5, 1.6, 1.7, taken from a com.sun.tools.javac.code.Source
+  45 # source version    a source version number, such as 1.5, 1.6, 1.7, taken from a javax.lang.model.SourceVersion
+  46 # string            a general string
+  47 # symbol            the name of a declared type
+  48 # symbol kind       the kind of a symbol (i.e. method, variable)
+  49 # kind name         an informative description of the kind of a declaration; see compiler.misc.kindname.*
+  50 # target            a target version number, such as 1.5, 1.6, 1.7, taken from a com.sun.tools.javac.jvm.Target
+  51 # token             the name of a non-terminal in source code; see compiler.misc.token.*
+  52 # tree tag          the name of a non-terminal in source code; see compiler.misc.token.*
+  53 # type              a Java type; e.g. int, X, X&lt;T&gt;
+  54 # url               a URL
+  55 # object            a Java object (unspecified)
+  56 # unused            the value is not used in this message
+  57 #
+  58 # The following compound types are also used:
+  59 #
+  60 # collection of X   a comma-separated collection of items; e.g. collection of type
+  61 # list of X         a comma-separated list of items; e.g. list of type
+  62 # set of X          a comma-separated set of items; e.g. set of modifier
+  63 #
+  64 # These may be composed:
+  65 #
+  66 # list of type or message segment
+  67 #
+  68 # The following type aliases are supported:
+  69 #
+  70 # message segment --&gt; diagnostic or fragment
+  71 # file name --&gt; file, path or file object
+  72 #
+  73 # Custom comments are supported in parenthesis i.e.
+  74 #
+  75 # number (classfile major version)
+  76 #
+  77 # These comments are used internally in order to generate an enum-like class declaration containing
+  78 # a method/field for each of the diagnostic keys listed here. Those methods/fields can then be used
+  79 # by javac code to build diagnostics in a type-safe fashion.
+  80 #
+  81 # In addition, these comments are verified by the jtreg test test/tools/javac/diags/MessageInfo,
+  82 # using info derived from the collected set of examples in test/tools/javac/diags/examples.
+  83 # MessageInfo can also be run as a standalone utility providing more facilities
+  84 # for manipulating this file. For more details, see MessageInfo.java.
+  85 
+  86 ##
+  87 ## errors
+  88 ##
+  89 
+  90 # 0: symbol
+  91 compiler.err.abstract.cant.be.instantiated={0}\u662F\u62BD\u8C61\u7684; \u65E0\u6CD5\u5B9E\u4F8B\u5316
+  92 
+  93 compiler.err.abstract.meth.cant.have.body=\u62BD\u8C61\u65B9\u6CD5\u4E0D\u80FD\u6709\u4E3B\u4F53
+  94 
+  95 # 0: kind name, 1: symbol
+  96 compiler.err.already.annotated={0} {1}\u5DF2\u8FDB\u884C\u6CE8\u91CA
+  97 
+  98 # 0: kind name, 1: symbol, 2: kind name, 3: symbol
+  99 compiler.err.already.defined=\u5DF2\u5728{2} {3}\u4E2D\u5B9A\u4E49\u4E86{0} {1}
+ 100 
+ 101 # 0: kind name, 1: symbol, 2: kind name, 3: kind name, 4: symbol
+ 102 compiler.err.already.defined.in.clinit=\u5DF2\u5728{3} {4}\u7684{2}\u4E2D\u5B9A\u4E49\u4E86{0} {1}
+ 103 
+ 104 # 0: symbol
+ 105 compiler.err.already.defined.single.import={0}\u7684 single-type-import \u5DF2\u5B9A\u4E49\u5177\u6709\u76F8\u540C\u7B80\u540D\u7684\u7C7B\u578B
+ 106 
+ 107 # 0: symbol
+ 108 compiler.err.already.defined.static.single.import={0}\u7684\u9759\u6001 single-type-import \u5DF2\u5B9A\u4E49\u5177\u6709\u76F8\u540C\u7B80\u540D\u7684\u7C7B\u578B
+ 109 
+ 110 # 0: symbol
+ 111 compiler.err.already.defined.this.unit=\u5DF2\u5728\u8BE5\u7F16\u8BD1\u5355\u5143\u4E2D\u5B9A\u4E49{0}
+ 112 
+ 113 # 0: type, 1: list of name
+ 114 compiler.err.annotation.missing.default.value=\u5BF9\u4E8E\u5143\u7D20 &#39;&#39;{1}&#39;&#39;, \u6CE8\u91CA @{0} \u7F3A\u5C11\u9ED8\u8BA4\u503C
+ 115 
+ 116 # 0: type, 1: list of name
+ 117 compiler.err.annotation.missing.default.value.1=\u5BF9\u4E8E\u5143\u7D20{1}, \u6CE8\u91CA @{0} \u7F3A\u5C11\u9ED8\u8BA4\u503C
+ 118 
+ 119 # 0: type
+ 120 compiler.err.annotation.not.valid.for.type=\u6CE8\u91CA\u5BF9\u4E8E\u7C7B\u578B{0}\u7684\u5143\u7D20\u65E0\u6548
+ 121 
+ 122 compiler.err.annotation.type.not.applicable=\u6CE8\u91CA\u7C7B\u578B\u4E0D\u9002\u7528\u4E8E\u8BE5\u7C7B\u578B\u7684\u58F0\u660E
+ 123 
+ 124 # 0: type
+ 125 compiler.err.annotation.type.not.applicable.to.type=\u6CE8\u91CA @{0} \u5728\u6B64\u7C7B\u578B\u4E0A\u4E0B\u6587\u4E2D\u4E0D\u9002\u7528
+ 126 
+ 127 compiler.err.annotation.value.must.be.annotation=\u6CE8\u91CA\u503C\u5FC5\u987B\u4E3A\u6CE8\u91CA
+ 128 
+ 129 compiler.err.annotation.value.must.be.class.literal=\u6CE8\u91CA\u503C\u5FC5\u987B\u4E3A\u7C7B\u6587\u5B57
+ 130 
+ 131 compiler.err.annotation.value.must.be.name.value=\u6CE8\u91CA\u503C\u5FC5\u987B\u91C7\u7528 &#39;&#39;name=value&#39;&#39; \u683C\u5F0F
+ 132 
+ 133 compiler.err.annotation.value.not.allowable.type=\u6CE8\u91CA\u503C\u4E0D\u662F\u5141\u8BB8\u7684\u7C7B\u578B
+ 134 
+ 135 compiler.err.expression.not.allowable.as.annotation.value=\u8868\u8FBE\u5F0F\u4E0D\u5141\u8BB8\u7528\u4F5C\u6CE8\u91CA\u503C
+ 136 
+ 137 compiler.err.anon.class.impl.intf.no.args=\u533F\u540D\u7C7B\u5B9E\u73B0\u63A5\u53E3; \u4E0D\u80FD\u6709\u53C2\u6570
+ 138 
+ 139 compiler.err.anon.class.impl.intf.no.typeargs=\u533F\u540D\u7C7B\u5B9E\u73B0\u63A5\u53E3; \u4E0D\u80FD\u5177\u6709\u7C7B\u578B\u53C2\u6570
+ 140 
+ 141 compiler.err.anon.class.impl.intf.no.qual.for.new=\u533F\u540D\u7C7B\u5B9E\u73B0\u63A5\u53E3; \u4E0D\u80FD\u6709\u9650\u5B9A\u7B26 - \u5BF9\u4E8E\u65B0
+ 142 
+ 143 compiler.err.cant.inherit.from.anon=\u65E0\u6CD5\u4ECE\u533F\u540D\u7C7B\u7EE7\u627F
+ 144 
+ 145 # 0: symbol, 1: symbol, 2: symbol
+ 146 compiler.err.array.and.varargs=\u65E0\u6CD5\u5728{2}\u4E2D\u540C\u65F6\u58F0\u660E{0}\u548C{1}
+ 147 
+ 148 compiler.err.array.dimension.missing=\u7F3A\u5C11\u6570\u7EC4\u7EF4
+ 149 
+ 150 compiler.err.illegal.array.creation.both.dimension.and.initialization=\u540C\u65F6\u4F7F\u7528\u7EF4\u8868\u8FBE\u5F0F\u548C\u521D\u59CB\u5316\u521B\u5EFA\u6570\u7EC4\u662F\u975E\u6CD5\u7684
+ 151 
+ 152 # 0: type
+ 153 compiler.err.array.req.but.found=\u9700\u8981\u6570\u7EC4, \u4F46\u627E\u5230{0}
+ 154 
+ 155 compiler.err.attribute.value.must.be.constant=\u5143\u7D20\u503C\u5FC5\u987B\u4E3A\u5E38\u91CF\u8868\u8FBE\u5F0F
+ 156 
+ 157 # 0: string (statement type)
+ 158 compiler.err.bad.initializer={0}\u7684\u521D\u59CB\u5316\u7A0B\u5E8F\u9519\u8BEF
+ 159 
+ 160 compiler.err.break.outside.switch.loop=\u5728 switch \u6216 loop \u5916\u90E8\u4E2D\u65AD
+ 161 
+ 162 compiler.err.break.outside.switch.expression=\u5C1D\u8BD5\u4ECE switch \u8868\u8FBE\u5F0F\u4E2D\u65AD
+ 163 
+ 164 compiler.err.continue.outside.switch.expression=\u5C1D\u8BD5\u4ECE switch \u8868\u8FBE\u5F0F\u7EE7\u7EED
+ 165 
+ 166 compiler.err.return.outside.switch.expression=\u5C1D\u8BD5\u4ECE switch \u8868\u8FBE\u5F0F\u8FD4\u56DE
+ 167 
+ 168 compiler.err.rule.completes.normally=switch \u89C4\u5219\u5B8C\u7ED3\u4F46\u6CA1\u6709\u63D0\u4F9B\u503C\n\uFF08switch \u8868\u8FBE\u5F0F\u4E2D\u7684 switch \u89C4\u5219\u5FC5\u987B\u63D0\u4F9B\u503C\u6216\u629B\u51FA\uFF09
+ 169 
+ 170 compiler.err.switch.expression.completes.normally=switch \u8868\u8FBE\u5F0F\u5B8C\u7ED3\u4F46\u6CA1\u6709\u63D0\u4F9B\u503C\n\uFF08switch \u8868\u8FBE\u5F0F\u5FC5\u987B\u4E3A\u6240\u6709\u53EF\u80FD\u7684\u8F93\u5165\u503C\u63D0\u4F9B\u503C\u6216\u629B\u51FA\uFF09
+ 171 
+ 172 compiler.err.no.switch.expression =yield \u5728 switch \u8868\u8FBE\u5F0F\u5916\u90E8
+ 173 
+ 174 compiler.err.no.switch.expression.qualify=yield \u5728 switch \u8868\u8FBE\u5F0F\u5916\u90E8\n\uFF08\u8981\u8C03\u7528\u79F0\u4E3A yield \u7684\u65B9\u6CD5\uFF0C\u8BF7\u901A\u8FC7\u63A5\u6536\u65B9\u6216\u7C7B\u578B\u540D\u79F0\u9650\u5B9A yield\uFF09
+ 175 
+ 176 compiler.err.invalid.yield=\u53D7\u9650\u6807\u8BC6\u7B26 &#39;&#39;yield&#39;&#39; \u7684\u7528\u6CD5\u65E0\u6548\n\uFF08\u8981\u8C03\u7528\u79F0\u4E3A yield \u7684\u65B9\u6CD5\uFF0C\u8BF7\u901A\u8FC7\u63A5\u6536\u65B9\u6216\u7C7B\u578B\u540D\u79F0\u9650\u5B9A yield\uFF09
+ 177 
+ 178 compiler.warn.invalid.yield=&#39;&#39;yield&#39;&#39; \u5728\u672A\u6765\u53D1\u884C\u7248\u4E2D\u53EF\u80FD\u4F1A\u6210\u4E3A\u53D7\u9650\u6807\u8BC6\u7B26\n\uFF08\u8981\u8C03\u7528\u79F0\u4E3A yield \u7684\u65B9\u6CD5\uFF0C\u8BF7\u901A\u8FC7\u63A5\u6536\u65B9\u6216\u7C7B\u578B\u540D\u79F0\u9650\u5B9A yield\uFF09
+ 179 
+ 180 compiler.err.switch.expression.empty=switch \u8868\u8FBE\u5F0F\u4E2D\u6CA1\u6709\u4EFB\u4F55 case \u5B50\u53E5
+ 181 
+ 182 compiler.err.switch.expression.no.result.expressions=switch \u8868\u8FBE\u5F0F\u6CA1\u6709\u4EFB\u4F55\u7ED3\u679C\u8868\u8FBE\u5F0F
+ 183 
+ 184 # 0: name
+ 185 compiler.err.call.must.be.first.stmt.in.ctor=\u5BF9{0}\u7684\u8C03\u7528\u5FC5\u987B\u662F\u6784\u9020\u5668\u4E2D\u7684\u7B2C\u4E00\u4E2A\u8BED\u53E5
+ 186 
+ 187 # 0: symbol kind, 1: name, 2: list of type or message segment, 3: list of type or message segment, 4: symbol kind, 5: type, 6: message segment
+ 188 compiler.err.cant.apply.symbol=\u65E0\u6CD5\u5C06{4} {5}\u4E2D\u7684{0} {1}\u5E94\u7528\u5230\u7ED9\u5B9A\u7C7B\u578B;\n\u9700\u8981: {2}\n\u627E\u5230:    {3}\n\u539F\u56E0: {6}
+ 189 
+ 190 # 0: symbol kind, 1: name, 2: list of type
+ 191 compiler.err.cant.apply.symbols=\u5BF9\u4E8E{1}({2}), \u627E\u4E0D\u5230\u5408\u9002\u7684{0}
+ 192 
+ 193 # 0: symbol kind, 1: name, 2: list of type or message segment, 3: list of type or message segment, 4: symbol kind, 5: type, 6: message segment
+ 194 compiler.misc.cant.apply.symbol=\u65E0\u6CD5\u5C06 {4} {5}\u4E2D\u7684 {0} {1}\u5E94\u7528\u5230\u7ED9\u5B9A\u7C7B\u578B\n\u9700\u8981: {2}\n\u627E\u5230:    {3}\n\u539F\u56E0: {6}
+ 195 
+ 196 # 0: symbol kind, 1: name, 2: list of type
+ 197 compiler.misc.cant.apply.symbols=\u5BF9\u4E8E{1}({2}), \u627E\u4E0D\u5230\u5408\u9002\u7684{0}
+ 198 
+ 199 # 0: kind name, 1: symbol
+ 200 compiler.misc.no.abstracts=\u5728 {0} {1} \u4E2D\u627E\u4E0D\u5230\u62BD\u8C61\u65B9\u6CD5
+ 201 
+ 202 # 0: kind name, 1: symbol
+ 203 compiler.misc.incompatible.abstracts=\u5728 {0} {1} \u4E2D\u627E\u5230\u591A\u4E2A\u975E\u8986\u76D6\u62BD\u8C61\u65B9\u6CD5
+ 204 
+ 205 compiler.err.bad.functional.intf.anno=\u610F\u5916\u7684 @FunctionalInterface \u6CE8\u91CA
+ 206 
+ 207 # 0: message segment
+ 208 compiler.err.bad.functional.intf.anno.1=\u610F\u5916\u7684 @FunctionalInterface \u6CE8\u91CA\n{0}
+ 209 
+ 210 # 0: message segment
+ 211 compiler.err.anonymous.diamond.method.does.not.override.superclass=\u65B9\u6CD5\u4E0D\u4F1A\u8986\u76D6\u6216\u5B9E\u73B0\u8D85\u7C7B\u578B\u4E2D\u7684\u65B9\u6CD5\n{0}
+ 212 
+ 213 # 0: symbol
+ 214 compiler.misc.not.a.functional.intf={0} \u4E0D\u662F\u51FD\u6570\u63A5\u53E3
+ 215 
+ 216 # 0: symbol, 1: message segment
+ 217 compiler.misc.not.a.functional.intf.1={0} \u4E0D\u662F\u51FD\u6570\u63A5\u53E3\n{1}
+ 218 
+ 219 # 0: type, 1: kind name, 2: symbol
+ 220 compiler.misc.invalid.generic.lambda.target=lambda \u8868\u8FBE\u5F0F\u7684\u51FD\u6570\u63CF\u8FF0\u7B26\u65E0\u6548\n{1} {2} \u4E2D\u7684\u65B9\u6CD5 {0} \u4E3A\u6CDB\u578B\u65B9\u6CD5
+ 221 
+ 222 # 0: kind name, 1: symbol
+ 223 compiler.misc.incompatible.descs.in.functional.intf=\u5728 {0} {1} \u4E2D\u627E\u5230\u4E0D\u517C\u5BB9\u7684\u51FD\u6570\u63CF\u8FF0\u7B26
+ 224 
+ 225 # 0: name, 1: list of type, 2: type, 3: list of type
+ 226 compiler.misc.descriptor=\u63CF\u8FF0\u7B26: {2} {0}({1})
+ 227 
+ 228 # 0: name, 1: list of type, 2: type, 3: list of type
+ 229 compiler.misc.descriptor.throws=\u63CF\u8FF0\u7B26: {2} {0}({1}) \u629B\u51FA{3}
+ 230 
+ 231 # 0: type
+ 232 compiler.misc.no.suitable.functional.intf.inst=\u65E0\u6CD5\u63A8\u65AD{0}\u7684\u51FD\u6570\u63A5\u53E3\u63CF\u8FF0\u7B26
+ 233 
+ 234 # 0: message segment
+ 235 compiler.misc.bad.intersection.target.for.functional.expr=lambda \u6216\u65B9\u6CD5\u5F15\u7528\u7684\u4EA4\u53C9\u7C7B\u578B\u76EE\u6807\u9519\u8BEF\n{0}
+ 236 
+ 237 # 0: symbol or type
+ 238 compiler.misc.not.an.intf.component=\u7EC4\u4EF6\u7C7B\u578B{0}\u4E0D\u662F\u63A5\u53E3
+ 239 
+ 240 # 0: kind name, 1: message segment
+ 241 compiler.err.invalid.mref={0}\u5F15\u7528\u65E0\u6548\n{1}
+ 242 
+ 243 # 0: kind name, 1: message segment
+ 244 compiler.misc.invalid.mref={0}\u5F15\u7528\u65E0\u6548\n{1}
+ 245 
+ 246 compiler.misc.static.mref.with.targs=\u6709\u5173\u9759\u6001\u65B9\u6CD5\u5F15\u7528\u7684\u53C2\u6570\u5316\u9650\u5B9A\u7B26
+ 247 
+ 248 # 0: symbol
+ 249 compiler.err.cant.assign.val.to.final.var=\u65E0\u6CD5\u4E3A\u6700\u7EC8\u53D8\u91CF{0}\u5206\u914D\u503C
+ 250 
+ 251 compiler.err.cant.assign.val.to.this=\u65E0\u6CD5\u5206\u914D\u7ED9 &#39;&#39;this&#39;&#39;
+ 252 
+ 253 # 0: symbol, 1: message segment
+ 254 compiler.err.cant.ref.non.effectively.final.var=\u4ECE{1}\u5F15\u7528\u7684\u672C\u5730\u53D8\u91CF\u5FC5\u987B\u662F\u6700\u7EC8\u53D8\u91CF\u6216\u5B9E\u9645\u4E0A\u7684\u6700\u7EC8\u53D8\u91CF
+ 255 
+ 256 compiler.err.try.with.resources.expr.needs.var=try-with-resources \u8D44\u6E90\u5FC5\u987B\u662F\u53D8\u91CF\u58F0\u660E, \u6216\u8005\u662F\u6307\u793A\u5BF9\u6700\u7EC8\u53D8\u91CF\u6216\u5B9E\u9645\u4E0A\u7684\u6700\u7EC8\u53D8\u91CF\u7684\u5F15\u7528\u7684\u8868\u8FBE\u5F0F
+ 257 
+ 258 # 0: symbol
+ 259 compiler.err.try.with.resources.expr.effectively.final.var=\u7528\u4F5C try-with-resources \u8D44\u6E90\u7684\u53D8\u91CF {0} \u65E2\u4E0D\u662F\u6700\u7EC8\u53D8\u91CF, \u4E5F\u4E0D\u662F\u5B9E\u9645\u4E0A\u7684\u6700\u7EC8\u53D8\u91CF
+ 260 
+ 261 
+ 262 compiler.misc.lambda=lambda \u8868\u8FBE\u5F0F
+ 263 
+ 264 compiler.misc.inner.cls=\u5185\u90E8\u7C7B
+ 265 
+ 266 # 0: type
+ 267 compiler.err.cant.deref=\u65E0\u6CD5\u53D6\u6D88\u5F15\u7528{0}
+ 268 
+ 269 compiler.err.cant.extend.intf.annotation=\u5BF9\u4E8E @interfaces, \u4E0D\u5141\u8BB8 &#39;&#39;extends&#39;&#39;
+ 270 
+ 271 compiler.err.annotation.decl.not.allowed.here=\u6B64\u5904\u4E0D\u5141\u8BB8\u6CE8\u91CA\u7C7B\u578B\u58F0\u660E
+ 272 
+ 273 # 0: symbol
+ 274 compiler.err.cant.inherit.from.final=\u65E0\u6CD5\u4ECE\u6700\u7EC8{0}\u8FDB\u884C\u7EE7\u627F
+ 275 
+ 276 # 0: symbol or string
+ 277 compiler.err.cant.ref.before.ctor.called=\u65E0\u6CD5\u5728\u8C03\u7528\u8D85\u7C7B\u578B\u6784\u9020\u5668\u4E4B\u524D\u5F15\u7528{0}
+ 278 
+ 279 compiler.err.cant.select.static.class.from.param.type=\u65E0\u6CD5\u4ECE\u53C2\u6570\u5316\u7684\u7C7B\u578B\u4E2D\u9009\u62E9\u9759\u6001\u7C7B
+ 280 
+ 281 # 0: symbol, 1: string, 2: string
+ 282 compiler.err.cant.inherit.diff.arg=\u65E0\u6CD5\u4F7F\u7528\u4EE5\u4E0B\u4E0D\u540C\u7684\u53C2\u6570\u7EE7\u627F{0}: &lt;{1}&gt; \u548C &lt;{2}&gt;
+ 283 
+ 284 compiler.err.catch.without.try=\u6709 &#39;&#39;catch&#39;&#39;, \u4F46\u662F\u6CA1\u6709 &#39;&#39;try&#39;&#39;
+ 285 
+ 286 # 0: kind name, 1: symbol
+ 287 compiler.err.clash.with.pkg.of.same.name={0} {1}\u4E0E\u5E26\u6709\u76F8\u540C\u540D\u79F0\u7684\u7A0B\u5E8F\u5305\u51B2\u7A81
+ 288 
+ 289 compiler.err.class.not.allowed=\u6B64\u5904\u4E0D\u5141\u8BB8\u4F7F\u7528\u7C7B, \u63A5\u53E3\u6216\u679A\u4E3E\u58F0\u660E
+ 290 
+ 291 compiler.err.const.expr.req=\u9700\u8981\u5E38\u91CF\u8868\u8FBE\u5F0F
+ 292 
+ 293 compiler.err.cont.outside.loop=continue \u5728 loop \u5916\u90E8
+ 294 
+ 295 # 0: symbol or type
+ 296 compiler.err.cyclic.inheritance=\u6D89\u53CA{0}\u7684\u5FAA\u73AF\u7EE7\u627F
+ 297 
+ 298 # 0: symbol
+ 299 compiler.err.cyclic.annotation.element=\u5143\u7D20 {0} \u7684\u7C7B\u578B\u4E3A\u5FAA\u73AF
+ 300 
+ 301 # 0: symbol
+ 302 compiler.err.call.to.super.not.allowed.in.enum.ctor=\u5728\u679A\u4E3E\u6784\u9020\u5668\u4E2D\u4E0D\u5141\u8BB8\u8C03\u7528\u8D85\u7C7B
+ 303 
+ 304 # 0: type
+ 305 compiler.err.no.superclass={0}\u4E0D\u5177\u6709\u8D85\u7C7B\u3002
+ 306 
+ 307 # 0: symbol, 1: type, 2: symbol, 3: type, 4: type
+ 308 compiler.err.concrete.inheritance.conflict={1}\u4E2D\u7684\u65B9\u6CD5{0}\u548C{3}\u4E2D\u7684\u65B9\u6CD5{2}\u662F\u4F7F\u7528\u76F8\u540C\u7684\u7B7E\u540D\u7EE7\u627F\u7684
+ 309 
+ 310 compiler.err.default.allowed.in.intf.annotation.member=\u6CE8\u91CA\u7C7B\u578B\u58F0\u660E\u4E2D\u4EC5\u5141\u8BB8\u9ED8\u8BA4\u503C
+ 311 
+ 312 # 0: symbol
+ 313 compiler.err.doesnt.exist=\u7A0B\u5E8F\u5305{0}\u4E0D\u5B58\u5728
+ 314 
+ 315 # 0: type
+ 316 compiler.err.duplicate.annotation.invalid.repeated=\u6CE8\u91CA{0}\u4E0D\u662F\u6709\u6548\u7684\u53EF\u91CD\u590D\u6CE8\u91CA
+ 317 
+ 318 # 0: name, 1: type
+ 319 compiler.err.duplicate.annotation.member.value=\u6CE8\u91CA@{1}\u4E2D\u7684\u5143\u7D20 &#39;&#39;{0}&#39;&#39; \u91CD\u590D\u3002
+ 320 
+ 321 # 0: type
+ 322 compiler.err.duplicate.annotation.missing.container={0} \u4E0D\u662F\u53EF\u91CD\u590D\u7684\u6CE8\u91CA\u7C7B\u578B
+ 323 
+ 324 # 0: symbol
+ 325 compiler.err.invalid.repeatable.annotation=\u6CE8\u91CA\u91CD\u590D: \u4F7F\u7528\u65E0\u6548\u7684 @Repeatable \u6CE8\u91CA\u5BF9{0}\u8FDB\u884C\u4E86\u6CE8\u91CA
+ 326 
+ 327 # 0: symbol or type
+ 328 compiler.err.invalid.repeatable.annotation.no.value={0}\u4E0D\u662F\u6709\u6548\u7684 @Repeatable, \u672A\u58F0\u660E\u4EFB\u4F55\u503C\u5143\u7D20\u65B9\u6CD5
+ 329 
+ 330 # 0: type, 1: number
+ 331 compiler.err.invalid.repeatable.annotation.multiple.values={0}\u4E0D\u662F\u6709\u6548\u7684 @Repeatable, \u5DF2\u58F0\u660E {1} \u4E2A\u540D\u4E3A &#39;&#39;value&#39;&#39; \u7684\u5143\u7D20\u65B9\u6CD5
+ 332 
+ 333 # 0: type
+ 334 compiler.err.invalid.repeatable.annotation.invalid.value={0}\u4E0D\u662F\u6709\u6548\u7684 @Repeatable: \u503C\u5143\u7D20\u65E0\u6548
+ 335 
+ 336 # 0: symbol or type, 1: type, 2: type
+ 337 compiler.err.invalid.repeatable.annotation.value.return=\u5305\u542B\u6CE8\u91CA\u7C7B\u578B ({0}) \u5FC5\u987B\u58F0\u660E\u7C7B\u578B{2}\u7684\u540D\u4E3A &#39;&#39;value&#39;&#39; \u7684\u5143\u7D20
+ 338 
+ 339 # 0: symbol or type, 1: symbol
+ 340 compiler.err.invalid.repeatable.annotation.elem.nondefault=\u5BF9\u4E8E\u5143\u7D20 {1}, \u5305\u542B\u6CE8\u91CA\u7C7B\u578B ({0}) \u6CA1\u6709\u9ED8\u8BA4\u503C
+ 341 
+ 342 # 0: symbol, 1: string, 2: symbol, 3: string
+ 343 compiler.err.invalid.repeatable.annotation.retention=\u5305\u542B\u6CE8\u91CA\u7C7B\u578B ({0}) \u7684\u4FDD\u7559\u671F\u77ED\u4E8E\u53EF\u91CD\u590D\u6CE8\u91CA\u7C7B\u578B ({2}) \u7684\u4FDD\u7559\u671F
+ 344 
+ 345 # 0: symbol, 1: symbol
+ 346 compiler.err.invalid.repeatable.annotation.not.documented=\u53EF\u91CD\u590D\u6CE8\u91CA\u7C7B\u578B ({1}) \u662F @Documented, \u800C\u5305\u542B\u6CE8\u91CA\u7C7B\u578B ({0}) \u5219\u4E0D\u662F
+ 347 
+ 348 # 0: symbol, 1: symbol
+ 349 compiler.err.invalid.repeatable.annotation.not.inherited=\u53EF\u91CD\u590D\u6CE8\u91CA\u7C7B\u578B ({1}) \u662F @Inherited, \u800C\u5305\u542B\u6CE8\u91CA\u7C7B\u578B ({0}) \u5219\u4E0D\u662F
+ 350 
+ 351 # 0: symbol, 1: symbol
+ 352 compiler.err.invalid.repeatable.annotation.incompatible.target=\u5305\u542B\u6CE8\u91CA\u7C7B\u578B ({0}) \u9002\u7528\u7684\u76EE\u6807\u591A\u4E8E\u53EF\u91CD\u590D\u6CE8\u91CA\u7C7B\u578B ({1})
+ 353 
+ 354 # 0: symbol
+ 355 compiler.err.invalid.repeatable.annotation.repeated.and.container.present=\u5BB9\u5668 {0} \u4E0D\u5F97\u4E0E\u5176\u5305\u542B\u7684\u5143\u7D20\u540C\u65F6\u5B58\u5728
+ 356 
+ 357 # 0: type, 1: symbol
+ 358 compiler.err.invalid.repeatable.annotation.not.applicable=\u5BB9\u5668{0}\u4E0D\u9002\u7528\u4E8E\u5143\u7D20 {1}
+ 359 
+ 360 # 0: type
+ 361 compiler.err.invalid.repeatable.annotation.not.applicable.in.context=\u5BB9\u5668{0}\u5728\u6B64\u7C7B\u578B\u4E0A\u4E0B\u6587\u4E2D\u4E0D\u9002\u7528
+ 362 
+ 363 # 0: name
+ 364 compiler.err.duplicate.class=\u7C7B\u91CD\u590D: {0}
+ 365 
+ 366 # 0: name, 1: name
+ 367 compiler.err.same.binary.name=\u7C7B\uFF1A{0} \u548C {1} \u5177\u6709\u76F8\u540C\u7684\u4E8C\u8FDB\u5236\u540D\u79F0
+ 368 
+ 369 compiler.err.duplicate.case.label=case \u6807\u7B7E\u91CD\u590D
+ 370 
+ 371 compiler.err.duplicate.default.label=default \u6807\u7B7E\u91CD\u590D
+ 372 
+ 373 compiler.err.else.without.if=\u6709 &#39;&#39;if&#39;&#39;, \u4F46\u662F\u6CA1\u6709 &#39;&#39;else&#39;&#39;
+ 374 
+ 375 compiler.err.empty.char.lit=\u7A7A\u5B57\u7B26\u6587\u5B57
+ 376 
+ 377 # 0: symbol
+ 378 compiler.err.encl.class.required=\u9700\u8981\u5305\u542B{0}\u7684\u5C01\u95ED\u5B9E\u4F8B
+ 379 
+ 380 compiler.err.enum.annotation.must.be.enum.constant=\u679A\u4E3E\u6CE8\u91CA\u503C\u5FC5\u987B\u662F\u679A\u4E3E\u5E38\u91CF
+ 381 
+ 382 compiler.err.enum.cant.be.instantiated=\u65E0\u6CD5\u5B9E\u4F8B\u5316\u679A\u4E3E\u7C7B\u578B
+ 383 
+ 384 compiler.err.enum.label.must.be.unqualified.enum=\u679A\u4E3E switch case \u6807\u7B7E\u5FC5\u987B\u4E3A\u679A\u4E3E\u5E38\u91CF\u7684\u975E\u9650\u5B9A\u540D\u79F0
+ 385 
+ 386 compiler.err.enum.no.subclassing=\u7C7B\u65E0\u6CD5\u76F4\u63A5\u6269\u5C55 java.lang.Enum
+ 387 
+ 388 compiler.err.enum.types.not.extensible=\u679A\u4E3E\u7C7B\u578B\u4E0D\u53EF\u7EE7\u627F
+ 389 
+ 390 compiler.err.enum.no.finalize=\u679A\u4E3E\u4E0D\u80FD\u6709 finalize \u65B9\u6CD5
+ 391 
+ 392 # 0: file name, 1: string
+ 393 compiler.err.error.reading.file=\u8BFB\u53D6{0}\u65F6\u51FA\u9519; {1}
+ 394 
+ 395 # 0: type
+ 396 compiler.err.except.already.caught=\u5DF2\u6355\u83B7\u5230\u5F02\u5E38\u9519\u8BEF{0}
+ 397 
+ 398 # 0: type
+ 399 compiler.err.except.never.thrown.in.try=\u5728\u76F8\u5E94\u7684 try \u8BED\u53E5\u4E3B\u4F53\u4E2D\u4E0D\u80FD\u629B\u51FA\u5F02\u5E38\u9519\u8BEF{0}
+ 400 
+ 401 # 0: symbol
+ 402 compiler.err.final.parameter.may.not.be.assigned=\u4E0D\u80FD\u5206\u914D\u6700\u7EC8\u53C2\u6570{0}
+ 403 
+ 404 # 0: symbol
+ 405 compiler.err.try.resource.may.not.be.assigned=\u53EF\u80FD\u672A\u5206\u914D\u53EF\u81EA\u52A8\u5173\u95ED\u7684\u8D44\u6E90{0}
+ 406 
+ 407 # 0: symbol
+ 408 compiler.err.pattern.binding.may.not.be.assigned=\u4E0D\u80FD\u5206\u914D\u6A21\u5F0F\u7ED1\u5B9A {0}
+ 409 
+ 410 # 0: symbol
+ 411 compiler.err.multicatch.parameter.may.not.be.assigned=\u53EF\u80FD\u672A\u5206\u914D multi-catch \u53C2\u6570{0}
+ 412 
+ 413 # 0: type, 1: type
+ 414 compiler.err.multicatch.types.must.be.disjoint=multi-catch \u8BED\u53E5\u4E2D\u7684\u66FF\u4EE3\u65E0\u6CD5\u901A\u8FC7\u5B50\u7C7B\u5316\u5173\u8054\n\u66FF\u4EE3{0}\u662F\u66FF\u4EE3{1}\u7684\u5B50\u7C7B
+ 415 
+ 416 compiler.err.finally.without.try=\u6709 &#39;&#39;finally&#39;&#39;, \u4F46\u662F\u6CA1\u6709 &#39;&#39;try&#39;&#39;
+ 417 
+ 418 # 0: type, 1: message segment
+ 419 compiler.err.foreach.not.applicable.to.type=for-each \u4E0D\u9002\u7528\u4E8E\u8868\u8FBE\u5F0F\u7C7B\u578B\n\u8981\u6C42: {1}\n\u627E\u5230:    {0}
+ 420 
+ 421 compiler.err.fp.number.too.large=\u6D6E\u70B9\u6570\u8FC7\u5927
+ 422 
+ 423 compiler.err.fp.number.too.small=\u6D6E\u70B9\u6570\u8FC7\u5C0F
+ 424 
+ 425 compiler.err.generic.array.creation=\u521B\u5EFA\u6CDB\u578B\u6570\u7EC4
+ 426 
+ 427 compiler.err.generic.throwable=\u6CDB\u578B\u7C7B\u4E0D\u80FD\u6269\u5C55 java.lang.Throwable
+ 428 
+ 429 # 0: symbol
+ 430 compiler.err.icls.cant.have.static.decl=\u5185\u90E8\u7C7B{0}\u4E2D\u7684\u9759\u6001\u58F0\u660E\u975E\u6CD5\n\u4FEE\u9970\u7B26 &#39;&#39;static&#39;&#39; \u4EC5\u5141\u8BB8\u5728\u5E38\u91CF\u53D8\u91CF\u58F0\u660E\u4E2D\u4F7F\u7528
+ 431 
+ 432 # 0: string
+ 433 compiler.err.illegal.char=\u975E\u6CD5\u5B57\u7B26: &#39;&#39;{0}&#39;&#39;
+ 434 
+ 435 # 0: string, 1: string
+ 436 compiler.err.illegal.char.for.encoding=\u7F16\u7801 {1} \u7684\u4E0D\u53EF\u6620\u5C04\u5B57\u7B26 (0x{0})
+ 437 
+ 438 # 0: set of flag, 1: set of flag
+ 439 compiler.err.illegal.combination.of.modifiers=\u975E\u6CD5\u7684\u4FEE\u9970\u7B26\u7EC4\u5408: {0}\u548C{1}
+ 440 
+ 441 compiler.err.illegal.enum.static.ref=\u521D\u59CB\u5316\u7A0B\u5E8F\u4E2D\u5BF9\u9759\u6001\u5B57\u6BB5\u7684\u5F15\u7528\u4E0D\u5408\u6CD5
+ 442 
+ 443 compiler.err.illegal.esc.char=\u975E\u6CD5\u8F6C\u4E49\u7B26
+ 444 
+ 445 compiler.err.illegal.forward.ref=\u975E\u6CD5\u524D\u5411\u5F15\u7528
+ 446 
+ 447 # 0: symbol, 1: object
+ 448 compiler.err.not.in.profile={0}\u5728\u914D\u7F6E\u6587\u4EF6 &#39;&#39;{1}&#39;&#39; \u4E2D\u4E0D\u53EF\u7528
+ 449 
+ 450 # 0: symbol
+ 451 compiler.warn.forward.ref=\u5148\u5F15\u7528\u53D8\u91CF &#39;&#39;{0}&#39;&#39;, \u7136\u540E\u518D\u5BF9\u5176\u521D\u59CB\u5316
+ 452 
+ 453 compiler.err.illegal.self.ref=\u521D\u59CB\u5316\u7A0B\u5E8F\u4E2D\u5B58\u5728\u81EA\u5F15\u7528
+ 454 
+ 455 # 0: symbol
+ 456 compiler.warn.self.ref=\u53D8\u91CF &#39;&#39;{0}&#39;&#39; \u7684\u521D\u59CB\u5316\u7A0B\u5E8F\u4E2D\u5B58\u5728\u81EA\u5F15\u7528
+ 457 
+ 458 compiler.err.illegal.generic.type.for.instof=instanceof \u7684\u6CDB\u578B\u7C7B\u578B\u4E0D\u5408\u6CD5
+ 459 
+ 460 # 0: type
+ 461 compiler.err.illegal.initializer.for.type={0}\u7684\u521D\u59CB\u5316\u7A0B\u5E8F\u4E0D\u5408\u6CD5
+ 462 
+ 463 compiler.err.illegal.line.end.in.char.lit=\u5B57\u7B26\u6587\u5B57\u7684\u884C\u7ED3\u5C3E\u4E0D\u5408\u6CD5
+ 464 
+ 465 compiler.err.illegal.text.block.open=\u6587\u672C\u5757\u8D77\u59CB\u5206\u9694\u7B26\u5E8F\u5217\u975E\u6CD5\uFF0C\u7F3A\u5C11\u884C\u7EC8\u6B62\u7B26
+ 466 
+ 467 compiler.warn.inconsistent.white.space.indentation=\u7A7A\u683C\u7F29\u8FDB\u4E0D\u4E00\u81F4
+ 468 
+ 469 compiler.warn.trailing.white.space.will.be.removed=\u5C06\u5220\u9664\u5C3E\u968F\u7A7A\u683C
+ 470 
+ 471 compiler.err.illegal.nonascii.digit=\u975E\u6CD5\u7684\u975E ASCII \u6570\u5B57
+ 472 
+ 473 compiler.err.illegal.underscore=\u975E\u6CD5\u4E0B\u5212\u7EBF
+ 474 
+ 475 compiler.err.illegal.dot=\u975E\u6CD5 &#39;&#39;.&#39;&#39;
+ 476 
+ 477 # 0: symbol
+ 478 compiler.err.illegal.qual.not.icls=\u975E\u6CD5\u9650\u5B9A\u7B26; {0}\u4E0D\u662F\u5185\u90E8\u7C7B
+ 479 
+ 480 compiler.err.illegal.start.of.expr=\u975E\u6CD5\u7684\u8868\u8FBE\u5F0F\u5F00\u59CB
+ 481 
+ 482 compiler.err.illegal.start.of.stmt=\u975E\u6CD5\u7684\u8BED\u53E5\u5F00\u59CB
+ 483 
+ 484 compiler.err.illegal.start.of.type=\u975E\u6CD5\u7684\u7C7B\u578B\u5F00\u59CB
+ 485 
+ 486 compiler.err.illegal.parenthesized.expression=\u975E\u6CD5\u7684\u542B\u62EC\u53F7\u8868\u8FBE\u5F0F
+ 487 
+ 488 compiler.err.illegal.unicode.esc=\u975E\u6CD5\u7684 Unicode \u8F6C\u4E49
+ 489 
+ 490 # 0: symbol
+ 491 compiler.err.import.requires.canonical=\u5BFC\u5165\u9700\u8981{0}\u7684\u89C4\u8303\u540D\u79F0
+ 492 
+ 493 compiler.err.improperly.formed.type.param.missing=\u7C7B\u578B\u7684\u683C\u5F0F\u4E0D\u6B63\u786E, \u7F3A\u5C11\u67D0\u4E9B\u53C2\u6570
+ 494 
+ 495 compiler.err.improperly.formed.type.inner.raw.param=\u7C7B\u578B\u7684\u683C\u5F0F\u4E0D\u6B63\u786E, \u7ED9\u51FA\u4E86\u539F\u59CB\u7C7B\u578B\u7684\u7C7B\u578B\u53C2\u6570
+ 496 
+ 497 # 0: type, 1: type
+ 498 compiler.err.incomparable.types=\u4E0D\u53EF\u6BD4\u8F83\u7684\u7C7B\u578B: {0}\u548C{1}
+ 499 
+ 500 # 0: string
+ 501 compiler.err.int.number.too.large=\u6574\u6570\u592A\u5927
+ 502 
+ 503 compiler.err.intf.annotation.members.cant.have.params=\u6CE8\u91CA\u7C7B\u578B\u58F0\u660E\u4E2D\u7684\u5143\u7D20\u65E0\u6CD5\u58F0\u660E\u5F62\u53C2
+ 504 
+ 505 # 0: symbol
+ 506 compiler.err.intf.annotation.cant.have.type.params=\u6CE8\u91CA\u7C7B\u578B {0} \u4E0D\u80FD\u4E3A\u6CDB\u578B
+ 507 
+ 508 compiler.err.intf.annotation.members.cant.have.type.params=\u6CE8\u91CA\u7C7B\u578B\u58F0\u660E\u4E2D\u7684\u5143\u7D20\u4E0D\u80FD\u4E3A\u6CDB\u578B\u65B9\u6CD5
+ 509 
+ 510 # 0: symbol, 1: type
+ 511 compiler.err.intf.annotation.member.clash=\u6CE8\u91CA\u7C7B\u578B{1}\u58F0\u660E\u4E0E\u65B9\u6CD5 {0} \u540C\u540D\u7684\u5143\u7D20
+ 512 
+ 513 compiler.err.intf.expected.here=\u6B64\u5904\u9700\u8981\u63A5\u53E3
+ 514 
+ 515 compiler.err.intf.meth.cant.have.body=\u63A5\u53E3\u62BD\u8C61\u65B9\u6CD5\u4E0D\u80FD\u5E26\u6709\u4E3B\u4F53
+ 516 
+ 517 compiler.err.invalid.annotation.member.type=\u6CE8\u91CA\u7C7B\u578B\u5143\u7D20\u7684\u7C7B\u578B\u65E0\u6548
+ 518 
+ 519 compiler.err.invalid.binary.number=\u4E8C\u8FDB\u5236\u6570\u5B57\u4E2D\u5FC5\u987B\u5305\u542B\u81F3\u5C11\u4E00\u4E2A\u4E8C\u8FDB\u5236\u6570
+ 520 
+ 521 compiler.err.invalid.hex.number=\u5341\u516D\u8FDB\u5236\u6570\u5B57\u5FC5\u987B\u5305\u542B\u81F3\u5C11\u4E00\u4F4D\u5341\u516D\u8FDB\u5236\u6570
+ 522 
+ 523 compiler.err.invalid.meth.decl.ret.type.req=\u65B9\u6CD5\u58F0\u660E\u65E0\u6548; \u9700\u8981\u8FD4\u56DE\u7C7B\u578B
+ 524 
+ 525 compiler.err.varargs.and.old.array.syntax=variable-arity \u53C2\u6570\u4E2D\u4E0D\u5141\u8BB8\u4F7F\u7528\u4F20\u7EDF\u6570\u7EC4\u8BB0\u53F7
+ 526 
+ 527 compiler.err.varargs.and.receiver =\u63A5\u6536\u65B9\u53C2\u6570\u4E0D\u5141\u8BB8\u4F7F\u7528 varargs \u8BB0\u53F7
+ 528 
+ 529 compiler.err.varargs.must.be.last =varargs \u53C2\u6570\u5FC5\u987B\u662F\u6700\u540E\u4E00\u4E2A\u53C2\u6570
+ 530 
+ 531 compiler.err.array.and.receiver =\u63A5\u6536\u65B9\u53C2\u6570\u4E0D\u5141\u8BB8\u4F7F\u7528\u4F20\u7EDF\u6570\u7EC4\u8BB0\u53F7
+ 532 
+ 533 compiler.err.wrong.receiver =\u9519\u8BEF\u7684\u63A5\u6536\u65B9\u53C2\u6570\u540D
+ 534 
+ 535 compiler.err.variable.not.allowed=\u6B64\u5904\u4E0D\u5141\u8BB8\u4F7F\u7528\u53D8\u91CF\u58F0\u660E
+ 536 
+ 537 # 0: name
+ 538 compiler.err.label.already.in.use=\u6807\u7B7E{0}\u5DF2\u4F7F\u7528
+ 539 
+ 540 # 0: symbol
+ 541 compiler.err.local.var.accessed.from.icls.needs.final=\u4ECE\u5185\u90E8\u7C7B\u4E2D\u8BBF\u95EE\u672C\u5730\u53D8\u91CF{0}; \u9700\u8981\u88AB\u58F0\u660E\u4E3A\u6700\u7EC8\u7C7B\u578B
+ 542 
+ 543 compiler.err.local.enum=\u679A\u4E3E\u7C7B\u578B\u4E0D\u80FD\u4E3A\u672C\u5730\u7C7B\u578B
+ 544 
+ 545 compiler.err.cannot.create.array.with.type.arguments=\u65E0\u6CD5\u521B\u5EFA\u5177\u6709\u7C7B\u578B\u53D8\u91CF\u7684\u6570\u7EC4
+ 546 
+ 547 compiler.err.cannot.create.array.with.diamond=\u65E0\u6CD5\u521B\u5EFA\u5177\u6709 &#39;&#39;&lt;&gt;&#39;&#39; \u7684\u6570\u7EC4
+ 548 
+ 549 compiler.err.invalid.module.directive=\u9884\u671F\u4E3A\u6A21\u5757\u6307\u4EE4\u5173\u952E\u5B57\u6216 &#39;&#39;}&#39;&#39;
+ 550 
+ 551 #
+ 552 # limits.  We don&#39;t give the limits in the diagnostic because we expect
+ 553 # them to change, yet we want to use the same diagnostic.  These are all
+ 554 # detected during code generation.
+ 555 #
+ 556 compiler.err.limit.code=\u4EE3\u7801\u8FC7\u957F
+ 557 
+ 558 compiler.err.limit.code.too.large.for.try.stmt=try \u8BED\u53E5\u7684\u4EE3\u7801\u8FC7\u957F
+ 559 
+ 560 compiler.err.limit.dimensions=\u6570\u7EC4\u7C7B\u578B\u7EF4\u8FC7\u591A
+ 561 
+ 562 compiler.err.limit.locals=\u672C\u5730\u53D8\u91CF\u8FC7\u591A
+ 563 
+ 564 compiler.err.limit.parameters=\u53C2\u6570\u8FC7\u591A
+ 565 
+ 566 compiler.err.limit.pool=\u5E38\u91CF\u8FC7\u591A
+ 567 
+ 568 compiler.err.limit.pool.in.class=\u7C7B{0}\u4E2D\u7684\u5E38\u91CF\u8FC7\u591A
+ 569 
+ 570 compiler.err.limit.stack=\u4EE3\u7801\u9700\u8981\u8FC7\u591A\u5806\u6808
+ 571 
+ 572 compiler.err.limit.string=\u5E38\u91CF\u5B57\u7B26\u4E32\u8FC7\u957F
+ 573 
+ 574 # 0: string
+ 575 compiler.err.limit.string.overflow=\u5BF9\u4E8E\u5E38\u91CF\u6C60\u6765\u8BF4, \u5B57\u7B26\u4E32 &quot;{0}...&quot; \u7684 UTF8 \u8868\u793A\u8FC7\u957F
+ 576 
+ 577 compiler.err.malformed.fp.lit=\u6D6E\u70B9\u6587\u5B57\u7684\u683C\u5F0F\u9519\u8BEF
+ 578 
+ 579 compiler.err.method.does.not.override.superclass=\u65B9\u6CD5\u4E0D\u4F1A\u8986\u76D6\u6216\u5B9E\u73B0\u8D85\u7C7B\u578B\u7684\u65B9\u6CD5
+ 580 
+ 581 compiler.err.static.methods.cannot.be.annotated.with.override=\u4E0D\u80FD\u4F7F\u7528 @Override \u6CE8\u91CA\u9759\u6001\u65B9\u6CD5
+ 582 
+ 583 compiler.err.missing.meth.body.or.decl.abstract=\u7F3A\u5C11\u65B9\u6CD5\u4E3B\u4F53, \u6216\u58F0\u660E\u62BD\u8C61
+ 584 
+ 585 compiler.err.missing.ret.stmt=\u7F3A\u5C11\u8FD4\u56DE\u8BED\u53E5
+ 586 
+ 587 # 0: type
+ 588 compiler.misc.missing.ret.val=\u7F3A\u5C11\u8FD4\u56DE\u503C
+ 589 
+ 590 compiler.misc.unexpected.ret.val=\u610F\u5916\u7684\u8FD4\u56DE\u503C
+ 591 
+ 592 # 0: set of flag
+ 593 compiler.err.mod.not.allowed.here=\u6B64\u5904\u4E0D\u5141\u8BB8\u4F7F\u7528\u4FEE\u9970\u7B26{0}
+ 594 
+ 595 # 0: name
+ 596 compiler.err.modifier.not.allowed.here=\u6B64\u5904\u4E0D\u5141\u8BB8\u4F7F\u7528\u4FEE\u9970\u7B26{0}
+ 597 
+ 598 compiler.err.intf.not.allowed.here=\u6B64\u5904\u4E0D\u5141\u8BB8\u4F7F\u7528\u63A5\u53E3
+ 599 
+ 600 # 0: symbol, 1: symbol
+ 601 compiler.err.name.clash.same.erasure=\u540D\u79F0\u51B2\u7A81: {0}\u548C{1}\u5177\u6709\u76F8\u540C\u7591\u7B26
+ 602 
+ 603 # 0: name, 1: list of type, 2: symbol, 3: name, 4: list of type, 5: symbol
+ 604 compiler.err.name.clash.same.erasure.no.override=\u540D\u79F0\u51B2\u7A81: {2} \u4E2D\u7684 {0}({1}) \u548C {5} \u4E2D\u7684 {3}({4}) \u5177\u6709\u76F8\u540C\u7591\u7B26, \u4F46\u4E24\u8005\u5747\u4E0D\u8986\u76D6\u5BF9\u65B9
+ 605 
+ 606 # 0: string, 1: name, 2: name, 3: list of type, 4: symbol, 5: name, 6: list of type, 7: symbol
+ 607 compiler.err.name.clash.same.erasure.no.override.1=\u540D\u79F0\u51B2\u7A81: {0} {1} \u7684\u4E24\u79CD\u65B9\u6CD5\u5177\u6709\u76F8\u540C\u7684\u7591\u7B26, \u4F46\u4E24\u8005\u5747\u4E0D\u8986\u76D6\u5BF9\u65B9\n\u7B2C\u4E00\u79CD\u65B9\u6CD5: {4} \u4E2D\u7684 {2}({3})\n\u7B2C\u4E8C\u79CD\u65B9\u6CD5: {7} \u4E2D\u7684 {5}({6})
+ 608 
+ 609 # 0: symbol, 1: symbol, 2: symbol, 3: symbol
+ 610 compiler.err.name.clash.same.erasure.no.hide=\u540D\u79F0\u51B2\u7A81: {1} \u4E2D\u7684 {0} \u548C {3} \u4E2D\u7684 {2} \u5177\u6709\u76F8\u540C\u7591\u7B26, \u4F46\u4E24\u8005\u5747\u4E0D\u9690\u85CF\u5BF9\u65B9
+ 611 
+ 612 compiler.err.name.reserved.for.internal.use={0}\u4E3A\u5185\u90E8\u4F7F\u7528\u4FDD\u7559
+ 613 
+ 614 compiler.err.native.meth.cant.have.body=\u672C\u673A\u65B9\u6CD5\u4E0D\u80FD\u5E26\u6709\u4E3B\u4F53
+ 615 
+ 616 
+ 617 # 0: message segment
+ 618 compiler.misc.incompatible.type.in.conditional=\u6761\u4EF6\u8868\u8FBE\u5F0F\u4E2D\u7684\u7C7B\u578B\u9519\u8BEF\n{0}
+ 619 
+ 620 compiler.misc.conditional.target.cant.be.void=\u6761\u4EF6\u8868\u8FBE\u5F0F\u7684\u76EE\u6807\u7C7B\u578B\u4E0D\u80FD\u4E3A\u7A7A
+ 621 
+ 622 compiler.misc.switch.expression.target.cant.be.void=switch \u8868\u8FBE\u5F0F\u7684\u76EE\u6807\u7C7B\u578B\u4E0D\u80FD\u4E3A\u7A7A
+ 623 
+ 624 # 0: message segment
+ 625 compiler.misc.incompatible.type.in.switch.expression=switch \u8868\u8FBE\u5F0F\u4E2D\u7684\u7C7B\u578B\u9519\u8BEF\n{0}
+ 626 
+ 627 # 0: message segment
+ 628 compiler.misc.incompatible.ret.type.in.lambda=lambda \u8868\u8FBE\u5F0F\u4E2D\u7684\u8FD4\u56DE\u7C7B\u578B\u9519\u8BEF\n{0}
+ 629 
+ 630 compiler.misc.stat.expr.expected=lambda \u4E3B\u4F53\u4E0E void \u51FD\u6570\u63A5\u53E3\u4E0D\u517C\u5BB9\n(\u8BF7\u8003\u8651\u4F7F\u7528\u5757 lambda \u4E3B\u4F53, \u6216\u8005\u6539\u4E3A\u4F7F\u7528\u8BED\u53E5\u8868\u8FBE\u5F0F)
+ 631 
+ 632 # 0: message segment
+ 633 compiler.misc.incompatible.ret.type.in.mref=\u65B9\u6CD5\u5F15\u7528\u4E2D\u7684\u8FD4\u56DE\u7C7B\u578B\u9519\u8BEF\n{0}
+ 634 
+ 635 compiler.err.lambda.body.neither.value.nor.void.compatible=lambda \u4E3B\u4F53\u4E0D\u662F\u503C, \u4E5F\u4E0D\u4E0E void \u517C\u5BB9
+ 636 
+ 637 # 0: list of type
+ 638 compiler.err.incompatible.thrown.types.in.mref=\u51FD\u6570\u8868\u8FBE\u5F0F\u4E2D\u629B\u51FA\u7684\u7C7B\u578B {0} \u4E0D\u517C\u5BB9
+ 639 
+ 640 compiler.misc.incompatible.arg.types.in.lambda=lambda \u8868\u8FBE\u5F0F\u4E2D\u7684\u53C2\u6570\u7C7B\u578B\u4E0D\u517C\u5BB9
+ 641 
+ 642 compiler.misc.incompatible.arg.types.in.mref=\u65B9\u6CD5\u5F15\u7528\u4E2D\u7684\u53C2\u6570\u7C7B\u578B\u4E0D\u517C\u5BB9
+ 643 
+ 644 compiler.err.new.not.allowed.in.annotation=\u6CE8\u91CA\u4E2D\u4E0D\u5141\u8BB8\u4F7F\u7528 &#39;&#39;new&#39;&#39;
+ 645 
+ 646 # 0: name, 1: type
+ 647 compiler.err.no.annotation.member={1}\u4E2D\u6CA1\u6709\u6CE8\u91CA\u6210\u5458{0}
+ 648 
+ 649 # 0: symbol
+ 650 compiler.err.no.encl.instance.of.type.in.scope=\u4F5C\u7528\u57DF\u4E2D\u6CA1\u6709\u7C7B\u578B\u4E3A{0}\u7684\u5C01\u95ED\u5B9E\u4F8B
+ 651 
+ 652 compiler.err.no.intf.expected.here=\u6B64\u5904\u4E0D\u9700\u8981\u63A5\u53E3
+ 653 
+ 654 compiler.err.no.match.entry={0}\u5728{1}\u7684\u6761\u76EE\u4E2D\u6CA1\u6709\u5339\u914D\u9879; \u9700\u8981{2}
+ 655 
+ 656 # 0: type
+ 657 compiler.err.not.annotation.type={0}\u4E0D\u662F\u6CE8\u91CA\u7C7B\u578B
+ 658 
+ 659 # 0: symbol, 1: symbol, 2: message segment
+ 660 compiler.err.not.def.access.package.cant.access={0} \u4E0D\u53EF\u89C1\n({2})
+ 661 
+ 662 # 0: symbol, 1: symbol, 2: message segment
+ 663 compiler.misc.not.def.access.package.cant.access={0} \u4E0D\u53EF\u89C1\n({2})
+ 664 
+ 665 # 0: symbol, 1: message segment
+ 666 compiler.err.package.not.visible=\u7A0B\u5E8F\u5305 {0} \u4E0D\u53EF\u89C1\n({1})
+ 667 
+ 668 # 0: symbol, 1: message segment
+ 669 compiler.misc.package.not.visible=\u7A0B\u5E8F\u5305 {0} \u4E0D\u53EF\u89C1\n({1})
+ 670 
+ 671 # {0} - current module
+ 672 # {1} - package in which the invisible class is declared
+ 673 # {2} - module in which {1} is declared
+ 674 # 0: symbol, 1: symbol, 2: symbol
+ 675 compiler.misc.not.def.access.does.not.read=\u7A0B\u5E8F\u5305 {1} \u5DF2\u5728\u6A21\u5757 {2} \u4E2D\u58F0\u660E, \u4F46\u6A21\u5757 {0} \u672A\u8BFB\u53D6\u5B83
+ 676 
+ 677 # {0} - package in which the invisible class is declared
+ 678 # {1} - module in which {0} is declared
+ 679 # 0: symbol, 1: symbol
+ 680 compiler.misc.not.def.access.does.not.read.from.unnamed=\u7A0B\u5E8F\u5305 {0} \u5DF2\u5728\u6A21\u5757 {1} \u4E2D\u58F0\u660E, \u4F46\u8BE5\u6A21\u5757\u4E0D\u5728\u6A21\u5757\u56FE\u4E2D
+ 681 
+ 682 # {0} - package in which the invisible class is declared
+ 683 # {1} - current module
+ 684 # 0: symbol, 1: symbol
+ 685 compiler.misc.not.def.access.does.not.read.unnamed=\u7A0B\u5E8F\u5305 {0} \u5DF2\u5728\u672A\u547D\u540D\u6A21\u5757\u4E2D\u58F0\u660E\uFF0C\u4F46\u6A21\u5757 {1} \u672A\u8BFB\u53D6\u5B83
+ 686 
+ 687 # {0} - package in which the invisible class is declared
+ 688 # {1} - module in which {0} is declared
+ 689 # 0: symbol, 1: symbol
+ 690 compiler.misc.not.def.access.not.exported=\u7A0B\u5E8F\u5305 {0} \u5DF2\u5728\u6A21\u5757 {1} \u4E2D\u58F0\u660E, \u4F46\u8BE5\u6A21\u5757\u672A\u5BFC\u51FA\u5B83
+ 691 
+ 692 # {0} - package in which the invisible class is declared
+ 693 # {1} - module in which {0} is declared
+ 694 # 0: symbol, 1: symbol
+ 695 compiler.misc.not.def.access.not.exported.from.unnamed=\u7A0B\u5E8F\u5305 {0} \u5DF2\u5728\u6A21\u5757 {1} \u4E2D\u58F0\u660E, \u4F46\u8BE5\u6A21\u5757\u672A\u5BFC\u51FA\u5B83
+ 696 
+ 697 # {0} - package in which the invisible class is declared
+ 698 # {1} - module in which {0} is declared
+ 699 # {2} - current module
+ 700 # 0: symbol, 1: symbol, 2: symbol
+ 701 compiler.misc.not.def.access.not.exported.to.module=\u7A0B\u5E8F\u5305 {0} \u5DF2\u5728\u6A21\u5757 {1} \u4E2D\u58F0\u660E, \u4F46\u8BE5\u6A21\u5757\u672A\u5C06\u5B83\u5BFC\u51FA\u5230\u6A21\u5757 {2}
+ 702 
+ 703 # {0} - package in which the invisible class is declared
+ 704 # {1} - module in which {0} is declared
+ 705 # 0: symbol, 1: symbol
+ 706 compiler.misc.not.def.access.not.exported.to.module.from.unnamed=\u7A0B\u5E8F\u5305 {0} \u5DF2\u5728\u6A21\u5757 {1} \u4E2D\u58F0\u660E, \u4F46\u8BE5\u6A21\u5757\u672A\u5C06\u5B83\u5BFC\u51FA\u5230\u672A\u547D\u540D\u6A21\u5757
+ 707 
+ 708 # 0: symbol, 1: symbol
+ 709 compiler.err.not.def.access.class.intf.cant.access={1}.{0} \u662F\u5728\u4E0D\u53EF\u8BBF\u95EE\u7684\u7C7B\u6216\u63A5\u53E3\u4E2D\u5B9A\u4E49\u7684
+ 710 
+ 711 # 0: symbol, 1: symbol
+ 712 compiler.misc.not.def.access.class.intf.cant.access={1}.{0} \u662F\u5728\u4E0D\u53EF\u8BBF\u95EE\u7684\u7C7B\u6216\u63A5\u53E3\u4E2D\u5B9A\u4E49\u7684
+ 713 
+ 714 # 0: symbol, 1: symbol, 2: symbol, 3: message segment
+ 715 compiler.err.not.def.access.class.intf.cant.access.reason=\u7A0B\u5E8F\u5305 {2} \u4E2D\u7684 {1}.{0} \u4E0D\u53EF\u8BBF\u95EE\n({3})
+ 716 
+ 717 # 0: symbol, 1: symbol, 2: symbol, 3: message segment
+ 718 compiler.misc.not.def.access.class.intf.cant.access.reason=\u7A0B\u5E8F\u5305 {2} \u4E2D\u7684 {1}.{0} \u4E0D\u53EF\u8BBF\u95EE\n({3})
+ 719 
+ 720 # 0: symbol, 1: list of type, 2: type
+ 721 compiler.misc.cant.access.inner.cls.constr=\u65E0\u6CD5\u8BBF\u95EE\u6784\u9020\u5668 {0}({1})\n\u4F5C\u7528\u57DF\u4E2D\u6CA1\u6709\u7C7B\u578B\u4E3A{2}\u7684\u5C01\u95ED\u5B9E\u4F8B
+ 722 
+ 723 # 0: symbol, 1: symbol
+ 724 compiler.err.not.def.public.cant.access={0}\u5728{1}\u4E2D\u4E0D\u662F\u516C\u5171\u7684; \u65E0\u6CD5\u4ECE\u5916\u90E8\u7A0B\u5E8F\u5305\u4E2D\u5BF9\u5176\u8FDB\u884C\u8BBF\u95EE
+ 725 
+ 726 # 0: symbol, 1: symbol
+ 727 compiler.err.not.def.public={0} \u5728 {1} \u4E2D\u4E0D\u662F\u516C\u5171\u7684
+ 728 
+ 729 # 0: symbol, 1: symbol
+ 730 compiler.misc.not.def.public.cant.access={0}\u5728{1}\u4E2D\u4E0D\u662F\u516C\u5171\u7684; \u65E0\u6CD5\u4ECE\u5916\u90E8\u7A0B\u5E8F\u5305\u4E2D\u5BF9\u5176\u8FDB\u884C\u8BBF\u95EE
+ 731 
+ 732 # 0: name
+ 733 compiler.err.not.loop.label=\u4E0D\u662F loop \u6807\u7B7E: {0}
+ 734 
+ 735 compiler.err.not.stmt=\u4E0D\u662F\u8BED\u53E5
+ 736 
+ 737 # 0: symbol
+ 738 compiler.err.not.encl.class=\u4E0D\u662F\u5C01\u95ED\u7C7B: {0}
+ 739 
+ 740 # 0: name, 1: type
+ 741 compiler.err.operator.cant.be.applied=\u4E00\u5143\u8FD0\u7B97\u7B26 &#39;&#39;{0}&#39;&#39; \u7684\u64CD\u4F5C\u6570\u7C7B\u578B{1}\u9519\u8BEF
+ 742 
+ 743 # 0: name, 1: type, 2: type
+ 744 compiler.err.operator.cant.be.applied.1=\u4E8C\u5143\u8FD0\u7B97\u7B26 &#39;&#39;{0}&#39;&#39; \u7684\u64CD\u4F5C\u6570\u7C7B\u578B\u9519\u8BEF\n\u7B2C\u4E00\u4E2A\u7C7B\u578B:  {1}\n\u7B2C\u4E8C\u4E2A\u7C7B\u578B: {2}
+ 745 
+ 746 compiler.err.pkg.annotations.sb.in.package-info.java=\u7A0B\u5E8F\u5305\u6CE8\u91CA\u5E94\u5728\u6587\u4EF6 package-info.java \u4E2D
+ 747 
+ 748 compiler.err.no.pkg.in.module-info.java=\u6587\u4EF6 module-info.java \u4E2D\u4E0D\u5141\u8BB8\u4F7F\u7528\u7A0B\u5E8F\u5305\u58F0\u660E
+ 749 
+ 750 # 0: symbol
+ 751 compiler.err.pkg.clashes.with.class.of.same.name=\u7A0B\u5E8F\u5305{0}\u4E0E\u5E26\u6709\u76F8\u540C\u540D\u79F0\u7684\u7C7B\u51B2\u7A81
+ 752 
+ 753 compiler.err.warnings.and.werror=\u53D1\u73B0\u8B66\u544A, \u4F46\u6307\u5B9A\u4E86 -Werror
+ 754 
+ 755 # Errors related to annotation processing
+ 756 
+ 757 # 0: symbol, 1: message segment, 2: string (stack-trace)
+ 758 compiler.err.proc.cant.access=\u65E0\u6CD5\u8BBF\u95EE{0}\n{1}\n\u6709\u5173\u8BE6\u7EC6\u4FE1\u606F, \u8BF7\u53C2\u9605\u4EE5\u4E0B\u5806\u6808\u8DDF\u8E2A\u3002\n{2}
+ 759 
+ 760 # 0: symbol, 1: message segment
+ 761 compiler.err.proc.cant.access.1=\u65E0\u6CD5\u8BBF\u95EE{0}\n{1}
+ 762 
+ 763 # 0: string
+ 764 compiler.err.proc.cant.find.class=\u627E\u4E0D\u5230 &#39;&#39;{0}&#39;&#39; \u7684\u7C7B\u6587\u4EF6\u3002
+ 765 
+ 766 # 0: string
+ 767 compiler.err.proc.cant.load.class=\u7531\u4E8E &#39;&#39;{0}&#39;&#39;\uFF0C\u65E0\u6CD5\u52A0\u8F7D\u5904\u7406\u5668\u7C7B\u6587\u4EF6\u3002
+ 768 
+ 769 # Print a client-generated error message; assumed to be localized, no translation required
+ 770 # 0: string
+ 771 compiler.err.proc.messager={0}
+ 772 
+ 773 # 0: string
+ 774 compiler.misc.exception.message={0}
+ 775 
+ 776 compiler.misc.user.selected.completion.failure=\u6309\u7C7B\u540D\u5217\u51FA\u7684\u7528\u6237\u9009\u62E9\u8F93\u5165\u63D0\u793A\u5931\u8D25
+ 777 
+ 778 # 0: collection of string
+ 779 compiler.err.proc.no.explicit.annotation.processing.requested=\u4EC5\u5F53\u663E\u5F0F\u8BF7\u6C42\u6CE8\u91CA\u5904\u7406\u65F6\u624D\u63A5\u53D7\u7C7B\u540D\u79F0 &#39;&#39;{0}&#39;&#39;
+ 780 
+ 781 compiler.err.proc.no.service=ServiceLoader \u4E0D\u53EF\u7528, \u4F46\u5B83\u662F\u6CE8\u91CA\u5904\u7406\u6240\u5FC5\u9700\u7684\u3002
+ 782 
+ 783 # 0: string, 1: string
+ 784 compiler.err.proc.processor.bad.option.name=\u5904\u7406\u7A0B\u5E8F &#39;&#39;{1}&#39;&#39; \u63D0\u4F9B\u7684\u9009\u9879\u540D\u79F0 &#39;&#39;{0}&#39;&#39; \u9519\u8BEF
+ 785 
+ 786 # 0: string
+ 787 compiler.err.proc.processor.cant.instantiate=\u65E0\u6CD5\u5B9E\u4F8B\u5316\u5904\u7406\u7A0B\u5E8F &#39;&#39;{0}&#39;&#39; \u7684\u5B9E\u4F8B
+ 788 
+ 789 # 0: string
+ 790 compiler.err.proc.processor.not.found=\u627E\u4E0D\u5230\u6CE8\u91CA\u5904\u7406\u7A0B\u5E8F &#39;&#39;{0}&#39;&#39;
+ 791 
+ 792 # 0: string
+ 793 compiler.err.proc.processor.wrong.type=\u6CE8\u91CA\u5904\u7406\u7A0B\u5E8F &#39;&#39;{0}&#39;&#39; \u672A\u5B9E\u73B0 javax.annotation.processing.Processor
+ 794 
+ 795 compiler.err.proc.service.problem=\u521B\u5EFA\u670D\u52A1\u52A0\u8F7D\u5668\u4EE5\u52A0\u8F7D\u5904\u7406\u7A0B\u5E8F\u65F6\u51FA\u9519\u3002
+ 796 
+ 797 # 0: string
+ 798 compiler.err.proc.bad.config.file=\u670D\u52A1\u914D\u7F6E\u6587\u4EF6\u4E0D\u6B63\u786E, \u6216\u6784\u9020\u5904\u7406\u7A0B\u5E8F\u5BF9\u8C61{0}\u65F6\u629B\u51FA\u5F02\u5E38\u9519\u8BEF
+ 799 
+ 800 compiler.err.proc.cant.create.loader=\u65E0\u6CD5\u4E3A\u6CE8\u91CA\u5904\u7406\u7A0B\u5E8F{0}\u521B\u5EFA\u7C7B\u52A0\u8F7D\u5668
+ 801 
+ 802 # 0: symbol
+ 803 compiler.err.qualified.new.of.static.class=\u9650\u5B9A\u7684\u65B0\u9759\u6001\u7C7B
+ 804 
+ 805 compiler.err.recursive.ctor.invocation=\u9012\u5F52\u6784\u9020\u5668\u8C03\u7528
+ 806 
+ 807 # 0: name, 1: symbol kind, 2: symbol, 3: symbol, 4: symbol kind, 5: symbol, 6: symbol
+ 808 compiler.err.ref.ambiguous=\u5BF9{0}\u7684\u5F15\u7528\u4E0D\u660E\u786E\n{3} \u4E2D\u7684{1} {2} \u548C {6} \u4E2D\u7684{4} {5} \u90FD\u5339\u914D
+ 809 
+ 810 # 0: name, 1: symbol kind, 2: symbol, 3: symbol, 4: symbol kind, 5: symbol, 6: symbol
+ 811 compiler.misc.ref.ambiguous=\u5BF9{0}\u7684\u5F15\u7528\u4E0D\u660E\u786E\n{3} \u4E2D\u7684{1} {2} \u548C {6} \u4E2D\u7684{4} {5} \u90FD\u5339\u914D
+ 812 
+ 813 compiler.err.repeated.annotation.target=\u6CE8\u91CA\u76EE\u6807\u91CD\u590D
+ 814 
+ 815 compiler.err.repeated.interface=\u63A5\u53E3\u91CD\u590D
+ 816 
+ 817 compiler.err.repeated.modifier=\u4FEE\u9970\u7B26\u91CD\u590D
+ 818 
+ 819 # 0: symbol, 1: set of modifier, 2: symbol
+ 820 compiler.err.report.access={0} \u5728 {2} \u4E2D\u662F {1} \u8BBF\u95EE\u63A7\u5236
+ 821 
+ 822 # 0: symbol, 1: set of modifier, 2: symbol
+ 823 compiler.misc.report.access={0} \u5728 {2} \u4E2D\u662F {1} \u8BBF\u95EE\u63A7\u5236
+ 824 
+ 825 compiler.err.ret.outside.meth=\u8FD4\u56DE\u5916\u90E8\u65B9\u6CD5
+ 826 
+ 827 compiler.err.signature.doesnt.match.supertype=\u7B7E\u540D\u4E0E{0}\u4E0D\u5339\u914D; \u4E0D\u517C\u5BB9\u7684\u8D85\u7C7B\u578B
+ 828 
+ 829 compiler.err.signature.doesnt.match.intf=\u7B7E\u540D\u4E0E{0}\u4E0D\u5339\u914D; \u4E0D\u517C\u5BB9\u7684\u63A5\u53E3
+ 830 
+ 831 # 0: symbol, 1: symbol, 2: symbol
+ 832 compiler.err.does.not.override.abstract={0}\u4E0D\u662F\u62BD\u8C61\u7684, \u5E76\u4E14\u672A\u8986\u76D6{2}\u4E2D\u7684\u62BD\u8C61\u65B9\u6CD5{1}
+ 833 
+ 834 # 0: file object
+ 835 compiler.err.source.cant.overwrite.input.file=\u5199\u5165\u6E90\u65F6\u51FA\u9519; \u65E0\u6CD5\u8986\u76D6\u8F93\u5165\u6587\u4EF6{0}
+ 836 
+ 837 # 0: symbol
+ 838 compiler.err.stack.sim.error=\u5185\u90E8\u9519\u8BEF: {0}\u4E2D\u7684\u5806\u6808 sim \u9519\u8BEF
+ 839 
+ 840 compiler.err.static.imp.only.classes.and.interfaces=\u4EC5\u4ECE\u7C7B\u548C\u63A5\u53E3\u9759\u6001\u5BFC\u5165
+ 841 
+ 842 compiler.err.string.const.req=\u9700\u8981\u5E38\u91CF\u5B57\u7B26\u4E32\u8868\u8FBE\u5F0F
+ 843 
+ 844 # 0: symbol, 1: fragment
+ 845 compiler.err.cannot.generate.class=\u751F\u6210\u7C7B {0} \u65F6\u51FA\u9519\n({1})
+ 846 
+ 847 # 0: symbol, 1: symbol
+ 848 compiler.misc.synthetic.name.conflict=\u7B26\u53F7{0}\u4E0E{1}\u4E2D\u7684 compiler-synthesized \u7B26\u53F7\u51B2\u7A81
+ 849 
+ 850 # 0: symbol, 1: type
+ 851 compiler.misc.illegal.signature=\u7C7B\u578B {1} \u7684\u7B7E\u540D\u5C5E\u6027\u975E\u6CD5
+ 852 
+ 853 compiler.err.throws.not.allowed.in.intf.annotation=@interface \u6210\u5458\u4E2D\u4E0D\u5141\u8BB8\u4F7F\u7528 throws \u5B50\u53E5
+ 854 
+ 855 compiler.err.try.without.catch.finally.or.resource.decls=&#39;&#39;try&#39;&#39; \u4E0D\u5E26\u6709 &#39;&#39;catch&#39;&#39;, &#39;&#39;finally&#39;&#39; \u6216\u8D44\u6E90\u58F0\u660E
+ 856 
+ 857 # 0: symbol
+ 858 compiler.err.type.doesnt.take.params=\u7C7B\u578B{0}\u4E0D\u5E26\u6709\u53C2\u6570
+ 859 
+ 860 compiler.err.type.var.cant.be.deref=\u65E0\u6CD5\u4ECE\u7C7B\u578B\u53D8\u91CF\u4E2D\u8FDB\u884C\u9009\u62E9
+ 861 
+ 862 compiler.err.type.var.may.not.be.followed.by.other.bounds=\u7C7B\u578B\u53D8\u91CF\u540E\u9762\u4E0D\u80FD\u5E26\u6709\u5176\u4ED6\u9650\u5236\u8303\u56F4
+ 863 
+ 864 compiler.err.type.var.more.than.once=\u7C7B\u578B\u53D8\u91CF{0}\u5728{1}\u7684\u7ED3\u679C\u7C7B\u578B\u4E2D\u591A\u6B21\u51FA\u73B0; \u5FC5\u987B\u5BF9\u5176\u8FDB\u884C\u5B9E\u4F8B\u5316
+ 865 
+ 866 compiler.err.type.var.more.than.once.in.result=\u7C7B\u578B\u53D8\u91CF{0}\u5728{1}\u7684\u7C7B\u578B\u4E2D\u591A\u6B21\u51FA\u73B0; \u5FC5\u987B\u5BF9\u5176\u8FDB\u884C\u5B9E\u4F8B\u5316
+ 867 
+ 868 # 0: type, 1: type, 2: fragment
+ 869 compiler.err.types.incompatible=\u7C7B\u578B {0} \u548C {1} \u4E0D\u517C\u5BB9\uFF1B\n{2}
+ 870 
+ 871 # 0: name, 1: list of type
+ 872 compiler.misc.incompatible.diff.ret=\u4E24\u8005\u90FD\u5B9A\u4E49\u4E86 {0}({1})\uFF0C\u4F46\u5374\u5E26\u6709\u4E0D\u76F8\u5173\u7684\u8FD4\u56DE\u7C7B\u578B
+ 873 
+ 874 # 0: kind name, 1: type, 2: name, 3: list of type, 4: symbol, 5: symbol
+ 875 compiler.misc.incompatible.unrelated.defaults={0} {1}\u4ECE\u7C7B\u578B {4} \u548C {5} \u4E2D\u7EE7\u627F\u4E86{2}({3}) \u7684\u4E0D\u76F8\u5173\u9ED8\u8BA4\u503C
+ 876 
+ 877 # 0: kind name, 1: type, 2: name, 3: list of type, 4: symbol, 5: symbol
+ 878 compiler.misc.incompatible.abstract.default={0} {1}\u4ECE\u7C7B\u578B {4} \u548C {5} \u4E2D\u7EE7\u627F\u4E86{2}({3}) \u7684\u62BD\u8C61\u548C\u9ED8\u8BA4\u503C
+ 879 
+ 880 # 0: name, 1: kind name, 2: symbol
+ 881 compiler.err.default.overrides.object.member={1} {2} \u4E2D\u7684\u9ED8\u8BA4\u65B9\u6CD5{0}\u8986\u76D6\u4E86 java.lang.Object \u7684\u6210\u5458
+ 882 
+ 883 # 0: type
+ 884 compiler.err.illegal.static.intf.meth.call=\u9759\u6001\u63A5\u53E3\u65B9\u6CD5\u8C03\u7528\u975E\u6CD5\n\u5E94\u5C06\u63A5\u6536\u65B9\u8868\u8FBE\u5F0F\u66FF\u6362\u4E3A\u7C7B\u578B\u9650\u5B9A\u7B26 &#39;&#39;{0}&#39;&#39;
+ 885 
+ 886 # 0: symbol or type, 1: message segment
+ 887 compiler.err.illegal.default.super.call=\u9ED8\u8BA4\u8D85\u7EA7\u8C03\u7528\u4E2D\u7684\u7C7B\u578B\u9650\u5B9A\u7B26{0}\u9519\u8BEF\n{1}
+ 888 
+ 889 # 0: symbol, 1: type
+ 890 compiler.misc.overridden.default=\u8986\u76D6\u4E86{1}\u4E2D\u7684\u65B9\u6CD5 {0}
+ 891 
+ 892 # 0: symbol, 1: type or symbol
+ 893 compiler.misc.redundant.supertype=\u5197\u4F59\u63A5\u53E3 {0} \u5DF2\u7531 {1} \u6269\u5C55
+ 894 
+ 895 compiler.err.unclosed.char.lit=\u672A\u7ED3\u675F\u7684\u5B57\u7B26\u6587\u5B57
+ 896 
+ 897 compiler.err.unclosed.comment=\u672A\u7ED3\u675F\u7684\u6CE8\u91CA
+ 898 
+ 899 compiler.err.unclosed.str.lit=\u672A\u7ED3\u675F\u7684\u5B57\u7B26\u4E32\u6587\u5B57
+ 900 
+ 901 compiler.err.unclosed.text.block=\u6587\u672C\u5757\u672A\u95ED\u5408
+ 902 
+ 903 # 0: string
+ 904 compiler.err.unsupported.encoding=\u4E0D\u652F\u6301\u7684\u7F16\u7801: {0}
+ 905 
+ 906 compiler.err.io.exception=\u8BFB\u53D6\u6E90\u6587\u4EF6\u65F6\u51FA\u9519: {0}
+ 907 
+ 908 # 0: name
+ 909 compiler.err.undef.label=\u672A\u5B9A\u4E49\u7684\u6807\u7B7E: {0}
+ 910 
+ 911 # 0: name
+ 912 compiler.err.illegal.ref.to.restricted.type=\u5BF9\u53D7\u9650\u5236\u7C7B\u578B &#39;&#39;{0}&#39;&#39; \u7684\u5F15\u7528\u975E\u6CD5
+ 913 
+ 914 # 0: name
+ 915 compiler.warn.illegal.ref.to.restricted.type=\u5BF9\u53D7\u9650\u5236\u7C7B\u578B &#39;&#39;{0}&#39;&#39; \u7684\u5F15\u7528\u975E\u6CD5
+ 916 
+ 917 # 0: name, 1: source
+ 918 compiler.err.restricted.type.not.allowed=\u6B64\u5904\u4E0D\u5141\u8BB8\u4F7F\u7528 &#39;&#39;{0}&#39;&#39;\n\u4ECE\u53D1\u884C\u7248 {1} \u5F00\u59CB\uFF0C&#39;&#39;{0}&#39;&#39; \u662F\u53D7\u9650\u7C7B\u578B\u540D\u79F0\uFF0C\u4E0D\u80FD\u7528\u4E8E\u7C7B\u578B\u58F0\u660E
+ 919 
+ 920 # 0: name, 1: source
+ 921 compiler.warn.restricted.type.not.allowed=\u4ECE\u53D1\u884C\u7248 {1} \u5F00\u59CB\uFF0C&#39;&#39;{0}&#39;&#39; \u662F\u53D7\u9650\u7C7B\u578B\u540D\u79F0\uFF0C\u4E0D\u80FD\u7528\u4E8E\u7C7B\u578B\u58F0\u660E\uFF0C\u4E5F\u4E0D\u80FD\u7528\u4F5C\u6570\u7EC4\u7684\u5143\u7D20\u7C7B\u578B
+ 922 
+ 923 # 0: name, 1: source
+ 924 compiler.warn.restricted.type.not.allowed.preview=&#39;&#39;{0}&#39;&#39; \u5728\u672A\u6765\u53D1\u884C\u7248\u4E2D\u53EF\u80FD\u4F1A\u6210\u4E3A\u53D7\u9650\u7C7B\u578B\u540D\u79F0\uFF0C\u53EF\u80FD\u65E0\u6CD5\u7528\u4E8E\u7C7B\u578B\u58F0\u660E\uFF0C\u4E5F\u4E0D\u80FD\u7528\u4F5C\u6570\u7EC4\u7684\u5143\u7D20\u7C7B\u578B
+ 925 
+ 926 # 0: name (variable), 1: message segment
+ 927 compiler.err.cant.infer.local.var.type=\u65E0\u6CD5\u63A8\u65AD\u672C\u5730\u53D8\u91CF {0} \u7684\u7C7B\u578B\n({1})
+ 928 
+ 929 # 0: name
+ 930 compiler.err.restricted.type.not.allowed.here=\u6B64\u5904\u4E0D\u5141\u8BB8\u4F7F\u7528 &#39;&#39;{0}&#39;&#39;
+ 931 
+ 932 # 0: name
+ 933 compiler.err.restricted.type.not.allowed.array=&#39;&#39;{0}&#39;&#39; \u4E0D\u5141\u8BB8\u7528\u4F5C\u6570\u7EC4\u7684\u5143\u7D20\u7C7B\u578B
+ 934 
+ 935 # 0: name
+ 936 compiler.err.restricted.type.not.allowed.compound=&#39;&#39;{0}&#39;&#39; \u4E0D\u5141\u8BB8\u5728\u590D\u5408\u58F0\u660E\u4E2D\u4F7F\u7528
+ 937 
+ 938 # 0: fragment
+ 939 compiler.err.invalid.lambda.parameter.declaration=\u65E0\u6548\u7684 lambda \u53C2\u6570\u58F0\u660E\n({0})
+ 940 
+ 941 compiler.misc.implicit.and.explicit.not.allowed=\u4E0D\u80FD\u5C06\u9690\u5F0F\u7C7B\u578B\u548C\u663E\u5F0F\u7C7B\u578B\u7684\u53C2\u6570\u6DF7\u5408\u4F7F\u7528
+ 942 
+ 943 compiler.misc.var.and.explicit.not.allowed=\u4E0D\u80FD\u5C06 &#39;&#39;var&#39;&#39; \u548C\u663E\u5F0F\u7C7B\u578B\u7684\u53C2\u6570\u6DF7\u5408\u4F7F\u7528
+ 944 
+ 945 compiler.misc.var.and.implicit.not.allowed=\u4E0D\u80FD\u5C06 &#39;&#39;var&#39;&#39; \u548C\u9690\u5F0F\u7C7B\u578B\u7684\u53C2\u6570\u6DF7\u5408\u4F7F\u7528
+ 946 
+ 947 compiler.misc.local.cant.infer.null=\u53D8\u91CF\u521D\u59CB\u5316\u7A0B\u5E8F\u4E3A &#39;&#39;null&#39;&#39;
+ 948 
+ 949 compiler.misc.local.cant.infer.void=\u53D8\u91CF\u521D\u59CB\u5316\u7A0B\u5E8F\u4E3A &#39;&#39;void&#39;&#39;
+ 950 
+ 951 compiler.misc.local.missing.init=\u65E0\u6CD5\u5728\u4E0D\u5E26\u521D\u59CB\u5316\u7A0B\u5E8F\u7684\u53D8\u91CF\u4E0A\u4F7F\u7528 &#39;&#39;var&#39;&#39;
+ 952 
+ 953 compiler.misc.local.lambda.missing.target=lambda \u8868\u8FBE\u5F0F\u9700\u8981\u663E\u5F0F\u76EE\u6807\u7C7B\u578B
+ 954 
+ 955 compiler.misc.local.mref.missing.target=\u65B9\u6CD5\u5F15\u7528\u9700\u8981\u663E\u5F0F\u76EE\u6807\u7C7B\u578B
+ 956 
+ 957 compiler.misc.local.array.missing.target=\u6570\u7EC4\u521D\u59CB\u5316\u7A0B\u5E8F\u9700\u8981\u663E\u5F0F\u76EE\u6807\u7C7B\u578B
+ 958 
+ 959 compiler.misc.local.self.ref=\u65E0\u6CD5\u5728\u81EA\u5F15\u7528\u53D8\u91CF\u4E0A\u4F7F\u7528 &#39;&#39;var&#39;&#39;
+ 960 
+ 961 # 0: message segment, 1: unused
+ 962 compiler.err.cant.apply.diamond=\u65E0\u6CD5\u63A8\u65AD{0}\u7684\u7C7B\u578B\u53C2\u6570
+ 963 
+ 964 # 0: message segment or type, 1: message segment
+ 965 compiler.err.cant.apply.diamond.1=\u65E0\u6CD5\u63A8\u65AD{0}\u7684\u7C7B\u578B\u53C2\u6570\n\u539F\u56E0: {1}
+ 966 
+ 967 # 0: message segment or type, 1: message segment
+ 968 compiler.misc.cant.apply.diamond.1=\u65E0\u6CD5\u63A8\u65AD{0}\u7684\u7C7B\u578B\u53C2\u6570\n\u539F\u56E0: {1}
+ 969 
+ 970 compiler.err.unreachable.stmt=\u65E0\u6CD5\u8BBF\u95EE\u7684\u8BED\u53E5
+ 971 
+ 972 compiler.err.not.exhaustive=switch \u8868\u8FBE\u5F0F\u4E0D\u5305\u542B\u6240\u6709\u53EF\u80FD\u7684\u8F93\u5165\u503C
+ 973 
+ 974 compiler.err.initializer.must.be.able.to.complete.normally=\u521D\u59CB\u5316\u7A0B\u5E8F\u5FC5\u987B\u80FD\u591F\u6B63\u5E38\u5B8C\u6210
+ 975 
+ 976 compiler.err.initializer.not.allowed=\u63A5\u53E3\u4E2D\u4E0D\u5141\u8BB8\u6709\u521D\u59CB\u5316\u7A0B\u5E8F
+ 977 
+ 978 # 0: type
+ 979 compiler.err.unreported.exception.need.to.catch.or.throw=\u672A\u62A5\u544A\u7684\u5F02\u5E38\u9519\u8BEF{0}; \u5FC5\u987B\u5BF9\u5176\u8FDB\u884C\u6355\u83B7\u6216\u58F0\u660E\u4EE5\u4FBF\u629B\u51FA
+ 980 
+ 981 # 0: type
+ 982 compiler.err.unreported.exception.default.constructor=\u9ED8\u8BA4\u6784\u9020\u5668\u4E2D\u672A\u62A5\u544A\u7684\u5F02\u5E38\u9519\u8BEF{0}
+ 983 
+ 984 # 0: type, 1: name
+ 985 compiler.err.unreported.exception.implicit.close=\u672A\u62A5\u544A\u7684\u5F02\u5E38\u9519\u8BEF{0}; \u5FC5\u987B\u5BF9\u5176\u8FDB\u884C\u6355\u83B7\u6216\u58F0\u660E\u4EE5\u4FBF\u629B\u51FA\n\u5BF9\u8D44\u6E90\u53D8\u91CF &#39;&#39;{1}&#39;&#39; \u9690\u5F0F\u8C03\u7528 close() \u65F6\u629B\u51FA\u4E86\u5F02\u5E38\u9519\u8BEF
+ 986 
+<a name="1" id="anc1"></a>
+
+ 987 compiler.err.void.not.allowed.here=\u6B64\u5904\u4E0D\u5141\u8BB8\u4F7F\u7528 &#39;&#39;\u7A7A&#39;&#39; \u7C7B\u578B
+ 988 
+ 989 # 0: string
+ 990 compiler.err.wrong.number.type.args=\u7C7B\u578B\u53D8\u91CF\u6570\u76EE\u9519\u8BEF; \u9700\u8981{0}
+ 991 
+ 992 # 0: symbol
+ 993 compiler.err.var.might.already.be.assigned=\u53EF\u80FD\u5DF2\u5206\u914D\u53D8\u91CF{0}
+ 994 
+ 995 # 0: symbol
+ 996 compiler.err.var.might.not.have.been.initialized=\u53EF\u80FD\u5C1A\u672A\u521D\u59CB\u5316\u53D8\u91CF{0}
+ 997 
+ 998 # 0: symbol
+ 999 compiler.err.var.not.initialized.in.default.constructor=\u53D8\u91CF {0} \u672A\u5728\u9ED8\u8BA4\u6784\u9020\u5668\u4E2D\u521D\u59CB\u5316
+1000 
+1001 # 0: symbol
+1002 compiler.err.var.might.be.assigned.in.loop=\u53EF\u80FD\u5728 loop \u4E2D\u5206\u914D\u4E86\u53D8\u91CF{0}
+1003 
+1004 # 0: symbol, 1: message segment
+1005 compiler.err.varargs.invalid.trustme.anno={0} \u6CE8\u91CA\u65E0\u6548\u3002{1}
+1006 
+1007 # 0: type
+1008 compiler.misc.varargs.trustme.on.reifiable.varargs=Varargs \u5143\u7D20\u7C7B\u578B{0}\u53EF\u5177\u4F53\u5316\u3002
+1009 
+1010 # 0: type, 1: type
+1011 compiler.err.instanceof.reifiable.not.safe={0} \u65E0\u6CD5\u5B89\u5168\u5730\u8F6C\u6362\u4E3A {1}
+1012 
+1013 # 0: symbol
+1014 compiler.misc.varargs.trustme.on.non.varargs.meth=\u65B9\u6CD5 {0} \u4E0D\u662F varargs \u65B9\u6CD5\u3002
+1015 
+1016 # 0: symbol
+1017 compiler.misc.varargs.trustme.on.virtual.varargs=\u5B9E\u4F8B\u65B9\u6CD5 {0} \u65E2\u4E0D\u662F\u6700\u7EC8\u7684, \u4E5F\u4E0D\u662F\u79C1\u6709\u7684\u3002
+1018 
+1019 # 0: symbol
+1020 compiler.misc.varargs.trustme.on.virtual.varargs.final.only=\u5B9E\u4F8B\u65B9\u6CD5 {0} \u4E0D\u662F\u6700\u7EC8\u7684\u3002
+1021 
+1022 # 0: type, 1: symbol kind, 2: symbol
+1023 compiler.misc.inaccessible.varargs.type=\u5F62\u5F0F varargs \u5143\u7D20\u7C7B\u578B{0}\u65E0\u6CD5\u4ECE {1} {2} \u8FDB\u884C\u8BBF\u95EE
+1024 
+1025 # In the following string, {1} will always be the detail message from
+1026 # java.io.IOException.
+1027 # 0: symbol, 1: string
+1028 compiler.err.class.cant.write=\u5199\u5165{0}\u65F6\u51FA\u9519: {1}
+1029 
+1030 # In the following string, {0} is the name of the class in the Java source.
+1031 # It really should be used two times..
+1032 # 0: kind name, 1: name
+1033 compiler.err.class.public.should.be.in.file={0} {1} \u662F\u516C\u5171\u7684, \u5E94\u5728\u540D\u4E3A {1}.java \u7684\u6587\u4EF6\u4E2D\u58F0\u660E
+1034 
+1035 ## All errors which do not refer to a particular line in the source code are
+1036 ## preceded by this string.
+1037 compiler.err.error=\u9519\u8BEF: 
+1038 
+1039 # The following error messages do not refer to a line in the source code.
+1040 compiler.err.cant.read.file=\u65E0\u6CD5\u8BFB\u53D6: {0}
+1041 
+1042 # 0: string
+1043 compiler.err.plugin.not.found=\u627E\u4E0D\u5230\u63D2\u4EF6: {0}
+1044 
+1045 # 0: path
+1046 compiler.warn.locn.unknown.file.on.module.path=\u6A21\u5757\u8DEF\u5F84\u4E2D\u7684\u672A\u77E5\u6587\u4EF6: {0}
+1047 
+1048 
+1049 # 0: path
+1050 compiler.err.locn.bad.module-info=\u8BFB\u53D6 {0} \u4E2D\u7684 module-info.class \u65F6\u51FA\u73B0\u95EE\u9898
+1051 
+1052 # 0: path
+1053 compiler.err.locn.cant.read.directory=\u65E0\u6CD5\u8BFB\u53D6\u76EE\u5F55 {0}
+1054 
+1055 # 0: path
+1056 compiler.err.locn.cant.read.file=\u65E0\u6CD5\u8BFB\u53D6\u6587\u4EF6 {0}
+1057 
+1058 # 0: path
+1059 compiler.err.locn.cant.get.module.name.for.jar=\u65E0\u6CD5\u786E\u5B9A {0} \u7684\u6A21\u5757\u540D\u79F0
+1060 
+1061 # 0: path
+1062 compiler.err.multi-module.outdir.cannot.be.exploded.module=\u5728\u591A\u6A21\u5757\u6A21\u5F0F\u4E0B, \u8F93\u51FA\u76EE\u5F55\u4E0D\u80FD\u662F\u5C55\u5F00\u7684\u6A21\u5757: {0}
+1063 
+1064 # 0: path
+1065 compiler.warn.outdir.is.in.exploded.module=\u8F93\u51FA\u76EE\u5F55\u4F4D\u4E8E\u5C55\u5F00\u7684\u6A21\u5757\u4E2D: {0}
+1066 
+1067 # 0: file object
+1068 compiler.err.locn.module-info.not.allowed.on.patch.path=\u5728\u8865\u4E01\u7A0B\u5E8F\u8DEF\u5F84\u4E2D\u4E0D\u5141\u8BB8 module-info.class: {0}
+1069 
+1070 # 0: string
+1071 compiler.err.locn.invalid.arg.for.xpatch=--patch-module \u9009\u9879\u7684\u53C2\u6570\u65E0\u6548: {0}
+1072 
+1073 compiler.err.file.sb.on.source.or.patch.path.for.module=\u6587\u4EF6\u5E94\u5728\u6E90\u8DEF\u5F84\u6216\u6A21\u5757\u7684\u8865\u4E01\u7A0B\u5E8F\u8DEF\u5F84\u4E2D
+1074 
+1075 #####
+1076 
+1077 # Fatal Errors
+1078 
+1079 compiler.misc.fatal.err.no.java.lang=\u81F4\u547D\u9519\u8BEF: \u5728\u7C7B\u8DEF\u5F84\u6216\u5F15\u5BFC\u7C7B\u8DEF\u5F84\u4E2D\u627E\u4E0D\u5230\u7A0B\u5E8F\u5305 java.lang
+1080 
+1081 # 0: name
+1082 compiler.misc.fatal.err.cant.locate.meth=\u81F4\u547D\u9519\u8BEF: \u627E\u4E0D\u5230\u65B9\u6CD5{0}
+1083 
+1084 # 0: name
+1085 compiler.misc.fatal.err.cant.locate.field=\u81F4\u547D\u9519\u8BEF: \u627E\u4E0D\u5230\u5B57\u6BB5{0}
+1086 
+1087 # 0: type
+1088 compiler.misc.fatal.err.cant.locate.ctor=\u81F4\u547D\u9519\u8BEF: \u627E\u4E0D\u5230{0}\u7684\u6784\u9020\u5668
+1089 
+1090 compiler.misc.fatal.err.cant.close=\u81F4\u547D\u9519\u8BEF: \u65E0\u6CD5\u5173\u95ED\u7F16\u8BD1\u5668\u8D44\u6E90
+1091 
+1092 #####
+1093 
+1094 ##
+1095 ## miscellaneous strings
+1096 ##
+1097 
+1098 compiler.misc.diamond.anonymous.methods.implicitly.override=(\u7531\u4E8E &lt;&gt;, \u533F\u540D\u7C7B\u4E2D\u58F0\u660E\u7684\u6BCF\u4E2A\u975E\u79C1\u6709\u65B9\u6CD5\u5FC5\u987B\u8986\u76D6\u6216\u5B9E\u73B0\u8D85\u7C7B\u578B\u4E2D\u7684\u65B9\u6CD5)
+1099 
+1100 compiler.misc.source.unavailable=(\u6E90\u4E0D\u53EF\u7528)
+1101 
+1102 compiler.misc.base.membership=\u60A8\u7684\u6240\u6709\u57FA\u7C7B\u90FD\u5C5E\u4E8E\u6211\u4EEC
+1103 
+1104 # 0: string, 1: string, 2: boolean
+1105 compiler.misc.x.print.processor.info=\u5904\u7406\u7A0B\u5E8F{0}\u4E0E{1}\u5339\u914D\u5E76\u8FD4\u56DE{2}\u3002
+1106 
+1107 # 0: number, 1: string, 2: set of symbol, 3: boolean
+1108 compiler.misc.x.print.rounds=\u5FAA\u73AF {0}:\n\t\u8F93\u5165\u6587\u4EF6: {1}\n\t\u6CE8\u91CA: {2}\n\t\u6700\u540E\u4E00\u4E2A\u5FAA\u73AF: {3}
+1109 
+1110 # 0: file name
+1111 compiler.warn.file.from.future=\u6587\u4EF6 {0} \u7684\u4FEE\u6539\u65E5\u671F\u662F\u672A\u6765\u7684\u65E5\u671F
+1112 
+1113 #####
+1114 
+1115 ## The following string will appear before all messages keyed as:
+1116 ## &quot;compiler.note&quot;.
+1117 
+1118 compiler.note.compressed.diags=\u67D0\u4E9B\u6D88\u606F\u5DF2\u7ECF\u8FC7\u7B80\u5316; \u8BF7\u4F7F\u7528 -Xdiags:verbose \u91CD\u65B0\u7F16\u8BD1\u4EE5\u83B7\u5F97\u5B8C\u6574\u8F93\u51FA
+1119 
+1120 # 0: boolean, 1: symbol
+1121 compiler.note.lambda.stat=\u8F6C\u6362 lambda \u8868\u8FBE\u5F0F\n\u66FF\u4EE3 metafactory = {0}\n\u5408\u6210\u65B9\u6CD5 = {1}
+1122 
+1123 # 0: boolean, 1: unused
+1124 compiler.note.mref.stat=\u8F6C\u6362\u65B9\u6CD5\u5F15\u7528\n\u66FF\u4EE3 metafactory = {0}\n
+1125 # 0: boolean, 1: symbol
+1126 compiler.note.mref.stat.1=\u8F6C\u6362\u65B9\u6CD5\u5F15\u7528\n\u66FF\u4EE3 metafactory = {0}\nbridge \u65B9\u6CD5 = {1}
+1127 
+1128 compiler.note.note=\u6CE8: 
+1129 
+1130 # 0: file name
+1131 compiler.note.deprecated.filename={0}\u4F7F\u7528\u6216\u8986\u76D6\u4E86\u5DF2\u8FC7\u65F6\u7684 API\u3002
+1132 
+1133 compiler.note.deprecated.plural=\u67D0\u4E9B\u8F93\u5165\u6587\u4EF6\u4F7F\u7528\u6216\u8986\u76D6\u4E86\u5DF2\u8FC7\u65F6\u7684 API\u3002
+1134 
+1135 # The following string may appear after one of the above deprecation
+1136 # messages.
+1137 compiler.note.deprecated.recompile=\u6709\u5173\u8BE6\u7EC6\u4FE1\u606F, \u8BF7\u4F7F\u7528 -Xlint:deprecation \u91CD\u65B0\u7F16\u8BD1\u3002
+1138 
+1139 # 0: file name
+1140 compiler.note.deprecated.filename.additional={0}\u8FD8\u4F7F\u7528\u6216\u8986\u76D6\u4E86\u5DF2\u8FC7\u65F6\u7684 API\u3002
+1141 
+1142 compiler.note.deprecated.plural.additional=\u67D0\u4E9B\u8F93\u5165\u6587\u4EF6\u8FD8\u4F7F\u7528\u6216\u8986\u76D6\u4E86\u5DF2\u8FC7\u65F6\u7684 API\u3002
+1143 
+1144 # 0: file name
+1145 compiler.note.removal.filename={0} \u4F7F\u7528\u6216\u8986\u76D6\u4E86\u6807\u8BB0\u4E3A\u5F85\u5220\u9664\u7684\u5DF2\u8FC7\u65F6 API\u3002
+1146 
+1147 compiler.note.removal.plural=\u67D0\u4E9B\u8F93\u5165\u6587\u4EF6\u4F7F\u7528\u6216\u8986\u76D6\u4E86\u6807\u8BB0\u4E3A\u5F85\u5220\u9664\u7684\u5DF2\u8FC7\u65F6 API\u3002
+1148 
+1149 # The following string may appear after one of the above removal messages.
+1150 compiler.note.removal.recompile=\u6709\u5173\u8BE6\u7EC6\u4FE1\u606F, \u8BF7\u4F7F\u7528 -Xlint:removal \u91CD\u65B0\u7F16\u8BD1\u3002
+1151 
+1152 # 0: file name
+1153 compiler.note.removal.filename.additional={0} \u989D\u5916\u4F7F\u7528\u6216\u8986\u76D6\u4E86\u6807\u8BB0\u4E3A\u5F85\u5220\u9664\u7684\u5DF2\u8FC7\u65F6 API\u3002
+1154 
+1155 compiler.note.removal.plural.additional=\u67D0\u4E9B\u8F93\u5165\u6587\u4EF6\u989D\u5916\u4F7F\u7528\u6216\u8986\u76D6\u4E86\u6807\u8BB0\u4E3A\u5F85\u5220\u9664\u7684\u5DF2\u8FC7\u65F6 API\u3002
+1156 
+1157 # 0: file name
+1158 compiler.note.unchecked.filename={0}\u4F7F\u7528\u4E86\u672A\u7ECF\u68C0\u67E5\u6216\u4E0D\u5B89\u5168\u7684\u64CD\u4F5C\u3002
+1159 
+1160 compiler.note.unchecked.plural=\u67D0\u4E9B\u8F93\u5165\u6587\u4EF6\u4F7F\u7528\u4E86\u672A\u7ECF\u68C0\u67E5\u6216\u4E0D\u5B89\u5168\u7684\u64CD\u4F5C\u3002
+1161 
+1162 # The following string may appear after one of the above unchecked messages.
+1163 compiler.note.unchecked.recompile=\u6709\u5173\u8BE6\u7EC6\u4FE1\u606F, \u8BF7\u4F7F\u7528 -Xlint:unchecked \u91CD\u65B0\u7F16\u8BD1\u3002
+1164 
+1165 # 0: file name
+1166 compiler.note.unchecked.filename.additional={0}\u8FD8\u6709\u672A\u7ECF\u68C0\u67E5\u6216\u4E0D\u5B89\u5168\u7684\u64CD\u4F5C\u3002
+1167 
+1168 compiler.note.unchecked.plural.additional=\u67D0\u4E9B\u8F93\u5165\u6587\u4EF6\u8FD8\u4F7F\u7528\u4E86\u672A\u7ECF\u68C0\u67E5\u6216\u4E0D\u5B89\u5168\u7684\u64CD\u4F5C\u3002
+1169 
+1170 # 0: file name
+1171 compiler.note.preview.filename={0} \u4F7F\u7528\u9884\u89C8\u8BED\u8A00\u529F\u80FD\u3002
+1172 
+1173 compiler.note.preview.plural=\u67D0\u4E9B\u8F93\u5165\u6587\u4EF6\u4F7F\u7528\u9884\u89C8\u8BED\u8A00\u529F\u80FD\u3002
+1174 
+1175 # The following string may appear after one of the above deprecation
+1176 # messages.
+1177 compiler.note.preview.recompile=\u6709\u5173\u8BE6\u7EC6\u4FE1\u606F\uFF0C\u8BF7\u4F7F\u7528 -Xlint:preview \u91CD\u65B0\u7F16\u8BD1\u3002
+1178 
+1179 # 0: file name
+1180 compiler.note.preview.filename.additional={0} \u8FD8\u4F7F\u7528\u9884\u89C8\u8BED\u8A00\u529F\u80FD\u3002
+1181 
+1182 compiler.note.preview.plural.additional=\u67D0\u4E9B\u8F93\u5165\u6587\u4EF6\u8FD8\u4F7F\u7528\u9884\u89C8\u8BED\u8A00\u529F\u80FD\u3002
+1183 
+1184 # Notes related to annotation processing
+1185 
+1186 # Print a client-generated note; assumed to be localized, no translation required
+1187 # 0: string
+1188 compiler.note.proc.messager={0}
+1189 
+1190 # 0: string, 1: string, 2: string
+1191 compiler.note.multiple.elements=\u901A\u8FC7 javax.lang.model.util.Elements.{0} \u5728\u6A21\u5757 &#39;&#39;{2}&#39;&#39; \u4E2D\u627E\u5230\u4E86\u591A\u4E2A\u540D\u4E3A &#39;&#39;{1}&#39;&#39; \u7684\u5143\u7D20\u3002
+1192 
+1193 #####
+1194 
+1195 # 0: number
+1196 compiler.misc.count.error={0} \u4E2A\u9519\u8BEF
+1197 
+1198 # 0: number
+1199 compiler.misc.count.error.plural={0} \u4E2A\u9519\u8BEF
+1200 
+1201 # 0: number, 1: number
+1202 compiler.misc.count.error.recompile=\u4EC5\u663E\u793A\u524D {0} \u4E2A\u9519\u8BEF\uFF08\u5171 {1} \u4E2A\uFF09\uFF1B\u82E5\u8981\u67E5\u770B\u66F4\u591A\u9519\u8BEF\uFF0C\u8BF7\u4F7F\u7528 -Xmaxerrs
+1203 
+1204 # 0: number, 1: number
+1205 compiler.misc.count.warn.recompile=\u4EC5\u663E\u793A\u524D {0} \u4E2A\u8B66\u544A\uFF08\u5171 {1} \u4E2A\uFF09\uFF1B\u82E5\u8981\u67E5\u770B\u66F4\u591A\u9519\u8BEF\uFF0C\u8BF7\u4F7F\u7528 -Xmaxwarns
+1206 
+1207 # 0: number
+1208 compiler.misc.count.warn={0} \u4E2A\u8B66\u544A
+1209 
+1210 # 0: number
+1211 compiler.misc.count.warn.plural={0} \u4E2A\u8B66\u544A
+1212 
+1213 compiler.misc.version.not.available=(\u7248\u672C\u4FE1\u606F\u4E0D\u53EF\u7528)
+1214 
+1215 ## extra output when using -verbose (JavaCompiler)
+1216 
+1217 # 0: symbol
+1218 compiler.misc.verbose.checking.attribution=[\u6B63\u5728\u68C0\u67E5{0}]
+1219 
+1220 # 0: string
+1221 compiler.misc.verbose.parsing.done=[\u8BED\u6CD5\u5206\u6790\u5DF2\u5B8C\u6210, \u7528\u65F6 {0} \u6BEB\u79D2]
+1222 
+1223 # 0: file name
+1224 compiler.misc.verbose.parsing.started=[\u8BED\u6CD5\u5206\u6790\u5F00\u59CB\u65F6\u95F4 {0}]
+1225 
+1226 # 0: string
+1227 compiler.misc.verbose.total=[\u5171 {0} \u6BEB\u79D2]
+1228 
+1229 # 0: file name
+1230 compiler.misc.verbose.wrote.file=[\u5DF2\u5199\u5165{0}]
+1231 
+1232 ## extra output when using -verbose (code/ClassReader)
+1233 # 0: string
+1234 compiler.misc.verbose.loading=[\u6B63\u5728\u52A0\u8F7D{0}]
+1235 
+1236 # 0: string
+1237 compiler.misc.verbose.sourcepath=[\u6E90\u6587\u4EF6\u7684\u641C\u7D22\u8DEF\u5F84: {0}]
+1238 
+1239 # 0: string
+1240 compiler.misc.verbose.classpath=[\u7C7B\u6587\u4EF6\u7684\u641C\u7D22\u8DEF\u5F84: {0}]
+1241 
+1242 ## extra output when using -prompt (util/Log)
+1243 compiler.misc.resume.abort=\u7EE7\u7EED(R), \u653E\u5F03(A)&gt;
+1244 
+1245 #####
+1246 
+1247 ##
+1248 ## warnings
+1249 ##
+1250 
+1251 ## All warning messages are preceded by the following string.
+1252 compiler.warn.warning=\u8B66\u544A: 
+1253 
+1254 ## Warning messages may also include the following prefix to identify a
+1255 ## lint option
+1256 # 0: option name
+1257 compiler.warn.lintOption=[{0}] 
+1258 
+1259 # 0: symbol
+1260 compiler.warn.constant.SVUID=serialVersionUID \u5728\u7C7B{0}\u4E2D\u5FC5\u987B\u662F\u5E38\u91CF
+1261 
+1262 # 0: path
+1263 compiler.warn.dir.path.element.not.found=\u9519\u8BEF\u7684\u8DEF\u5F84\u5143\u7D20 &quot;{0}&quot;: \u6CA1\u6709\u8FD9\u79CD\u76EE\u5F55
+1264 
+1265 # 0: file name
+1266 compiler.warn.dir.path.element.not.directory=\u9519\u8BEF\u7684\u8DEF\u5F84\u5143\u7D20 &quot;{0}&quot;: \u4E0D\u662F\u76EE\u5F55
+1267 
+1268 compiler.warn.finally.cannot.complete=finally \u5B50\u53E5\u65E0\u6CD5\u6B63\u5E38\u5B8C\u6210
+1269 
+1270 # 0: name
+1271 compiler.warn.poor.choice.for.module.name=\u6A21\u5757\u540D\u79F0\u7EC4\u6210\u90E8\u5206 {0} \u5E94\u907F\u514D\u4EE5\u6570\u5B57\u7ED3\u5C3E
+1272 
+1273 # 0: string
+1274 compiler.warn.incubating.modules=\u4F7F\u7528 incubating \u6A21\u5757: {0}
+1275 
+1276 # 0: symbol, 1: symbol
+1277 compiler.warn.has.been.deprecated={1}\u4E2D\u7684{0}\u5DF2\u8FC7\u65F6
+1278 
+1279 # 0: symbol, 1: symbol
+1280 compiler.warn.has.been.deprecated.for.removal={1} \u4E2D\u7684 {0} \u5DF2\u8FC7\u65F6, \u4E14\u6807\u8BB0\u4E3A\u5F85\u5220\u9664
+1281 
+1282 # 0: symbol
+1283 compiler.warn.is.preview={0} \u662F\u67D0\u9884\u89C8\u529F\u80FD\u4E2D\u7684\u4E00\u4E2A API
+1284 
+1285 # 0: symbol
+1286 compiler.err.is.preview={0} \u662F\u67D0\u9884\u89C8\u529F\u80FD\u4E2D\u7684\u4E00\u4E2A API
+1287 
+1288 # 0: symbol
+1289 compiler.warn.has.been.deprecated.module=\u6A21\u5757 {0} \u5DF2\u8FC7\u65F6
+1290 
+1291 # 0: symbol
+1292 compiler.warn.has.been.deprecated.for.removal.module=\u6A21\u5757 {0} \u5DF2\u8FC7\u65F6, \u4E14\u6807\u8BB0\u4E3A\u5F85\u5220\u9664
+1293 
+1294 # 0: symbol
+1295 compiler.warn.sun.proprietary={0}\u662F\u5185\u90E8\u4E13\u7528 API, \u53EF\u80FD\u4F1A\u5728\u672A\u6765\u53D1\u884C\u7248\u4E2D\u5220\u9664
+1296 
+1297 compiler.warn.illegal.char.for.encoding=\u7F16\u7801{0}\u7684\u4E0D\u53EF\u6620\u5C04\u5B57\u7B26
+1298 
+1299 # 0: symbol
+1300 compiler.warn.improper.SVUID=\u5FC5\u987B\u5728\u7C7B{0}\u4E2D\u5C06 serialVersionUID \u58F0\u660E\u4E3A static final
+1301 
+1302 # 0: type, 1: type
+1303 compiler.warn.inexact.non-varargs.call=\u6700\u540E\u4E00\u4E2A\u53C2\u6570\u4F7F\u7528\u4E86\u4E0D\u51C6\u786E\u7684\u53D8\u91CF\u7C7B\u578B\u7684 varargs \u65B9\u6CD5\u7684\u975E varargs \u8C03\u7528; \n\u5BF9\u4E8E varargs \u8C03\u7528, \u5E94\u4F7F\u7528 {0}\n\u5BF9\u4E8E\u975E varargs \u8C03\u7528, \u5E94\u4F7F\u7528 {1}, \u8FD9\u6837\u4E5F\u53EF\u4EE5\u6291\u5236\u6B64\u8B66\u544A
+1304 
+1305 # 0: list of type
+1306 compiler.warn.unreachable.catch=catch \u5B50\u53E5\u65E0\u6CD5\u8BBF\u95EE\n\u5DF2\u6355\u83B7\u5230\u629B\u51FA\u7684\u7C7B\u578B{0}
+1307 
+1308 # 0: list of type
+1309 compiler.warn.unreachable.catch.1=catch \u5B50\u53E5\u65E0\u6CD5\u8BBF\u95EE\n\u5DF2\u6355\u83B7\u5230\u629B\u51FA\u7684\u7C7B\u578B{0}
+1310 
+1311 # 0: symbol
+1312 compiler.warn.long.SVUID=serialVersionUID \u5728\u7C7B{0}\u4E2D\u5FC5\u987B\u662F long \u7C7B\u578B
+1313 
+1314 # 0: symbol
+1315 compiler.warn.missing.SVUID=\u53EF\u5E8F\u5217\u5316\u7C7B{0}\u6CA1\u6709 serialVersionUID \u7684\u5B9A\u4E49
+1316 
+1317 # 0: symbol, 1: symbol, 2: symbol, 3: symbol
+1318 compiler.warn.potentially.ambiguous.overload={1} \u4E2D\u7684 {0} \u53EF\u80FD\u4E0E {3} \u4E2D\u7684 {2} \u6DF7\u6DC6
+1319 
+1320 # 0: message segment
+1321 compiler.warn.override.varargs.missing={0}; \u88AB\u8986\u76D6\u7684\u65B9\u6CD5\u6CA1\u6709 &#39;&#39;...&#39;&#39;
+1322 
+1323 # 0: message segment
+1324 compiler.warn.override.varargs.extra={0}; \u8986\u76D6\u7684\u65B9\u6CD5\u7F3A\u5C11 &#39;&#39;...&#39;&#39;
+1325 
+1326 # 0: message segment
+1327 compiler.warn.override.bridge={0}; \u88AB\u8986\u76D6\u7684\u65B9\u6CD5\u4E3A bridge \u65B9\u6CD5
+1328 
+1329 # 0: symbol
+1330 compiler.warn.pkg-info.already.seen=\u5DF2\u627E\u5230\u7A0B\u5E8F\u5305{0}\u7684 package-info.java \u6587\u4EF6
+1331 
+1332 # 0: path
+1333 compiler.warn.path.element.not.found=\u9519\u8BEF\u7684\u8DEF\u5F84\u5143\u7D20 &quot;{0}&quot;: \u6CA1\u6709\u8FD9\u79CD\u6587\u4EF6\u6216\u76EE\u5F55
+1334 
+1335 compiler.warn.possible.fall-through.into.case=\u53EF\u80FD\u65E0\u6CD5\u5B9E\u73B0 case
+1336 
+1337 # 0: type
+1338 compiler.warn.redundant.cast=\u51FA\u73B0\u5197\u4F59\u7684\u5230{0}\u7684\u8F6C\u6362
+1339 
+1340 # 0: number
+1341 compiler.warn.position.overflow=\u884C {0} \u5904\u7684\u4F4D\u7F6E\u7F16\u7801\u6EA2\u51FA
+1342 
+1343 # 0: file name, 1: number, 2: number
+1344 compiler.warn.big.major.version={0}: \u4E3B\u7248\u672C {1} \u6BD4 {2} \u65B0, \u6B64\u7F16\u8BD1\u5668\u652F\u6301\u6700\u65B0\u7684\u4E3B\u7248\u672C\u3002\n\u5EFA\u8BAE\u5347\u7EA7\u6B64\u7F16\u8BD1\u5668\u3002
+1345 
+1346 # 0: kind name, 1: symbol
+1347 compiler.warn.static.not.qualified.by.type=static {0}\u5E94\u7531\u7C7B\u578B\u540D\u79F0{1}\u800C\u4E0D\u662F\u8868\u8FBE\u5F0F\u9650\u5B9A
+1348 
+1349 # 0: string
+1350 compiler.warn.source.no.bootclasspath=\u672A\u4E0E -source {0} \u4E00\u8D77\u8BBE\u7F6E\u5F15\u5BFC\u7C7B\u8DEF\u5F84
+1351 
+1352 # 0: string
+1353 compiler.warn.source.no.system.modules.path=\u672A\u4E0E -source {0} \u4E00\u8D77\u8BBE\u7F6E\u7CFB\u7EDF\u6A21\u5757\u8DEF\u5F84
+1354 
+1355 # 0: string
+1356 compiler.warn.option.obsolete.source=\u6E90\u503C{0}\u5DF2\u8FC7\u65F6, \u5C06\u5728\u672A\u6765\u6240\u6709\u53D1\u884C\u7248\u4E2D\u5220\u9664
+1357 
+1358 # 0: target
+1359 compiler.warn.option.obsolete.target=\u76EE\u6807\u503C{0}\u5DF2\u8FC7\u65F6, \u5C06\u5728\u672A\u6765\u6240\u6709\u53D1\u884C\u7248\u4E2D\u5220\u9664
+1360 
+1361 # 0: string, 1: string
+1362 compiler.err.option.removed.source=\u4E0D\u518D\u652F\u6301\u6E90\u9009\u9879 {0}\u3002\u8BF7\u4F7F\u7528 {1} \u6216\u66F4\u9AD8\u7248\u672C\u3002
+1363 
+1364 # 0: target, 1: target
+1365 compiler.err.option.removed.target=\u4E0D\u518D\u652F\u6301\u76EE\u6807\u9009\u9879 {0}\u3002\u8BF7\u4F7F\u7528 {1} \u6216\u66F4\u9AD8\u7248\u672C\u3002
+1366 
+1367 
+1368 # 0: target, 1: target
+1369 compiler.warn.option.parameters.unsupported=\u76EE\u6807\u503C {0} \u4E0D\u652F\u6301 -parameters\u3002\u8BF7\u4F7F\u7528 {1} \u6216\u66F4\u9AD8\u7248\u672C\u3002
+1370 
+1371 compiler.warn.option.obsolete.suppression=\u8981\u9690\u85CF\u6709\u5173\u5DF2\u8FC7\u65F6\u9009\u9879\u7684\u8B66\u544A, \u8BF7\u4F7F\u7528 -Xlint:-options\u3002
+1372 
+1373 # 0: name, 1: number, 2: number, 3: number, 4: number
+1374 compiler.warn.future.attr={1}.{2} \u7248\u7C7B\u6587\u4EF6\u4E2D\u5F15\u5165\u7684 {0} \u5C5E\u6027\u5728 {3}.{4} \u7248\u7C7B\u6587\u4EF6\u4E2D\u88AB\u5FFD\u7565
+1375 
+1376 compiler.warn.requires.automatic=\u9700\u8981\u81EA\u52A8\u6A21\u5757\u7684\u6307\u4EE4
+1377 
+1378 compiler.warn.requires.transitive.automatic=\u9700\u8981\u81EA\u52A8\u6A21\u5757\u7684\u8FC7\u6E21\u6307\u4EE4
+1379 
+1380 # Warnings related to annotation processing
+1381 # 0: string
+1382 compiler.warn.proc.package.does.not.exist=\u7A0B\u5E8F\u5305{0}\u4E0D\u5B58\u5728
+1383 
+1384 # 0: string
+1385 compiler.warn.proc.file.reopening=\u5C1D\u8BD5\u591A\u6B21\u4E3A &#39;&#39;{0}&#39;&#39; \u521B\u5EFA\u6587\u4EF6
+1386 
+1387 # 0: string
+1388 compiler.warn.proc.type.already.exists=\u7C7B\u578B &#39;&#39;{0}&#39;&#39; \u7684\u6587\u4EF6\u5DF2\u7ECF\u5B58\u5728\u4E8E\u6E90\u8DEF\u5F84\u6216\u7C7B\u8DEF\u5F84\u4E2D
+1389 
+1390 # 0: string
+1391 compiler.warn.proc.type.recreate=\u5C1D\u8BD5\u591A\u6B21\u521B\u5EFA\u7C7B\u578B &#39;&#39;{0}&#39;&#39; \u7684\u6587\u4EF6
+1392 
+1393 # 0: string
+1394 compiler.warn.proc.illegal.file.name=\u65E0\u6CD5\u521B\u5EFA\u5E26\u6709\u975E\u6CD5\u540D\u79F0 &#39;&#39;{0}&#39;&#39; \u7684\u6587\u4EF6\u3002
+1395 
+1396 # 0: string, 1: string
+1397 compiler.warn.proc.suspicious.class.name=\u6B63\u5728\u4E3A\u540D\u79F0\u4EE5{1}\u7ED3\u5C3E\u7684\u7C7B\u578B\u521B\u5EFA\u6587\u4EF6: &#39;&#39;{0}&#39;&#39;
+1398 
+1399 # 0: string
+1400 compiler.warn.proc.file.create.last.round=\u5C06\u4E0D\u5BF9\u5728\u6700\u540E\u4E00\u4E2A\u5FAA\u73AF\u4E2D\u521B\u5EFA\u7684\u7C7B\u578B\u4E3A &#39;&#39;{0}&#39;&#39; \u7684\u6587\u4EF6\u8FDB\u884C\u6CE8\u91CA\u5904\u7406\u3002
+1401 
+1402 # 0: string, 1: string
+1403 compiler.warn.proc.malformed.supported.string=\u5904\u7406\u7A0B\u5E8F &#39;&#39;{1}&#39;&#39; \u4E3A\u652F\u6301\u7684\u6CE8\u91CA\u7C7B\u578B\u8FD4\u56DE\u683C\u5F0F\u9519\u8BEF\u7684\u5B57\u7B26\u4E32 &#39;&#39;{0}&#39;&#39;
+1404 
+1405 # 0: set of string
+1406 compiler.warn.proc.annotations.without.processors=\u6CA1\u6709\u5904\u7406\u7A0B\u5E8F\u8981\u4F7F\u7528\u4EE5\u4E0B\u4EFB\u4F55\u6CE8\u91CA: {0}
+1407 
+1408 # 0: source version, 1: string, 2: string
+1409 compiler.warn.proc.processor.incompatible.source.version=\u6765\u81EA\u6CE8\u91CA\u5904\u7406\u7A0B\u5E8F &#39;&#39;{1}&#39;&#39; \u7684\u53D7\u652F\u6301 source \u7248\u672C &#39;&#39;{0}&#39;&#39; \u4F4E\u4E8E -source &#39;&#39;{2}&#39;&#39;
+1410 
+1411 # 0: string, 1: string
+1412 compiler.warn.proc.duplicate.option.name=\u6CE8\u91CA\u5904\u7406\u7A0B\u5E8F &#39;&#39;{1}&#39;&#39; \u8FD4\u56DE\u91CD\u590D\u7684\u652F\u6301\u7684\u9009\u9879 &#39;&#39;{0}&#39;&#39;
+1413 
+1414 # 0: string, 1: string
+1415 compiler.warn.proc.duplicate.supported.annotation=\u6CE8\u91CA\u5904\u7406\u7A0B\u5E8F &#39;&#39;{1}&#39;&#39; \u8FD4\u56DE\u91CD\u590D\u7684\u652F\u6301\u7684\u6CE8\u91CA\u7C7B\u578B &#39;&#39;{0}&#39;&#39;
+1416 
+1417 # 0: string
+1418 compiler.warn.proc.redundant.types.with.wildcard=\u6CE8\u91CA\u5904\u7406\u7A0B\u5E8F &#39;&#39;{0}&#39;&#39; \u91CD\u590D\u652F\u6301 &#39;&#39;*&#39;&#39; \u548C\u5176\u4ED6\u6CE8\u91CA\u7C7B\u578B
+1419 
+1420 compiler.warn.proc.proc-only.requested.no.procs=\u5728\u672A\u8BF7\u6C42\u7F16\u8BD1\u7684\u60C5\u51B5\u4E0B\u8FDB\u884C\u6CE8\u91CA\u5904\u7406, \u4F46\u627E\u4E0D\u5230\u5904\u7406\u7A0B\u5E8F\u3002
+1421 
+1422 compiler.warn.proc.use.implicit=\u6CE8\u91CA\u5904\u7406\u4E0D\u9002\u7528\u4E8E\u9690\u5F0F\u7F16\u8BD1\u7684\u6587\u4EF6\u3002\n\u4F7F\u7528 -implicit \u6307\u5B9A\u7528\u4E8E\u9690\u5F0F\u7F16\u8BD1\u7684\u7B56\u7565\u3002
+1423 
+1424 compiler.warn.proc.use.proc.or.implicit=\u6CE8\u91CA\u5904\u7406\u4E0D\u9002\u7528\u4E8E\u9690\u5F0F\u7F16\u8BD1\u7684\u6587\u4EF6\u3002\n\u4F7F\u7528 -proc:none \u7981\u7528\u6CE8\u91CA\u5904\u7406\u6216\u4F7F\u7528 -implicit \u6307\u5B9A\u7528\u4E8E\u9690\u5F0F\u7F16\u8BD1\u7684\u7B56\u7565\u3002
+1425 
+1426 # Print a client-generated warning; assumed to be localized, no translation required
+1427 # 0: string
+1428 compiler.warn.proc.messager={0}
+1429 
+1430 # 0: set of string
+1431 compiler.warn.proc.unclosed.type.files=\u7C7B\u578B &#39;&#39;{0}&#39;&#39; \u7684\u6587\u4EF6\u672A\u5173\u95ED; \u5C06\u4E0D\u9488\u5BF9\u8FD9\u4E9B\u7C7B\u578B\u8FDB\u884C\u6CE8\u91CA\u5904\u7406
+1432 
+1433 # 0: string
+1434 compiler.warn.proc.unmatched.processor.options=\u4EE5\u4E0B\u9009\u9879\u672A\u88AB\u4EFB\u4F55\u5904\u7406\u7A0B\u5E8F\u8BC6\u522B: &#39;&#39;{0}&#39;&#39;
+1435 
+1436 compiler.warn.try.explicit.close.call=\u5728\u53EF\u81EA\u52A8\u7ED3\u675F\u7684\u8D44\u6E90\u4E0A\u663E\u5F0F\u8C03\u7528 close()
+1437 
+1438 # 0: symbol
+1439 compiler.warn.try.resource.not.referenced=\u4E0D\u80FD\u5728\u76F8\u5E94\u7684 try \u8BED\u53E5\u7684\u6B63\u6587\u4E2D\u5F15\u7528\u53EF\u81EA\u52A8\u7ED3\u675F\u7684\u8D44\u6E90{0}
+1440 
+1441 # 0: type
+1442 compiler.warn.try.resource.throws.interrupted.exc=\u53EF\u81EA\u52A8\u5173\u95ED\u7684\u8D44\u6E90{0}\u5305\u542B\u7684\u6210\u5458\u65B9\u6CD5 close() \u53EF\u80FD\u629B\u51FA InterruptedException
+1443 
+1444 compiler.warn.unchecked.assign=\u672A\u7ECF\u68C0\u67E5\u7684\u5206\u914D: \u5C06{0}\u5206\u914D\u7ED9{1}
+1445 
+1446 # 0: symbol, 1: type
+1447 compiler.warn.unchecked.assign.to.var=\u5BF9\u4F5C\u4E3A\u539F\u59CB\u7C7B\u578B{1}\u7684\u6210\u5458\u7684\u53D8\u91CF{0}\u7684\u5206\u914D\u672A\u7ECF\u8FC7\u68C0\u67E5
+1448 
+1449 # 0: symbol, 1: type
+1450 compiler.warn.unchecked.call.mbr.of.raw.type=\u5BF9\u4F5C\u4E3A\u539F\u59CB\u7C7B\u578B{1}\u7684\u6210\u5458\u7684{0}\u7684\u8C03\u7528\u672A\u7ECF\u8FC7\u68C0\u67E5
+1451 
+1452 compiler.warn.unchecked.cast.to.type=\u5411\u7C7B\u578B{0}\u7684\u8F6C\u6362\u672A\u7ECF\u8FC7\u68C0\u67E5
+1453 
+1454 # 0: kind name, 1: name, 2: object, 3: object, 4: kind name, 5: symbol
+1455 compiler.warn.unchecked.meth.invocation.applied=\u65B9\u6CD5\u8C03\u7528\u672A\u7ECF\u8FC7\u68C0\u67E5: \u5C06{4} {5}\u4E2D\u7684{0} {1}\u5E94\u7528\u5230\u7ED9\u5B9A\u7684\u7C7B\u578B\n\u9700\u8981: {2}\n\u627E\u5230:    {3}
+1456 
+1457 # 0: type
+1458 compiler.warn.unchecked.generic.array.creation=\u5BF9\u4E8E\u7C7B\u578B\u4E3A{0}\u7684 varargs \u53C2\u6570, \u6CDB\u578B\u6570\u7EC4\u521B\u5EFA\u672A\u7ECF\u8FC7\u68C0\u67E5
+1459 
+1460 # 0: type
+1461 compiler.warn.unchecked.varargs.non.reifiable.type=\u53C2\u6570\u5316 vararg \u7C7B\u578B{0}\u7684\u5806\u53EF\u80FD\u5DF2\u53D7\u6C61\u67D3
+1462 
+1463 # 0: symbol
+1464 compiler.warn.varargs.unsafe.use.varargs.param=Varargs \u65B9\u6CD5\u53EF\u80FD\u5BFC\u81F4\u6765\u81EA\u4E0D\u53EF\u5177\u4F53\u5316 varargs \u53C2\u6570 {0} \u7684\u5806\u6C61\u67D3
+1465 
+1466 compiler.warn.missing.deprecated.annotation=\u672A\u4F7F\u7528 @Deprecated \u5BF9\u5DF2\u8FC7\u65F6\u7684\u9879\u76EE\u8FDB\u884C\u6CE8\u91CA
+1467 
+1468 # 0: kind name
+1469 compiler.warn.deprecated.annotation.has.no.effect=@Deprecated \u6CE8\u91CA\u5BF9\u6B64 {0} \u58F0\u660E\u6CA1\u6709\u4EFB\u4F55\u6548\u679C
+1470 
+1471 # 0: string
+1472 compiler.warn.invalid.path=\u65E0\u6548\u6587\u4EF6\u540D: {0}
+1473 
+1474 # 0: string
+1475 compiler.err.invalid.path=\u65E0\u6548\u6587\u4EF6\u540D: {0}
+1476 
+1477 
+1478 # 0: path
+1479 compiler.warn.invalid.archive.file=\u4EE5\u4E0B\u8DEF\u5F84\u4E2D\u5B58\u5728\u610F\u5916\u7684\u6587\u4EF6: {0}
+1480 
+1481 # 0: path
+1482 compiler.warn.unexpected.archive.file=\u4EE5\u4E0B\u6863\u6848\u6587\u4EF6\u5B58\u5728\u610F\u5916\u7684\u6269\u5C55\u540D: {0}
+1483 
+1484 # 0: path
+1485 compiler.err.no.zipfs.for.archive=\u6CA1\u6709\u4EFB\u4F55\u6587\u4EF6\u7CFB\u7EDF\u63D0\u4F9B\u65B9\u53EF\u5904\u7406\u6B64\u6587\u4EF6: {0}
+1486 
+1487 compiler.warn.div.zero=\u9664\u6570\u4E3A\u96F6
+1488 
+1489 compiler.warn.empty.if=if \u4E4B\u540E\u6CA1\u6709\u8BED\u53E5
+1490 
+1491 # 0: type, 1: name
+1492 compiler.warn.annotation.method.not.found=\u65E0\u6CD5\u627E\u5230\u7C7B\u578B &#39;&#39;{0}&#39;&#39; \u7684\u6CE8\u91CA\u65B9\u6CD5 &#39;&#39;{1}()&#39;&#39;
+1493 
+1494 # 0: type, 1: name, 2: message segment
+1495 compiler.warn.annotation.method.not.found.reason=\u65E0\u6CD5\u627E\u5230\u7C7B\u578B &#39;&#39;{0}&#39;&#39; \u7684\u6CE8\u91CA\u65B9\u6CD5 &#39;&#39;{1}()&#39;&#39;: {2}
+1496 
+1497 # 0: file object, 1: symbol, 2: name
+1498 compiler.warn.unknown.enum.constant=\u672A\u77E5\u7684\u679A\u4E3E\u5E38\u91CF {1}.{2}
+1499 
+1500 # 0: file object, 1: symbol, 2: name, 3: message segment
+1501 compiler.warn.unknown.enum.constant.reason=\u672A\u77E5\u7684\u679A\u4E3E\u5E38\u91CF {1}.{2}\n\u539F\u56E0: {3}
+1502 
+1503 # 0: type, 1: type
+1504 compiler.warn.raw.class.use=\u627E\u5230\u539F\u59CB\u7C7B\u578B: {0}\n\u7F3A\u5C11\u6CDB\u578B\u7C7B{1}\u7684\u7C7B\u578B\u53C2\u6570
+1505 
+1506 compiler.warn.diamond.redundant.args=\u65B0\u8868\u8FBE\u5F0F\u4E2D\u5B58\u5728\u5197\u4F59\u7C7B\u578B\u53C2\u6570 (\u6539\u7528 diamond \u8FD0\u7B97\u7B26)\u3002
+1507 
+1508 compiler.warn.local.redundant.type=\u672C\u5730\u53D8\u91CF\u7684\u5197\u4F59\u7C7B\u578B (\u4F7F\u7528 &#39;&#39;var&#39;&#39; \u66FF\u6362\u663E\u5F0F\u7C7B\u578B)\u3002
+1509 
+1510 compiler.warn.potential.lambda.found=\u53EF\u5C06\u6B64\u533F\u540D\u5185\u90E8\u7C7B\u521B\u5EFA\u8F6C\u6362\u4E3A lambda \u8868\u8FBE\u5F0F\u3002
+1511 
+1512 compiler.warn.method.redundant.typeargs=\u65B9\u6CD5\u8C03\u7528\u4E2D\u5B58\u5728\u5197\u4F59\u7C7B\u578B\u53C2\u6570\u3002
+1513 
+1514 # 0: symbol, 1: message segment
+1515 compiler.warn.varargs.redundant.trustme.anno=\u5197\u4F59\u7684 {0} \u6CE8\u91CA\u3002{1}
+1516 
+1517 # 0: symbol
+1518 compiler.warn.access.to.member.from.serializable.element=\u53EF\u4E32\u884C\u5316\u5143\u7D20\u5BF9\u6210\u5458 {0} \u7684\u8BBF\u95EE\u53EF\u4EE5\u7531\u4E0D\u53D7\u4FE1\u4EFB\u7684\u4EE3\u7801\u516C\u5F00\u6267\u884C
+1519 
+1520 # 0: symbol
+1521 compiler.warn.access.to.member.from.serializable.lambda=\u53EF\u4E32\u884C\u5316 lambda \u5BF9\u6210\u5458 {0} \u7684\u8BBF\u95EE\u53EF\u4EE5\u7531\u4E0D\u53D7\u4FE1\u4EFB\u7684\u4EE3\u7801\u516C\u5F00\u6267\u884C
+1522 
+1523 #####
+1524 
+1525 ## The following are tokens which are non-terminals in the language. They should
+1526 ## be named as JLS3 calls them when translated to the appropriate language.
+1527 compiler.misc.token.identifier=&lt;\u6807\u8BC6\u7B26&gt;
+1528 
+1529 compiler.misc.token.character=&lt;\u5B57\u7B26&gt;
+1530 
+1531 compiler.misc.token.string=&lt;\u5B57\u7B26\u4E32&gt;
+1532 
+1533 compiler.misc.token.integer=&lt;\u6574\u578B&gt;
+1534 
+1535 compiler.misc.token.long-integer=&lt;\u957F\u6574\u578B&gt;
+1536 
+1537 compiler.misc.token.float=&lt;\u6D6E\u70B9\u578B&gt;
+1538 
+1539 compiler.misc.token.double=&lt;\u53CC\u7CBE\u5EA6\u578B&gt;
+1540 
+1541 compiler.misc.token.bad-symbol=&lt;\u9519\u8BEF\u7B26\u53F7&gt;
+1542 
+1543 compiler.misc.token.end-of-input=&lt;\u8F93\u5165\u7ED3\u675F&gt;
+1544 
+1545 ## The argument to the following string will always be one of the following:
+1546 ## 1. one of the above non-terminals
+1547 ## 2. a keyword (JLS1.8)
+1548 ## 3. a boolean literal (JLS3.10.3)
+1549 ## 4. the null literal (JLS3.10.7)
+1550 ## 5. a Java separator (JLS3.11)
+1551 ## 6. an operator (JLS3.12)
+1552 ##
+1553 ## This is the only place these tokens will be used.
+1554 # 0: token
+1555 compiler.err.expected=\u9700\u8981{0}
+1556 
+1557 # 0: string
+1558 compiler.err.expected.str=\u9700\u8981 {0}
+1559 
+1560 # 0: token, 1: token
+1561 compiler.err.expected2=\u9700\u8981{0}\u6216{1}
+1562 
+1563 # 0: token, 1: token, 2: token
+1564 compiler.err.expected3=\u9700\u8981{0}, {1}\u6216{2}
+1565 
+1566 # 0: token, 1: token, 2: token, 3: string
+1567 compiler.err.expected4=\u9700\u8981 {0}\u3001{1}\u3001{2} \u6216 {3}
+1568 
+1569 compiler.err.premature.eof=\u8FDB\u884C\u8BED\u6CD5\u5206\u6790\u65F6\u5DF2\u5230\u8FBE\u6587\u4EF6\u7ED3\u5C3E
+1570 
+1571 compiler.err.enum.constant.expected=\u6B64\u5904\u9700\u8981\u679A\u4E3E\u5E38\u91CF
+1572 
+1573 compiler.err.enum.constant.not.expected=\u6B64\u5904\u4E0D\u9700\u8981\u679A\u4E3E\u5E38\u91CF
+1574 
+1575 ## The following are related in form, but do not easily fit the above paradigm.
+1576 compiler.err.expected.module=\u9700\u8981 &#39;&#39;module&#39;&#39;
+1577 
+1578 compiler.err.expected.module.or.open=\u9700\u8981 &#39;&#39;module&#39;&#39; \u6216 &#39;&#39;open&#39;&#39;
+1579 
+1580 compiler.err.dot.class.expected=\u9700\u8981 &#39;&#39;.class&#39;&#39;
+1581 
+1582 ## The argument to this string will always be either &#39;case&#39; or &#39;default&#39;.
+1583 # 0: token
+1584 compiler.err.orphaned=\u5B64\u7ACB\u7684{0}
+1585 
+1586 # 0: name
+1587 compiler.misc.anonymous.class=&lt;\u533F\u540D{0}&gt;
+1588 
+1589 # 0: name, 1: type
+1590 compiler.misc.type.captureof=capture#{0}, \u5171 {1}
+1591 
+1592 compiler.misc.type.captureof.1=capture#{0}
+1593 
+1594 compiler.misc.type.none=&lt;\u65E0&gt;
+1595 
+1596 compiler.misc.unnamed.package=\u672A\u547D\u540D\u7A0B\u5E8F\u5305
+1597 
+1598 compiler.misc.unnamed.module=\u672A\u547D\u540D\u6A21\u5757
+1599 
+1600 #####
+1601 
+1602 # 0: symbol, 1: message segment
+1603 compiler.err.cant.access=\u65E0\u6CD5\u8BBF\u95EE{0}\n{1}
+1604 
+1605 # 0: name
+1606 compiler.misc.bad.class.file=\u7C7B\u6587\u4EF6\u5BF9\u4E8E\u7C7B {0} \u65E0\u6548
+1607 
+1608 # 0: file name, 1: string (expected constant pool entry type), 2: number (constant pool index)
+1609 compiler.misc.bad.const.pool.entry={0} \u4E2D\u9519\u8BEF\u7684\u5E38\u91CF\u6C60\u6761\u76EE\n\u9884\u671F\u4E3A\u7D22\u5F15 {2} \u5904\u7684 {1}
+1610 
+1611 # 0: file name, 1: number (constant pool index), 2: number (constant pool size)
+1612 compiler.misc.bad.const.pool.index={0} \u4E2D\u7684\u5E38\u91CF\u6C60\u7D22\u5F15\u9519\u8BEF\n\u7D22\u5F15 {1} \u4E0D\u5728\u6C60\u5927\u5C0F {2} \u5185\u3002
+1613 
+1614 # 0: file name, 1: message segment
+1615 compiler.misc.bad.class.file.header=\u9519\u8BEF\u7684\u7C7B\u6587\u4EF6: {0}\n{1}\n\u8BF7\u5220\u9664\u8BE5\u6587\u4EF6\u6216\u786E\u4FDD\u8BE5\u6587\u4EF6\u4F4D\u4E8E\u6B63\u786E\u7684\u7C7B\u8DEF\u5F84\u5B50\u76EE\u5F55\u4E2D\u3002
+1616 
+1617 # 0: file name, 1: message segment
+1618 compiler.misc.bad.source.file.header=\u9519\u8BEF\u7684\u6E90\u6587\u4EF6: {0}\n{1}\n\u8BF7\u5220\u9664\u8BE5\u6587\u4EF6\u6216\u786E\u4FDD\u8BE5\u6587\u4EF6\u4F4D\u4E8E\u6B63\u786E\u7684\u6E90\u8DEF\u5F84\u5B50\u76EE\u5F55\u4E2D\u3002
+1619 
+1620 ## The following are all possible strings for the second argument ({1}) of the
+1621 ## above strings.
+1622 compiler.misc.bad.class.signature=\u9519\u8BEF\u7684\u7C7B\u7B7E\u540D: {0}
+1623 
+1624 #0: symbol, 1: symbol
+1625 compiler.misc.bad.enclosing.class={0}\u7684\u5C01\u95ED\u7C7B\u9519\u8BEF: {1}
+1626 
+1627 # 0: symbol
+1628 compiler.misc.bad.enclosing.method=\u7C7B {0} \u7684\u5C01\u95ED\u65B9\u6CD5\u5C5E\u6027\u9519\u8BEF
+1629 
+1630 compiler.misc.bad.runtime.invisible.param.annotations=\u9519\u8BEF\u7684 RuntimeInvisibleParameterAnnotations \u5C5E\u6027: {0}
+1631 
+1632 compiler.misc.bad.const.pool.tag=\u9519\u8BEF\u7684\u5E38\u91CF\u6C60\u6807\u8BB0: {0}
+1633 
+1634 compiler.misc.bad.const.pool.tag.at=\u9519\u8BEF\u7684\u5E38\u91CF\u6C60\u6807\u8BB0: {0}, \u4F4D\u4E8E{1}
+1635 
+1636 compiler.misc.bad.signature=\u9519\u8BEF\u7684\u7B7E\u540D: {0}
+1637 
+1638 compiler.misc.bad.type.annotation.value=\u9519\u8BEF\u7684\u7C7B\u578B\u6CE8\u91CA\u76EE\u6807\u7C7B\u578B\u503C: {0}
+1639 
+1640 compiler.misc.bad.module-info.name=\u9519\u8BEF\u7684\u7C7B\u540D
+1641 
+1642 compiler.misc.class.file.wrong.class=\u7C7B\u6587\u4EF6\u5305\u542B\u9519\u8BEF\u7684\u7C7B: {0}
+1643 
+1644 compiler.misc.module.info.invalid.super.class=\u5E26\u6709\u65E0\u6548\u8D85\u7C7B\u7684 module-info
+1645 
+1646 # 0: name
+1647 compiler.misc.class.file.not.found=\u627E\u4E0D\u5230{0}\u7684\u7C7B\u6587\u4EF6
+1648 
+1649 # 0: string (constant value), 1: symbol (constant field), 2: type (field type)
+1650 compiler.misc.bad.constant.range={1} \u7684\u5E38\u91CF\u503C &#39;&#39;{0}&#39;&#39; \u8D85\u51FA\u4E86 {2} \u7684\u9884\u671F\u8303\u56F4
+1651 
+1652 # 0: string (constant value), 1: symbol (constant field), 2: string (expected class)
+1653 compiler.misc.bad.constant.value={1} \u7684\u5E38\u91CF\u503C &#39;&#39;{0}&#39;&#39; \u9519\u8BEF, \u9884\u671F\u4E3A {2}
+1654 
+1655 # 0: type (field type)
+1656 compiler.misc.bad.constant.value.type=&#39;&#39;{0}&#39;&#39; \u7C7B\u578B\u7684\u53D8\u91CF\u4E0D\u80FD\u5177\u6709\u5E38\u91CF\u503C\uFF0C\u4F46\u662F\u4E3A\u5176\u6307\u5B9A\u4E86\u4E00\u4E2A\u5E38\u91CF\u503C
+1657 
+1658 # 0: string (classfile major version), 1: string (classfile minor version)
+1659 compiler.misc.invalid.default.interface=\u5728 {0}.{1} \u7248\u7C7B\u6587\u4EF6\u4E2D\u627E\u5230\u9ED8\u8BA4\u65B9\u6CD5
+1660 
+1661 # 0: string (classfile major version), 1: string (classfile minor version)
+1662 compiler.misc.invalid.static.interface=\u5728 {0}.{1} \u7248\u7C7B\u6587\u4EF6\u4E2D\u627E\u5230\u9759\u6001\u65B9\u6CD5
+1663 
+1664 # 0: string (classfile major version), 1: string (classfile minor version)
+1665 compiler.misc.anachronistic.module.info=\u5728 {0}.{1} \u7248\u7C7B\u6587\u4EF6\u4E2D\u627E\u5230\u6A21\u5757\u58F0\u660E
+1666 
+1667 # 0: name
+1668 compiler.misc.file.doesnt.contain.class=\u6587\u4EF6\u4E0D\u5305\u542B\u7C7B{0}
+1669 
+1670 # 0: symbol
+1671 compiler.misc.file.does.not.contain.package=\u6587\u4EF6\u4E0D\u5305\u542B\u7A0B\u5E8F\u5305{0}
+1672 
+1673 compiler.misc.file.does.not.contain.module=\u6587\u4EF6\u4E0D\u5305\u542B\u6A21\u5757\u58F0\u660E
+1674 
+1675 compiler.misc.illegal.start.of.class.file=\u975E\u6CD5\u7684\u7C7B\u6587\u4EF6\u5F00\u59CB
+1676 
+1677 compiler.misc.unable.to.access.file=\u65E0\u6CD5\u8BBF\u95EE\u6587\u4EF6: {0}
+1678 
+1679 compiler.misc.unicode.str.not.supported=\u4E0D\u652F\u6301\u7C7B\u6587\u4EF6\u4E2D\u7684 Unicode \u5B57\u7B26\u4E32
+1680 
+1681 compiler.misc.undecl.type.var=\u672A\u58F0\u660E\u7684\u7C7B\u578B\u53D8\u91CF: {0}
+1682 
+1683 compiler.misc.malformed.vararg.method=\u7C7B\u6587\u4EF6\u5305\u542B\u683C\u5F0F\u9519\u8BEF\u7684\u53D8\u91CF\u5143\u6570\u65B9\u6CD5: {0}
+1684 
+1685 compiler.misc.wrong.version=\u7C7B\u6587\u4EF6\u5177\u6709\u9519\u8BEF\u7684\u7248\u672C {0}.{1}, \u5E94\u4E3A {2}.{3}
+1686 
+1687 #####
+1688 
+1689 # 0: type, 1: type or symbol
+1690 compiler.err.not.within.bounds=\u7C7B\u578B\u53C2\u6570{0}\u4E0D\u5728\u7C7B\u578B\u53D8\u91CF{1}\u7684\u8303\u56F4\u5185
+1691 
+1692 ## The following are all possible strings for the second argument ({1}) of the
+1693 ## above string.
+1694 
+1695 ## none yet...
+1696 
+1697 #####
+1698 
+1699 # 0: message segment
+1700 compiler.err.prob.found.req=\u4E0D\u517C\u5BB9\u7684\u7C7B\u578B: {0}
+1701 
+1702 # 0: message segment
+1703 compiler.misc.prob.found.req=\u4E0D\u517C\u5BB9\u7684\u7C7B\u578B: {0}
+1704 
+1705 # 0: message segment, 1: type, 2: type
+1706 compiler.warn.prob.found.req={0}\n\u9700\u8981: {2}\n\u627E\u5230:    {1}
+1707 
+1708 # 0: type, 1: type
+1709 compiler.misc.inconvertible.types={0}\u65E0\u6CD5\u8F6C\u6362\u4E3A{1}
+1710 
+1711 # 0: type, 1: type
+1712 compiler.misc.possible.loss.of.precision=\u4ECE{0}\u8F6C\u6362\u5230{1}\u53EF\u80FD\u4F1A\u6709\u635F\u5931
+1713 
+1714 compiler.misc.unchecked.assign=\u672A\u7ECF\u68C0\u67E5\u7684\u8F6C\u6362
+1715 
+1716 # compiler.misc.storecheck=\
+1717 #     assignment might cause later store checks to fail
+1718 # compiler.misc.unchecked=\
+1719 #     assigned array cannot dynamically check its stores
+1720 compiler.misc.unchecked.cast.to.type=\u672A\u7ECF\u68C0\u67E5\u7684\u8F6C\u6362
+1721 
+1722 # compiler.err.star.expected=\
+1723 #     &#39;&#39;*&#39;&#39; expected
+1724 # compiler.err.no.elem.type=\
+1725 #     \[\*\] cannot have a type
+1726 
+1727 # 0: message segment
+1728 compiler.misc.try.not.applicable.to.type=try-with-resources \u4E0D\u9002\u7528\u4E8E\u53D8\u91CF\u7C7B\u578B\n({0})
+1729 
+1730 #####
+1731 
+1732 # 0: object, 1: message segment
+1733 compiler.err.type.found.req=\u610F\u5916\u7684\u7C7B\u578B\n\u9700\u8981: {1}\n\u627E\u5230:    {0}
+1734 
+1735 ## The following are all possible strings for the first argument ({0}) of the
+1736 ## above string.
+1737 compiler.misc.type.req.class=\u7C7B
+1738 
+1739 compiler.misc.type.req.class.array=\u7C7B\u6216\u6570\u7EC4
+1740 
+1741 compiler.misc.type.req.array.or.iterable=\u6570\u7EC4\u6216 java.lang.Iterable
+1742 
+1743 compiler.misc.type.req.ref=\u5F15\u7528
+1744 
+1745 compiler.misc.type.req.exact=\u4E0D\u5E26\u9650\u5236\u8303\u56F4\u7684\u7C7B\u6216\u63A5\u53E3
+1746 
+1747 # 0: type
+1748 compiler.misc.type.parameter=\u7C7B\u578B\u53C2\u6570{0}
+1749 
+1750 #####
+1751 
+1752 ## The following are all possible strings for the last argument of all those
+1753 ## diagnostics whose key ends in &quot;.1&quot;
+1754 
+1755 # 0: type, 1: list of type
+1756 compiler.misc.no.unique.maximal.instance.exists=\u5BF9\u4E8E\u4E0A\u9650\u4E3A{1}\u7684\u7C7B\u578B\u53D8\u91CF{0}, \u4E0D\u5B58\u5728\u552F\u4E00\u6700\u5927\u5B9E\u4F8B
+1757 
+1758 # 0: type, 1: list of type
+1759 compiler.misc.no.unique.minimal.instance.exists=\u5BF9\u4E8E\u4E0B\u9650\u4E3A{1}\u7684\u7C7B\u578B\u53D8\u91CF{0}, \u4E0D\u5B58\u5728\u552F\u4E00\u6700\u5C0F\u5B9E\u4F8B
+1760 
+1761 # 0: type, 1: list of type
+1762 compiler.misc.incompatible.upper.bounds=\u63A8\u8BBA\u53D8\u91CF {0} \u5177\u6709\u4E0D\u517C\u5BB9\u7684\u4E0A\u9650 {1}
+1763 
+1764 # 0: type, 1: list of type
+1765 compiler.misc.incompatible.eq.bounds=\u63A8\u8BBA\u53D8\u91CF{0}\u5177\u6709\u4E0D\u517C\u5BB9\u7684\u7B49\u5F0F\u7EA6\u675F\u6761\u4EF6{1}
+1766 
+1767 # 0: type, 1: fragment, 2: fragment
+1768 compiler.misc.incompatible.bounds=\u63A8\u8BBA\u53D8\u91CF {0} \u5177\u6709\u4E0D\u517C\u5BB9\u7684\u4E0A\u9650\n{1}\n{2}
+1769 
+1770 # 0: list of type
+1771 compiler.misc.lower.bounds=\u4E0B\u9650\uFF1A{0}
+1772 
+1773 # 0: list of type
+1774 compiler.misc.eq.bounds=\u7B49\u5F0F\u7EA6\u675F\u6761\u4EF6\uFF1A{0}
+1775 
+1776 # 0: list of type
+1777 compiler.misc.upper.bounds=\u4E0B\u9650\uFF1A{0}
+1778 
+1779 # 0: list of type, 1: type, 2: type
+1780 compiler.misc.infer.no.conforming.instance.exists=\u4E0D\u5B58\u5728\u7C7B\u578B\u53D8\u91CF{0}\u7684\u5B9E\u4F8B, \u4EE5\u4F7F{1}\u4E0E{2}\u4E00\u81F4
+1781 
+1782 # 0: list of type, 1: message segment
+1783 compiler.misc.infer.no.conforming.assignment.exists=\u65E0\u6CD5\u63A8\u65AD\u7C7B\u578B\u53D8\u91CF {0}\n(\u53C2\u6570\u4E0D\u5339\u914D; {1})
+1784 
+1785 # 0: list of type
+1786 compiler.misc.infer.arg.length.mismatch=\u65E0\u6CD5\u63A8\u65AD\u7C7B\u578B\u53D8\u91CF {0}\n(\u5B9E\u9645\u53C2\u6570\u5217\u8868\u548C\u5F62\u5F0F\u53C2\u6570\u5217\u8868\u957F\u5EA6\u4E0D\u540C)
+1787 
+1788 # 0: list of type, 1: message segment
+1789 compiler.misc.infer.varargs.argument.mismatch=\u65E0\u6CD5\u63A8\u65AD\u7C7B\u578B\u53D8\u91CF {0}\n(varargs \u4E0D\u5339\u914D; {1})
+1790 
+1791 # 0: type, 1: list of type
+1792 compiler.misc.inferred.do.not.conform.to.upper.bounds=\u63A8\u65AD\u7C7B\u578B\u4E0D\u7B26\u5408\u4E0A\u9650\n\u63A8\u65AD: {0}\n\u4E0A\u9650: {1}
+1793 
+1794 # 0: type, 1: list of type
+1795 compiler.misc.inferred.do.not.conform.to.lower.bounds=\u63A8\u65AD\u7C7B\u578B\u4E0D\u7B26\u5408\u4E0B\u9650\n\u63A8\u65AD: {0}\n\u4E0B\u9650: {1}
+1796 
+1797 # 0: type, 1: list of type
+1798 compiler.misc.inferred.do.not.conform.to.eq.bounds=\u63A8\u65AD\u7C7B\u578B\u4E0D\u7B26\u5408\u7B49\u5F0F\u7EA6\u675F\u6761\u4EF6\n\u63A8\u65AD: {0}\n\u7B49\u5F0F\u7EA6\u675F\u6761\u4EF6: {1}
+1799 
+1800 # 0: symbol
+1801 compiler.misc.diamond={0}&lt;&gt;
+1802 
+1803 # 0: type
+1804 compiler.misc.diamond.non.generic=\u65E0\u6CD5\u5C06 &#39;&#39;&lt;&gt;&#39;&#39; \u4E0E\u975E\u6CDB\u578B\u7C7B{0}\u4E00\u8D77\u4F7F\u7528
+1805 
+1806 # 0: list of type, 1: message segment
+1807 compiler.misc.diamond.invalid.arg=\u6B64\u4E0A\u4E0B\u6587\u4E2D\u4E0D\u5141\u8BB8\u4F7F\u7528\u4E3A{1}\u63A8\u65AD\u7684\u7C7B\u578B\u53C2\u6570{0}\n\u63A8\u65AD\u53C2\u6570\u5728\u7B7E\u540D\u5C5E\u6027\u4E2D\u65E0\u6CD5\u8868\u8FBE
+1808 
+1809 # 0: list of type, 1: message segment
+1810 compiler.misc.diamond.invalid.args=\u6B64\u4E0A\u4E0B\u6587\u4E2D\u4E0D\u5141\u8BB8\u4F7F\u7528\u4E3A{1}\u63A8\u65AD\u7684\u7C7B\u578B\u53C2\u6570{0}\n\u63A8\u65AD\u53C2\u6570\u5728\u7B7E\u540D\u5C5E\u6027\u4E2D\u65E0\u6CD5\u8868\u8FBE
+1811 
+1812 # 0: type
+1813 compiler.misc.diamond.and.explicit.params=\u4E0D\u80FD\u5C06 &#39;&#39;&lt;&gt;&#39;&#39; \u4E0E\u6784\u9020\u5668\u7684\u663E\u5F0F\u7C7B\u578B\u53C2\u6570\u4E00\u8D77\u4F7F\u7528
+1814 
+1815 compiler.misc.mref.infer.and.explicit.params=\u4E0D\u80FD\u5C06\u539F\u59CB\u6784\u9020\u5668\u5F15\u7528\u4E0E\u6784\u9020\u5668\u7684\u663E\u5F0F\u7C7B\u578B\u53C2\u6570\u4E00\u8D77\u4F7F\u7528
+1816 
+1817 # 0: type, 1: list of type
+1818 compiler.misc.explicit.param.do.not.conform.to.bounds=\u663E\u5F0F\u7C7B\u578B\u53C2\u6570{0}\u4E0D\u7B26\u5408\u58F0\u660E\u7684\u8303\u56F4{1}
+1819 
+1820 compiler.misc.arg.length.mismatch=\u5B9E\u9645\u53C2\u6570\u5217\u8868\u548C\u5F62\u5F0F\u53C2\u6570\u5217\u8868\u957F\u5EA6\u4E0D\u540C
+1821 
+1822 # 0: string
+1823 compiler.misc.wrong.number.type.args=\u7C7B\u578B\u53D8\u91CF\u6570\u76EE\u9519\u8BEF; \u9700\u8981{0}
+1824 
+1825 # 0: message segment
+1826 compiler.misc.no.conforming.assignment.exists=\u53C2\u6570\u4E0D\u5339\u914D; {0}
+1827 
+1828 # 0: message segment
+1829 compiler.misc.varargs.argument.mismatch=varargs \u4E0D\u5339\u914D; {0}
+1830 
+1831 #####
+1832 
+1833 # 0: symbol or type, 1: file name
+1834 compiler.warn.auxiliary.class.accessed.from.outside.of.its.source.file={1} \u4E2D\u7684\u8F85\u52A9\u7C7B{0}\u4E0D\u5E94\u4ECE\u5176\u81EA\u8EAB\u7684\u6E90\u6587\u4EF6\u4EE5\u5916\u8BBF\u95EE
+1835 
+1836 ## The first argument ({0}) is a &quot;kindname&quot;.
+1837 # 0: kind name, 1: symbol, 2: symbol
+1838 compiler.err.abstract.cant.be.accessed.directly=\u65E0\u6CD5\u76F4\u63A5\u8BBF\u95EE{2}\u4E2D\u7684\u62BD\u8C61{0} {1}
+1839 
+1840 ## The first argument ({0}) is a &quot;kindname&quot;.
+1841 # 0: symbol kind, 1: symbol
+1842 compiler.err.non-static.cant.be.ref=\u65E0\u6CD5\u4ECE\u9759\u6001\u4E0A\u4E0B\u6587\u4E2D\u5F15\u7528\u975E\u9759\u6001 {0} {1}
+1843 
+1844 # 0: symbol kind, 1: symbol
+1845 compiler.misc.bad.static.method.in.unbound.lookup=\u5728\u672A\u7ED1\u5B9A\u67E5\u627E\u4E2D\u627E\u5230\u610F\u5916\u7684\u9759\u6001 {0} {1}
+1846 
+1847 # 0: symbol kind, 1: symbol
+1848 compiler.misc.bad.instance.method.in.unbound.lookup=\u5728\u672A\u7ED1\u5B9A\u67E5\u627E\u4E2D\u627E\u5230\u610F\u5916\u7684\u5B9E\u4F8B {0} {1}
+1849 
+1850 # 0: symbol kind, 1: symbol
+1851 compiler.misc.bad.static.method.in.bound.lookup=\u5728\u7ED1\u5B9A\u67E5\u627E\u4E2D\u627E\u5230\u610F\u5916\u7684\u9759\u6001 {0} {1}
+1852 
+1853 ## Both arguments ({0}, {1}) are &quot;kindname&quot;s.  {0} is a comma-separated list
+1854 ## of kindnames (the list should be identical to that provided in source.
+1855 # 0: set of kind name, 1: set of kind name
+1856 compiler.err.unexpected.type=\u610F\u5916\u7684\u7C7B\u578B\n\u9700\u8981: {0}\n\u627E\u5230:    {1}
+1857 
+1858 compiler.err.unexpected.lambda=\u6B64\u5904\u4E0D\u5E94\u4E3A lambda \u8868\u8FBE\u5F0F
+1859 
+1860 compiler.err.unexpected.mref=\u6B64\u5904\u4E0D\u5E94\u4E3A\u65B9\u6CD5\u5F15\u7528
+1861 
+1862 ## The first argument {0} is a &quot;kindname&quot; (e.g. &#39;constructor&#39;, &#39;field&#39;, etc.)
+1863 ## The second argument {1} is the non-resolved symbol
+1864 ## The third argument {2} is a list of type parameters (non-empty if {1} is a method)
+1865 ## The fourth argument {3} is a list of argument types (non-empty if {1} is a method)
+1866 # 0: kind name, 1: name, 2: unused, 3: unused
+1867 compiler.err.cant.resolve=\u627E\u4E0D\u5230\u7B26\u53F7\n\u7B26\u53F7: {0} {1}
+1868 
+1869 # 0: kind name, 1: name, 2: unused, 3: list of type
+1870 compiler.err.cant.resolve.args=\u627E\u4E0D\u5230\u7B26\u53F7\n\u7B26\u53F7: {0} {1}({3})
+1871 
+1872 # 0: kind name, 1: name, 2: unused, 3: list of type
+1873 compiler.misc.cant.resolve.args=\u627E\u4E0D\u5230\u7B26\u53F7\n\u7B26\u53F7: {0} {1}({3})
+1874 
+1875 # 0: kind name, 1: name, 2: list of type, 3: list of type
+1876 compiler.err.cant.resolve.args.params=\u627E\u4E0D\u5230\u7B26\u53F7\n\u7B26\u53F7: {0} &lt;{2}&gt;{1}({3})
+1877 
+1878 ## arguments from {0} to {3} have the same meaning as above
+1879 ## The fifth argument {4} is a location subdiagnostic (see below)
+1880 # 0: kind name, 1: name, 2: unused, 3: unused, 4: message segment
+1881 compiler.err.cant.resolve.location=\u627E\u4E0D\u5230\u7B26\u53F7\n\u7B26\u53F7:   {0} {1}\n\u4F4D\u7F6E: {4}
+1882 
+1883 # 0: kind name, 1: name, 2: unused, 3: list of type, 4: message segment
+1884 compiler.err.cant.resolve.location.args=\u627E\u4E0D\u5230\u7B26\u53F7\n\u7B26\u53F7:   {0} {1}({3})\n\u4F4D\u7F6E: {4}
+1885 
+1886 # 0: kind name, 1: name, 2: list of type, 3: list, 4: message segment
+1887 compiler.err.cant.resolve.location.args.params=\u627E\u4E0D\u5230\u7B26\u53F7\n\u7B26\u53F7:   {0} &lt;{2}&gt;{1}({3})\n\u4F4D\u7F6E: {4}
+1888 
+1889 ### Following are replicated/used for method reference diagnostics
+1890 
+1891 # 0: kind name, 1: name, 2: unused, 3: list of type, 4: message segment
+1892 compiler.misc.cant.resolve.location.args=\u627E\u4E0D\u5230\u7B26\u53F7\n\u7B26\u53F7:   {0} {1}({3})\n\u4F4D\u7F6E: {4}
+1893 
+1894 # 0: kind name, 1: name, 2: list of type, 3: list, 4: message segment
+1895 compiler.misc.cant.resolve.location.args.params=\u627E\u4E0D\u5230\u7B26\u53F7\n\u7B26\u53F7:   {0} &lt;{2}&gt;{1}({3})\n\u4F4D\u7F6E: {4}
+1896 
+1897 ##a location subdiagnostic is composed as follows:
+1898 ## The first argument {0} is the location &quot;kindname&quot; (e.g. &#39;constructor&#39;, &#39;field&#39;, etc.)
+1899 ## The second argument {1} is the location name
+1900 ## The third argument {2} is the location type (only when {1} is a variable name)
+1901 
+1902 # 0: kind name, 1: type or symbol, 2: unused
+1903 compiler.misc.location={0} {1}
+1904 
+1905 # 0: kind name, 1: symbol, 2: type
+1906 compiler.misc.location.1=\u7C7B\u578B\u4E3A{2}\u7684{0} {1}
+1907 
+1908 ## The following are all possible string for &quot;kindname&quot;.
+1909 ## They should be called whatever the JLS calls them after it been translated
+1910 ## to the appropriate language.
+1911 # compiler.misc.kindname.constructor=\
+1912 #     static member
+1913 compiler.misc.kindname.annotation=@interface
+1914 
+1915 compiler.misc.kindname.constructor=\u6784\u9020\u5668
+1916 
+1917 compiler.misc.kindname.enum=\u679A\u4E3E
+1918 
+1919 compiler.misc.kindname.interface=\u63A5\u53E3
+1920 
+1921 compiler.misc.kindname.static=\u9759\u6001
+1922 
+1923 compiler.misc.kindname.type.variable=\u7C7B\u578B\u53D8\u91CF
+1924 
+1925 compiler.misc.kindname.type.variable.bound=\u7C7B\u578B\u53D8\u91CF\u7684\u9650\u5236\u8303\u56F4
+1926 
+1927 compiler.misc.kindname.variable=\u53D8\u91CF
+1928 
+1929 compiler.misc.kindname.value=\u503C
+1930 
+1931 compiler.misc.kindname.method=\u65B9\u6CD5
+1932 
+1933 compiler.misc.kindname.class=\u7C7B
+1934 
+1935 compiler.misc.kindname.package=\u7A0B\u5E8F\u5305
+1936 
+1937 compiler.misc.kindname.module=\u6A21\u5757
+1938 
+1939 compiler.misc.kindname.static.init=\u9759\u6001\u521D\u59CB\u5316\u7A0B\u5E8F
+1940 
+1941 compiler.misc.kindname.instance.init=\u5B9E\u4F8B\u521D\u59CB\u5316\u7A0B\u5E8F
+1942 
+1943 compiler.misc.kindname.record.component=\u8BB0\u5F55\u7EC4\u4EF6
+1944 
+1945 compiler.misc.kindname.record=\u8BB0\u5F55
+1946 
+1947 #####
+1948 
+1949 compiler.misc.no.args=\u6CA1\u6709\u53C2\u6570
+1950 
+1951 # 0: message segment
+1952 compiler.err.override.static={0}\n\u8986\u76D6\u7684\u65B9\u6CD5\u4E3A static
+1953 
+1954 # 0: message segment, 1: set of flag
+1955 compiler.err.override.meth={0}\n\u88AB\u8986\u76D6\u7684\u65B9\u6CD5\u4E3A{1}
+1956 
+1957 # 0: message segment, 1: type
+1958 compiler.err.override.meth.doesnt.throw={0}\n\u88AB\u8986\u76D6\u7684\u65B9\u6CD5\u672A\u629B\u51FA{1}
+1959 
+1960 # In the following string {1} is a space separated list of Java Keywords, as
+1961 # they would have been declared in the source code
+1962 # 0: message segment, 1: set of flag or string
+1963 compiler.err.override.weaker.access={0}\n\u6B63\u5728\u5C1D\u8BD5\u5206\u914D\u66F4\u4F4E\u7684\u8BBF\u95EE\u6743\u9650; \u4EE5\u524D\u4E3A{1}
+1964 
+1965 # 0: message segment, 1: type, 2: type
+1966 compiler.err.override.incompatible.ret={0}\n\u8FD4\u56DE\u7C7B\u578B{1}\u4E0E{2}\u4E0D\u517C\u5BB9
+1967 
+1968 # 0: message segment, 1: type, 2: type
+1969 compiler.warn.override.unchecked.ret={0}\n\u8FD4\u56DE\u7C7B\u578B\u9700\u8981\u4ECE{1}\u5230{2}\u7684\u672A\u7ECF\u68C0\u67E5\u7684\u8F6C\u6362
+1970 
+1971 # 0: message segment, 1: type
+1972 compiler.warn.override.unchecked.thrown={0}\n\u88AB\u8986\u76D6\u7684\u65B9\u6CD5\u672A\u629B\u51FA{1}
+1973 
+1974 # 0: symbol
+1975 compiler.warn.override.equals.but.not.hashcode=\u7C7B{0}\u8986\u76D6\u4E86 equals, \u4F46\u8BE5\u7C7B\u6216\u4EFB\u4F55\u8D85\u7C7B\u90FD\u672A\u8986\u76D6 hashCode \u65B9\u6CD5
+1976 
+1977 ## The following are all possible strings for the first argument ({0}) of the
+1978 ## above strings.
+1979 # 0: symbol, 1: symbol, 2: symbol, 3: symbol
+1980 compiler.misc.cant.override={1}\u4E2D\u7684{0}\u65E0\u6CD5\u8986\u76D6{3}\u4E2D\u7684{2}
+1981 
+1982 # 0: symbol, 1: symbol, 2: symbol, 3: symbol
+1983 compiler.misc.cant.hide={1} \u4E2D\u7684 {0} \u65E0\u6CD5\u9690\u85CF {3} \u4E2D\u7684 {2}
+1984 
+1985 # 0: symbol, 1: symbol, 2: symbol, 3: symbol
+1986 compiler.misc.cant.implement={1}\u4E2D\u7684{0}\u65E0\u6CD5\u5B9E\u73B0{3}\u4E2D\u7684{2}
+1987 
+1988 # 0: symbol, 1: symbol, 2: symbol, 3: symbol
+1989 compiler.misc.clashes.with={1}\u4E2D\u7684{0}\u4E0E{3}\u4E2D\u7684{2}\u51B2\u7A81
+1990 
+1991 # 0: symbol, 1: symbol, 2: symbol, 3: symbol
+1992 compiler.misc.unchecked.override={1}\u4E2D\u7684{0}\u8986\u76D6\u4E86{3}\u4E2D\u7684{2}
+1993 
+1994 # 0: symbol, 1: symbol, 2: symbol, 3: symbol
+1995 compiler.misc.unchecked.implement={1}\u4E2D\u7684{0}\u5B9E\u73B0\u4E86{3}\u4E2D\u7684{2}
+1996 
+1997 # 0: symbol, 1: symbol, 2: symbol, 3: symbol
+1998 compiler.misc.unchecked.clash.with={1}\u4E2D\u7684{0}\u8986\u76D6\u4E86{3}\u4E2D\u7684{2}
+1999 
+2000 # 0: symbol, 1: symbol, 2: symbol, 3: symbol
+2001 compiler.misc.varargs.override={1}\u4E2D\u7684{0}\u8986\u76D6\u4E86{3}\u4E2D\u7684{2}
+2002 
+2003 # 0: symbol, 1: symbol, 2: symbol, 3: symbol
+2004 compiler.misc.varargs.implement={1}\u4E2D\u7684{0}\u5B9E\u73B0\u4E86{3}\u4E2D\u7684{2}
+2005 
+2006 # 0: symbol, 1: symbol, 2: symbol, 3: symbol
+2007 compiler.misc.varargs.clash.with={1}\u4E2D\u7684{0}\u8986\u76D6\u4E86{3}\u4E2D\u7684{2}
+2008 
+2009 # 0: kind name, 1: symbol, 2: symbol, 3: message segment
+2010 compiler.misc.inapplicable.method={0} {1}.{2}\u4E0D\u9002\u7528\n({3})
+2011 
+2012 ########################################
+2013 # Diagnostics for language feature changes.
+2014 # Such diagnostics have a common template which can be customized by using a feature
+2015 # diagnostic fragment (one of those given below).
+2016 ########################################
+2017 
+2018 # 0: message segment (feature), 1: string (found version), 2: string (expected version)
+2019 compiler.err.feature.not.supported.in.source=-source {1} \u4E2D\u4E0D\u652F\u6301 {0}\n(\u8BF7\u4F7F\u7528 -source {2} \u6216\u66F4\u9AD8\u7248\u672C\u4EE5\u542F\u7528 {0})
+2020 
+2021 # 0: message segment (feature), 1: string (found version), 2: string (expected version)
+2022 compiler.err.feature.not.supported.in.source.plural=-source {1} \u4E2D\u4E0D\u652F\u6301 {0}\n(\u8BF7\u4F7F\u7528 -source {2} \u6216\u66F4\u9AD8\u7248\u672C\u4EE5\u542F\u7528 {0})
+2023 
+2024 # 0: message segment (feature), 1: string (found version), 2: string (expected version)
+2025 compiler.misc.feature.not.supported.in.source=-source {1} \u4E2D\u4E0D\u652F\u6301 {0}\n(\u8BF7\u4F7F\u7528 -source {2} \u6216\u66F4\u9AD8\u7248\u672C\u4EE5\u542F\u7528 {0})
+2026 
+2027 # 0: message segment (feature), 1: string (found version), 2: string (expected version)
+2028 compiler.misc.feature.not.supported.in.source.plural=-source {1} \u4E2D\u4E0D\u652F\u6301 {0}\n(\u8BF7\u4F7F\u7528 -source {2} \u6216\u66F4\u9AD8\u7248\u672C\u4EE5\u542F\u7528 {0})
+2029 
+2030 # 0: message segment (feature)
+2031 compiler.err.preview.feature.disabled={0} \u662F\u9884\u89C8\u529F\u80FD\uFF0C\u9ED8\u8BA4\u60C5\u51B5\u4E0B\u7981\u7528\u3002\n\uFF08\u8BF7\u4F7F\u7528 --enable-preview \u4EE5\u542F\u7528 {0}\uFF09
+2032 
+2033 # 0: message segment (feature)
+2034 compiler.err.preview.feature.disabled.plural={0} \u662F\u9884\u89C8\u529F\u80FD\uFF0C\u9ED8\u8BA4\u60C5\u51B5\u4E0B\u7981\u7528\u3002\n\uFF08\u8BF7\u4F7F\u7528 --enable-preview \u4EE5\u542F\u7528 {0}\uFF09
+2035 
+2036 # 0: file object (classfile), 1: string (expected version)
+2037 compiler.err.preview.feature.disabled.classfile={0} \u7684\u7C7B\u6587\u4EF6\u4F7F\u7528 Java SE {1} \u7684\u9884\u89C8\u529F\u80FD\u3002\n\uFF08\u8BF7\u4F7F\u7528 --enable-preview \u4EE5\u5141\u8BB8\u52A0\u8F7D\u5305\u542B\u9884\u89C8\u529F\u80FD\u7684\u7C7B\u6587\u4EF6\uFF09
+2038 
+2039 # 0: message segment (feature)
+2040 compiler.warn.preview.feature.use={0} \u662F\u9884\u89C8\u529F\u80FD\uFF0C\u53EF\u80FD\u4F1A\u5728\u672A\u6765\u53D1\u884C\u7248\u4E2D\u5220\u9664\u3002
+2041 
+2042 # 0: message segment (feature)
+2043 compiler.warn.preview.feature.use.plural={0} \u662F\u9884\u89C8\u529F\u80FD\uFF0C\u53EF\u80FD\u4F1A\u5728\u672A\u6765\u53D1\u884C\u7248\u4E2D\u5220\u9664\u3002
+2044 
+2045 # 0: file object (classfile), 1: string (expected version)
+2046 compiler.warn.preview.feature.use.classfile={0} \u7684\u7C7B\u6587\u4EF6\u4F7F\u7528 Java SE {1} \u7684\u9884\u89C8\u529F\u80FD\u3002
+2047 
+2048 
+2049 compiler.misc.feature.modules=\u6A21\u5757
+2050 
+2051 compiler.misc.feature.diamond.and.anon.class=&#39;&#39;&lt;&gt;&#39;&#39; \u5177\u6709\u533F\u540D\u7684\u5185\u90E8\u7C7B
+2052 
+2053 compiler.misc.feature.var.in.try.with.resources=try-with-resources \u4E2D\u7684\u53D8\u91CF
+2054 
+2055 compiler.misc.feature.type.annotations=\u7C7B\u578B\u6CE8\u91CA
+2056 
+2057 compiler.misc.feature.annotations.after.type.params=\u5728\u65B9\u6CD5\u7C7B\u578B\u53C2\u6570\u4E4B\u540E\u7684\u6CE8\u91CA
+2058 
+2059 compiler.misc.feature.repeatable.annotations=\u91CD\u590D\u7684\u6CE8\u91CA
+2060 
+2061 compiler.misc.feature.diamond=diamond \u8FD0\u7B97\u7B26
+2062 
+2063 compiler.misc.feature.lambda=lambda \u8868\u8FBE\u5F0F
+2064 
+2065 compiler.misc.feature.method.references=\u65B9\u6CD5\u5F15\u7528
+2066 
+2067 compiler.misc.feature.default.methods=\u9ED8\u8BA4\u65B9\u6CD5
+2068 
+2069 compiler.misc.feature.intersection.types.in.cast=\u4EA4\u53C9\u7C7B\u578B
+2070 
+2071 compiler.misc.feature.static.intf.methods=\u9759\u6001\u63A5\u53E3\u65B9\u6CD5
+2072 
+2073 compiler.misc.feature.static.intf.method.invoke=\u9759\u6001\u63A5\u53E3\u65B9\u6CD5\u8C03\u7528
+2074 
+2075 compiler.misc.feature.private.intf.methods=\u79C1\u6709\u63A5\u53E3\u65B9\u6CD5
+2076 
+2077 compiler.misc.feature.text.blocks=\u6587\u672C\u5757
+2078 
+2079 compiler.misc.feature.multiple.case.labels=\u591A\u4E2A case \u6807\u7B7E
+2080 
+2081 compiler.misc.feature.switch.rules=switch \u89C4\u5219
+2082 
+2083 compiler.misc.feature.switch.expressions=switch \u8868\u8FBE\u5F0F
+2084 
+2085 compiler.misc.feature.var.syntax.in.implicit.lambda=\u9690\u5F0F lambda \u4E2D\u7684 var \u8BED\u6CD5
+2086 
+2087 compiler.misc.feature.pattern.matching.instanceof=instanceof \u4E2D\u7684\u6A21\u5F0F\u5339\u914D
+2088 
+2089 compiler.misc.feature.reifiable.types.instanceof=instanceof \u4E2D\u7684\u53EF\u5177\u4F53\u5316\u7C7B\u578B
+2090 
+2091 compiler.misc.feature.records=\u8BB0\u5F55
+2092 
+2093 compiler.misc.feature.sealed.classes=\u5BC6\u5C01\u7C7B
+2094 
+2095 compiler.warn.underscore.as.identifier=\u4ECE\u53D1\u884C\u7248 9 \u5F00\u59CB, &#39;&#39;_&#39;&#39; \u4E3A\u5173\u952E\u5B57, \u4E0D\u80FD\u7528\u4F5C\u6807\u8BC6\u7B26
+2096 
+2097 compiler.err.underscore.as.identifier=\u4ECE\u53D1\u884C\u7248 9 \u5F00\u59CB, &#39;&#39;_&#39;&#39; \u4E3A\u5173\u952E\u5B57, \u4E0D\u80FD\u7528\u4F5C\u6807\u8BC6\u7B26
+2098 
+2099 compiler.err.underscore.as.identifier.in.lambda=&#39;&#39;_&#39;&#39; \u7528\u4F5C\u6807\u8BC6\u7B26\n(\u5BF9\u4E8E lambda \u53C2\u6570, \u7981\u6B62\u5C06 &#39;&#39;_&#39;&#39; \u7528\u4F5C\u6807\u8BC6\u7B26)
+2100 
+2101 compiler.err.enum.as.identifier=\u4ECE\u53D1\u884C\u7248 5 \u5F00\u59CB, &#39;&#39;enum&#39;&#39; \u4E3A\u5173\u952E\u5B57, \u4E0D\u80FD\u7528\u4F5C\u6807\u8BC6\u7B26
+2102 
+2103 compiler.err.assert.as.identifier=\u4ECE\u53D1\u884C\u7248 1.4 \u5F00\u59CB, &#39;&#39;assert&#39;&#39; \u4E3A\u5173\u952E\u5B57, \u4E0D\u80FD\u7528\u4F5C\u6807\u8BC6\u7B26
+2104 
+2105 # TODO 308: make a better error message
+2106 compiler.err.this.as.identifier=\u4ECE\u53D1\u884C\u7248 8 \u5F00\u59CB\uFF0C&#39;&#39;this&#39;&#39; \u53EA\u80FD\u4F5C\u4E3A\u63A5\u6536\u65B9\u7C7B\u578B\u7684\u53C2\u6570\u540D\uFF0C\n\u8BE5\u53C2\u6570\u5FC5\u987B\u4E3A\u7B2C\u4E00\u4E2A\u53C2\u6570\uFF0C\u5E76\u4E14\u4E0D\u80FD\u662F lambda \u53C2\u6570
+2107 
+2108 compiler.err.receiver.parameter.not.applicable.constructor.toplevel.class=\u63A5\u6536\u65B9\u53C2\u6570\u4E0D\u9002\u7528\u4E8E\u9876\u5C42\u7C7B\u7684\u6784\u9020\u5668
+2109 
+2110 # TODO 308: make a better error message
+2111 # 0: annotation
+2112 compiler.err.cant.type.annotate.scoping.1=\u65E0\u6CD5\u4F7F\u7528 type-use \u6CE8\u91CA {0} \u6765\u6CE8\u91CA\u786E\u5B9A\u4F5C\u7528\u57DF\u7ED3\u6784
+2113 
+2114 # TODO 308: make a better error message
+2115 # 0: list of annotation
+2116 compiler.err.cant.type.annotate.scoping=\u65E0\u6CD5\u4F7F\u7528 type-use \u6CE8\u91CA {0} \u6765\u6CE8\u91CA\u786E\u5B9A\u4F5C\u7528\u57DF\u7ED3\u6784
+2117 
+2118 # 0: type, 1: type
+2119 compiler.err.incorrect.receiver.name=\u63A5\u6536\u65B9\u540D\u79F0\u4E0E\u5C01\u95ED\u7C7B\u7C7B\u578B\u4E0D\u5339\u914D\n\u9700\u8981: {0}\n\u627E\u5230:    {1}
+2120 
+2121 # 0: type, 1: type
+2122 compiler.err.incorrect.receiver.type=\u63A5\u6536\u65B9\u7C7B\u578B\u4E0E\u5C01\u95ED\u7C7B\u7C7B\u578B\u4E0D\u5339\u914D\n\u9700\u8981: {0}\n\u627E\u5230:    {1}
+2123 
+2124 # 0: type, 1: type
+2125 compiler.err.incorrect.constructor.receiver.type=\u63A5\u6536\u65B9\u7C7B\u578B\u4E0E\u5916\u90E8\u5C01\u95ED\u7C7B\u7C7B\u578B\u4E0D\u5339\u914D\n\u9700\u8981: {0}\n\u627E\u5230:    {1}
+2126 
+2127 # 0: type, 1: type
+2128 compiler.err.incorrect.constructor.receiver.name=\u63A5\u6536\u65B9\u540D\u79F0\u4E0E\u5916\u90E8\u5C01\u95ED\u7C7B\u7C7B\u578B\u4E0D\u5339\u914D\n\u9700\u8981: {0}\n\u627E\u5230:    {1}
+2129 
+2130 compiler.err.no.annotations.on.dot.class=\u7C7B\u6587\u5B57\u7C7B\u578B\u4E2D\u4E0D\u5141\u8BB8\u4F7F\u7528\u4EFB\u4F55\u6CE8\u91CA
+2131 
+2132 ########################################
+2133 # Diagnostics for verbose resolution
+2134 # used by Resolve (debug only)
+2135 ########################################
+2136 
+2137 # 0: number, 1: symbol, 2: unused
+2138 compiler.misc.applicable.method.found=\u627E\u5230\u7B2C {0} \u4E2A\u9002\u7528\u65B9\u6CD5: {1}
+2139 
+2140 # 0: number, 1: symbol, 2: message segment
+2141 compiler.misc.applicable.method.found.1=\u627E\u5230\u7B2C {0} \u4E2A\u9002\u7528\u65B9\u6CD5: {1}\n({2})
+2142 
+2143 # 0: number, 1: symbol, 2: message segment
+2144 compiler.misc.not.applicable.method.found=\u627E\u5230\u7B2C {0} \u4E2A\u4E0D\u9002\u7528\u7684\u65B9\u6CD5: {1}\n({2})
+2145 
+2146 # 0: type
+2147 compiler.misc.partial.inst.sig=\u90E8\u5206\u5B9E\u4F8B\u5316\u4E3A: {0}
+2148 
+2149 # 0: name, 1: symbol, 2: number, 3: string (method resolution phase), 4: list of type or message segment, 5: list of type or message segment
+2150 compiler.note.verbose.resolve.multi=\u5C06\u7C7B\u578B {1} \u7684\u65B9\u6CD5 {0} \u89E3\u6790\u4E3A\u5019\u9009\u9879 {2}\n\u9636\u6BB5: {3}\n\u5177\u6709\u5B9E\u9645\u503C: {4}\n\u5177\u6709\u7C7B\u578B\u53C2\u6570: {5}\n\u5019\u9009\u9879:
+2151 
+2152 # 0: name, 1: symbol, 2: unused, 3: string (method resolution phase), 4: list of type or message segment, 5: list of type or message segment
+2153 compiler.note.verbose.resolve.multi.1=\u7C7B\u578B {1} \u7684\u65B9\u6CD5 {0} \u89E3\u6790\u9519\u8BEF\n\u9636\u6BB5: {3}\n\u5177\u6709\u5B9E\u9645\u503C: {4}\n\u5177\u6709\u7C7B\u578B\u53C2\u6570: {5}\n\u5019\u9009\u9879:
+2154 
+2155 # 0: symbol, 1: type, 2: type
+2156 compiler.note.deferred.method.inst=\u65B9\u6CD5 {0} \u7684\u5EF6\u8FDF\u5B9E\u4F8B\u5316\n\u5B9E\u4F8B\u5316\u7B7E\u540D: {1}\n\u76EE\u6807\u7C7B\u578B: {2}
+2157 
+2158 ########################################
+2159 # Diagnostics for lambda deduplication
+2160 # used by LambdaToMethod (debug only)
+2161 ########################################
+2162 
+2163 # 0: symbol
+2164 compiler.note.verbose.l2m.deduplicate=\u6B63\u5728\u5BF9 lambda \u51FD\u6570\u5B9E\u73B0\u65B9\u6CD5 {0} \u8FDB\u884C\u91CD\u590D\u6570\u636E\u5220\u9664
+2165 
+2166 ########################################
+2167 # Diagnostics for where clause implementation
+2168 # used by the RichDiagnosticFormatter.
+2169 ########################################
+2170 
+2171 compiler.misc.type.null=&lt;\u7A7A\u503C&gt;
+2172 
+2173 # X#n (where n is an int id) is disambiguated tvar name
+2174 # 0: name, 1: number
+2175 compiler.misc.type.var={0}#{1}
+2176 
+2177 # CAP#n (where n is an int id) is an abbreviation for &#39;captured type&#39;
+2178 # 0: number
+2179 compiler.misc.captured.type=CAP#{0}
+2180 
+2181 # &lt;INT#n&gt; (where n is an int id) is an abbreviation for &#39;intersection type&#39;
+2182 # 0: number
+2183 compiler.misc.intersection.type=INT#{0}
+2184 
+2185 # where clause for captured type: contains upper (&#39;extends {1}&#39;) and lower
+2186 # (&#39;super {2}&#39;) bound along with the wildcard that generated this captured type ({3})
+2187 # 0: type, 1: type, 2: type, 3: type
+2188 compiler.misc.where.captured={0}\u4ECE{3}\u7684\u6355\u83B7\u6269\u5C55{1} \u8D85 {2}
+2189 
+2190 # compact where clause for captured type: contains upper (&#39;extends {1}&#39;) along
+2191 # with the wildcard that generated this captured type ({3})
+2192 # 0: type, 1: type, 2: unused, 3: type
+2193 compiler.misc.where.captured.1={0}\u4ECE{3}\u7684\u6355\u83B7\u6269\u5C55{1}
+2194 
+2195 # where clause for type variable: contains upper bound(s) (&#39;extends {1}&#39;) along with
+2196 # the kindname ({2}) and location ({3}) in which the typevar has been declared
+2197 # 0: type, 1: list of type, 2: symbol kind, 3: symbol
+2198 compiler.misc.where.typevar={0}\u6269\u5C55\u5DF2\u5728{2} {3}\u4E2D\u58F0\u660E\u7684{1}
+2199 
+2200 # compact where clause for type variable: contains the kindname ({2}) and location ({3})
+2201 # in which the typevar has been declared
+2202 # 0: type, 1: list of type, 2: symbol kind, 3: symbol
+2203 compiler.misc.where.typevar.1={0}\u5DF2\u5728{2} {3}\u4E2D\u58F0\u660E
+2204 
+2205 # where clause for fresh type variable: contains upper bound(s) (&#39;extends {1}&#39;).
+2206 # Since a fresh type-variable is synthetic - there&#39;s no location/kindname here.
+2207 # 0: type, 1: list of type
+2208 compiler.misc.where.fresh.typevar={0}\u6269\u5C55{1}
+2209 
+2210 # where clause for type variable: contains all the upper bound(s) (&#39;extends {1}&#39;)
+2211 # of this intersection type
+2212 # 0: type, 1: list of type
+2213 compiler.misc.where.intersection={0}\u6269\u5C55{1}
+2214 
+2215 ### Where clause headers ###
+2216 compiler.misc.where.description.captured=\u5176\u4E2D, {0}\u662F\u65B0\u7C7B\u578B\u53D8\u91CF:
+2217 
+2218 # 0: set of type
+2219 compiler.misc.where.description.typevar=\u5176\u4E2D, {0}\u662F\u7C7B\u578B\u53D8\u91CF:
+2220 
+2221 # 0: set of type
+2222 compiler.misc.where.description.intersection=\u5176\u4E2D, {0}\u662F\u4EA4\u53C9\u7C7B\u578B:
+2223 
+2224 # 0: set of type
+2225 compiler.misc.where.description.captured.1=\u5176\u4E2D, {0}\u662F\u65B0\u7C7B\u578B\u53D8\u91CF:
+2226 
+2227 # 0: set of type
+2228 compiler.misc.where.description.typevar.1=\u5176\u4E2D, {0}\u662F\u7C7B\u578B\u53D8\u91CF:
+2229 
+2230 # 0: set of type
+2231 compiler.misc.where.description.intersection.1=\u5176\u4E2D, {0}\u662F\u4EA4\u53C9\u7C7B\u578B:
+2232 
+2233 ###
+2234 # errors related to doc comments
+2235 
+2236 compiler.err.dc.bad.entity=HTML \u5B9E\u4F53\u9519\u8BEF
+2237 
+2238 compiler.err.dc.bad.inline.tag=\u5185\u5D4C\u6807\u8BB0\u7684\u7528\u6CD5\u4E0D\u6B63\u786E
+2239 
+2240 compiler.err.dc.identifier.expected=\u9700\u8981\u6807\u8BC6\u7B26
+2241 
+2242 compiler.err.dc.malformed.html=\u683C\u5F0F\u9519\u8BEF\u7684 HTML
+2243 
+2244 compiler.err.dc.missing.semicolon=\u7F3A\u5C11\u5206\u53F7
+2245 
+2246 compiler.err.dc.no.content=\u65E0\u5185\u5BB9
+2247 
+2248 compiler.err.dc.no.tag.name=&#39;@&#39; \u540E\u6CA1\u6709\u6807\u8BB0\u540D
+2249 
+2250 compiler.err.dc.gt.expected=\u9700\u8981 &#39;&#39;&gt;&#39;&#39;
+2251 
+2252 compiler.err.dc.ref.bad.parens=\u5F15\u7528\u4E2D\u7F3A\u5C11 &#39;&#39;)&#39;&#39;
+2253 
+2254 compiler.err.dc.ref.syntax.error=\u5F15\u7528\u4E2D\u51FA\u73B0\u8BED\u6CD5\u9519\u8BEF
+2255 
+2256 compiler.err.dc.ref.unexpected.input=\u610F\u5916\u7684\u6587\u672C
+2257 
+2258 compiler.err.dc.unexpected.content=\u610F\u5916\u7684\u5185\u5BB9
+2259 
+2260 compiler.err.dc.unterminated.inline.tag=\u672A\u7EC8\u6B62\u7684\u5185\u5D4C\u6807\u8BB0
+2261 
+2262 compiler.err.dc.unterminated.signature=\u672A\u7EC8\u6B62\u7684\u7B7E\u540D
+2263 
+2264 compiler.err.dc.unterminated.string=\u672A\u7EC8\u6B62\u7684\u5B57\u7B26\u4E32
+2265 
+2266 ###
+2267 # errors related to modules
+2268 
+2269 compiler.err.expected.module=\u9884\u671F &#39;&#39;module&#39;&#39;
+2270 
+2271 # 0: symbol
+2272 compiler.err.module.not.found=\u627E\u4E0D\u5230\u6A21\u5757: {0}
+2273 
+2274 # 0: symbol
+2275 compiler.warn.module.not.found=\u627E\u4E0D\u5230\u6A21\u5757: {0}
+2276 
+2277 compiler.err.too.many.modules=\u627E\u5230\u592A\u591A\u7684\u6A21\u5757\u58F0\u660E
+2278 
+2279 compiler.err.module.not.found.on.module.source.path=\u5728\u6A21\u5757\u6E90\u8DEF\u5F84\u4E2D\u627E\u4E0D\u5230\u6A21\u5757
+2280 
+2281 compiler.err.not.in.module.on.module.source.path=\u4E0D\u5728\u6A21\u5757\u6E90\u8DEF\u5F84\u4E0A\u7684\u6A21\u5757\u4E2D
+2282 
+2283 # 0: symbol
+2284 compiler.err.duplicate.module=\u91CD\u590D\u7684\u6A21\u5757: {0}
+2285 
+2286 # 0: symbol
+2287 compiler.err.duplicate.requires=\u91CD\u590D\u7684 requires \u6307\u4EE4: {0}
+2288 
+2289 # 0: symbol
+2290 compiler.err.conflicting.exports=\u91CD\u590D\u6216\u51B2\u7A81\u7684\u5BFC\u51FA\u64CD\u4F5C: {0}
+2291 
+2292 # 0: symbol
+2293 compiler.err.conflicting.opens=\u91CD\u590D\u6216\u51B2\u7A81\u7684\u6253\u5F00\u64CD\u4F5C: {0}
+2294 
+2295 # 0: symbol
+2296 compiler.err.conflicting.exports.to.module=\u91CD\u590D\u6216\u51B2\u7A81\u7684\u5BFC\u51FA\u5230\u6A21\u5757\u64CD\u4F5C: {0}
+2297 
+2298 # 0: symbol
+2299 compiler.err.conflicting.opens.to.module=\u91CD\u590D\u6216\u51B2\u7A81\u7684\u6253\u5F00\u5230\u6A21\u5757\u64CD\u4F5C: {0}
+2300 
+2301 compiler.err.no.opens.unless.strong=\u53EA\u5141\u8BB8\u5728\u5F3A\u6A21\u5757\u4E2D\u4F7F\u7528 &#39;&#39;opens&#39;&#39;
+2302 
+2303 # 0: symbol
+2304 compiler.err.repeated.provides.for.service=\u670D\u52A1 {0} \u6709\u591A\u4E2A &#39;&#39;provides&#39;&#39;
+2305 
+2306 # 0: symbol, 1: symbol
+2307 compiler.err.duplicate.provides=\u91CD\u590D\u7684 provides \u6307\u4EE4: \u670D\u52A1 {0}, \u5B9E\u73B0 {1}
+2308 
+2309 # 0: symbol
+2310 compiler.err.duplicate.uses=\u91CD\u590D\u7684 uses \u6307\u4EE4: {0}
+2311 
+2312 # 0: symbol
+2313 compiler.err.service.implementation.is.abstract=\u670D\u52A1\u5B9E\u73B0\u662F\u62BD\u8C61\u7C7B: {0}
+2314 
+2315 compiler.err.service.implementation.must.be.subtype.of.service.interface=\u670D\u52A1\u5B9E\u73B0\u7C7B\u578B\u5FC5\u987B\u662F\u670D\u52A1\u63A5\u53E3\u7C7B\u578B\u7684\u5B50\u7C7B\u578B, \u6216\u8005\u5177\u6709\u540D\u4E3A &quot;provider&quot; \u7684, \u8FD4\u56DE\u670D\u52A1\u5B9E\u73B0\u7684\u516C\u5171\u9759\u6001\u65E0\u53C2\u6570\u65B9\u6CD5
+2316 
+2317 compiler.err.service.implementation.provider.return.must.be.subtype.of.service.interface=&quot;provider&quot; \u65B9\u6CD5\u8FD4\u56DE\u7C7B\u578B\u5FC5\u987B\u662F\u670D\u52A1\u63A5\u53E3\u7C7B\u578B\u7684\u5B50\u7C7B\u578B
+2318 
+2319 # 0: symbol
+2320 compiler.err.service.implementation.is.inner=\u670D\u52A1\u5B9E\u73B0\u662F\u5185\u90E8\u7C7B: {0}
+2321 
+2322 # 0: symbol
+2323 compiler.err.service.definition.is.enum=\u670D\u52A1\u5B9A\u4E49\u662F\u679A\u4E3E: {0}
+2324 
+2325 # 0: symbol
+2326 compiler.err.service.implementation.doesnt.have.a.no.args.constructor=\u670D\u52A1\u5B9E\u73B0\u6CA1\u6709\u9ED8\u8BA4\u7684\u6784\u9020\u5668: {0}
+2327 
+2328 # 0: symbol
+2329 compiler.err.service.implementation.no.args.constructor.not.public=\u670D\u52A1\u5B9E\u73B0\u7684\u65E0\u53C2\u6570\u6784\u9020\u5668\u4E0D\u662F\u516C\u5171\u6784\u9020\u5668: {0}
+2330 
+2331 # 0: symbol
+2332 compiler.err.package.empty.or.not.found=\u7A0B\u5E8F\u5305\u4E3A\u7A7A\u6216\u4E0D\u5B58\u5728: {0}
+2333 
+2334 # 0: symbol
+2335 compiler.warn.package.empty.or.not.found=\u7A0B\u5E8F\u5305\u4E3A\u7A7A\u6216\u4E0D\u5B58\u5728: {0}
+2336 
+2337 compiler.err.no.output.dir=\u672A\u6307\u5B9A\u7C7B\u8F93\u51FA\u76EE\u5F55
+2338 
+2339 compiler.err.unnamed.pkg.not.allowed.named.modules=\u547D\u540D\u6A21\u5757\u4E2D\u4E0D\u5141\u8BB8\u672A\u547D\u540D\u7A0B\u5E8F\u5305
+2340 
+2341 # 0: name, 1: name
+2342 compiler.err.module.name.mismatch=\u6A21\u5757\u540D\u79F0 {0} \u4E0E\u9884\u671F\u540D\u79F0 {1} \u4E0D\u5339\u914D
+2343 
+2344 # 0: name, 1: name
+2345 compiler.misc.module.name.mismatch=\u6A21\u5757\u540D\u79F0 {0} \u4E0E\u9884\u671F\u540D\u79F0 {1} \u4E0D\u5339\u914D
+2346 
+2347 # 0: name
+2348 compiler.err.module.non.zero.opens=\u6253\u5F00\u7684\u6A21\u5757 {0} \u5177\u6709\u975E\u96F6 opens_count
+2349 
+2350 # 0: name
+2351 compiler.misc.module.non.zero.opens=\u6253\u5F00\u7684\u6A21\u5757 {0} \u5177\u6709\u975E\u96F6 opens_count
+2352 
+2353 compiler.err.module.decl.sb.in.module-info.java=\u6A21\u5757\u58F0\u660E\u5E94\u8BE5\u5728\u540D\u4E3A module-info.java \u7684\u6587\u4EF6\u4E2D
+2354 
+2355 # 0: set of string
+2356 compiler.err.too.many.patched.modules=\u592A\u591A\u6253\u8865\u4E01\u7684\u6A21\u5757 ({0}), \u8BF7\u4F7F\u7528 --module-source-path
+2357 
+2358 # 0: name, 1: name
+2359 compiler.err.file.patched.and.msp=\u53EF\u4ECE --patch-module \u548C --module-source-path \u8BBF\u95EE\u6587\u4EF6, \u4F46\u8BE5\u6587\u4EF6\u5728\u6BCF\u4E2A\u8DEF\u5F84\u4E2D\u5C5E\u4E8E\u4E0D\u540C\u7684\u6A21\u5757: {0}, {1}
+2360 
+2361 compiler.err.processorpath.no.processormodulepath=-processorpath \u4E0E --processor-module-path \u7684\u7EC4\u5408\u975E\u6CD5
+2362 
+2363 # 0: symbol
+2364 compiler.err.package.in.other.module=\u7A0B\u5E8F\u5305\u5DF2\u5B58\u5728\u4E8E\u53E6\u4E00\u4E2A\u6A21\u5757\u4E2D: {0}
+2365 
+2366 # 0: symbol, 1: name, 2: symbol, 3: symbol
+2367 compiler.err.package.clash.from.requires=\u6A21\u5757 {0} \u540C\u65F6\u4ECE {2} \u548C {3} \u8BFB\u53D6\u7A0B\u5E8F\u5305 {1}
+2368 
+2369 # 0: name, 1: symbol, 2: symbol
+2370 compiler.err.package.clash.from.requires.in.unnamed=\u672A\u547D\u540D\u7684\u6A21\u5757\u540C\u65F6\u4ECE {1} \u548C {2} \u8BFB\u53D6\u7A0B\u5E8F\u5305 {0}
+2371 
+2372 # 0: string
+2373 compiler.err.module.not.found.in.module.source.path=\u5728\u6A21\u5757\u6E90\u8DEF\u5F84\u4E2D\u627E\u4E0D\u5230\u6A21\u5757 {0}
+2374 
+2375 compiler.err.output.dir.must.be.specified.with.dash.m.option=\u5982\u679C\u4F7F\u7528 -m \u9009\u9879, \u5219\u5FC5\u987B\u6307\u5B9A\u7C7B\u8F93\u51FA\u76EE\u5F55
+2376 
+2377 compiler.err.modulesourcepath.must.be.specified.with.dash.m.option=\u5982\u679C\u4F7F\u7528 -m \u9009\u9879, \u5219\u5FC5\u987B\u6307\u5B9A\u6A21\u5757\u6E90\u8DEF\u5F84
+2378 
+2379 # 0: symbol
+2380 compiler.err.service.implementation.not.in.right.module=\u5FC5\u987B\u5728\u4E0E provides \u6307\u4EE4\u76F8\u540C\u7684\u6A21\u5757\u4E2D\u5B9A\u4E49\u670D\u52A1\u5B9E\u73B0
+2381 
+2382 # 0: symbol
+2383 compiler.err.cyclic.requires=\u6D89\u53CA {0} \u7684\u5FAA\u73AF\u88AB\u4F9D\u8D56\u5BF9\u8C61
+2384 
+2385 # 0: fragment, 1: name
+2386 compiler.err.duplicate.module.on.path={1} \u4E2D\u7684 {0} \u4E0A\u5B58\u5728\n\u91CD\u590D\u7684\u6A21\u5757
+2387 
+2388 # 0: option name, 1: string
+2389 compiler.warn.bad.name.for.option={0} \u9009\u9879\u7684\u503C\u4E2D\u6709\u9519\u8BEF\u7684\u540D\u79F0: &#39;&#39;{1}&#39;&#39;
+2390 
+2391 # 0: option name, 1: string
+2392 compiler.err.bad.name.for.option={0} \u9009\u9879\u7684\u503C\u4E2D\u6709\u9519\u8BEF\u7684\u540D\u79F0: &#39;&#39;{1}&#39;&#39;
+2393 
+2394 # 0: option name, 1: symbol
+2395 compiler.warn.module.for.option.not.found=\u627E\u4E0D\u5230 {0} \u9009\u9879\u4E2D\u7684\u6A21\u5757\u540D\u79F0: {1}
+2396 
+2397 compiler.err.addmods.all.module.path.invalid=--add-modules ALL-MODULE-PATH \u53EA\u80FD\u5728\u7F16\u8BD1\u672A\u547D\u540D\u6A21\u5757\u6216\u5728\u81EA\u52A8\u6A21\u5757\u7684\u4E0A\u4E0B\u6587\u4E2D\u7F16\u8BD1\u65F6\u4F7F\u7528
+2398 
+2399 # 0: symbol
+2400 compiler.err.add.exports.with.release=\u4E0D\u5141\u8BB8\u5728\u4F7F\u7528 --release \u65F6\u4ECE\u7CFB\u7EDF\u6A21\u5757 {0} \u5BFC\u51FA\u7A0B\u5E8F\u5305:
+2401 
+2402 # 0: symbol
+2403 compiler.err.add.reads.with.release=\u4E0D\u5141\u8BB8\u5728\u4F7F\u7528 --release \u65F6\u4E3A\u7CFB\u7EDF\u6A21\u5757 {0} \u6DFB\u52A0\u8BFB\u53D6\u7EF4\u8FB9:
+2404 
+2405 compiler.warn.addopens.ignored=--add-opens \u5728\u7F16\u8BD1\u65F6\u6CA1\u6709\u4EFB\u4F55\u6548\u679C
+2406 
+2407 compiler.misc.locn.module_source_path=\u6A21\u5757\u6E90\u8DEF\u5F84
+2408 
+2409 compiler.misc.locn.upgrade_module_path=\u5347\u7EA7\u6A21\u5757\u8DEF\u5F84
+2410 
+2411 compiler.misc.locn.system_modules=\u7CFB\u7EDF\u6A21\u5757
+2412 
+2413 compiler.misc.locn.module_path=\u5E94\u7528\u7A0B\u5E8F\u6A21\u5757\u8DEF\u5F84
+2414 
+2415 compiler.misc.cant.resolve.modules=\u65E0\u6CD5\u89E3\u6790\u6A21\u5757
+2416 
+2417 compiler.misc.bad.requires.flag=\u9519\u8BEF\u7684\u8BF7\u6C42\u6807\u8BB0\uFF1A{0}
+2418 
+2419 # 0: string
+2420 compiler.err.invalid.module.specifier=\u4E0D\u5141\u8BB8\u6A21\u5757\u8BF4\u660E\u7B26: {0}
+2421 
+2422 # 0: symbol
+2423 compiler.warn.service.provided.but.not.exported.or.used=\u5DF2\u63D0\u4F9B\u670D\u52A1\u63A5\u53E3, \u4F46\u672A\u5BFC\u51FA\u6216\u4F7F\u7528\u670D\u52A1\u63A5\u53E3
+2424 
+2425 # 0: kind name, 1: symbol, 2: symbol
+2426 compiler.warn.leaks.not.accessible=\u6A21\u5757 {2} \u4E2D\u7684 {0} {1} \u5BF9\u9700\u8981\u8BE5\u6A21\u5757\u7684\u5BA2\u6237\u673A\u4E0D\u53EF\u8BBF\u95EE
+2427 # 0: kind name, 1: symbol, 2: symbol
+2428 compiler.warn.leaks.not.accessible.unexported=\u672A\u5BFC\u51FA\u6A21\u5757 {2} \u4E2D\u7684 {0} {1}
+2429 # 0: kind name, 1: symbol, 2: symbol
+2430 compiler.warn.leaks.not.accessible.not.required.transitive=\u672A\u4F7F\u7528 &#39;&#39;requires transitive&#39;&#39; \u95F4\u63A5\u5BFC\u51FA\u6A21\u5757 {2} \u4E2D\u7684 {0} {1}
+2431 # 0: kind name, 1: symbol, 2: symbol
+2432 compiler.warn.leaks.not.accessible.unexported.qualified=\u6A21\u5757 {2} \u4E2D\u7684 {0} {1} \u53EF\u80FD\u5BF9\u9700\u8981\u8BE5\u6A21\u5757\u7684\u6240\u6709\u5BA2\u6237\u673A\u90FD\u4E0D\u53EF\u89C1
+2433 
+2434 ###
+2435 # errors related to options
+2436 
+2437 # 0: string, 1: string
+2438 compiler.err.illegal.argument.for.option={0} \u7684\u53C2\u6570\u975E\u6CD5: {1}
+2439 
+2440 compiler.err.match.binding.exists=\u5C1D\u8BD5\u91CD\u65B0\u5B9A\u4E49\u73B0\u6709\u7684\u5339\u914D\u7ED1\u5B9A\uFF0C\u8FD9\u662F\u975E\u6CD5\u7684
+2441 
+2442 compiler.err.switch.null.not.allowed=case \u4E2D\u4E0D\u5141\u8BB8\u4F7F\u7528\u7A7A\u6807\u7B7E
+2443 
+2444 compiler.err.switch.case.unexpected.statement=case \u4E2D\u5B58\u5728\u610F\u5916\u8BED\u53E5\uFF0C\u5E94\u4E3A\u8868\u8FBE\u5F0F\u3001\u5757\u6216\u629B\u51FA\u8BED\u53E5
+2445 
+2446 compiler.err.switch.mixing.case.types=\u5728 switch \u4E2D\u4F7F\u7528\u4E86\u4E0D\u540C case \u7C7B\u578B
+2447 
+2448 ###
+2449 # errors related to sealed classes
+2450 
+2451 # permits clause
+2452 # 0: fragment
+2453 compiler.err.invalid.permits.clause=\u65E0\u6548\u7684 permits \u5B50\u53E5\n({0})
+2454 
+2455 # 0: string
+2456 compiler.misc.class.is.not.sealed=\u5FC5\u987B\u5BC6\u5C01 {0}
+2457 
+2458 # 0: type
+2459 compiler.misc.is.a.type.variable=\u4E0D\u5F97\u5305\u542B\u7C7B\u578B\u53D8\u91CF\uFF1A{0}
+2460 
+2461 # 0: type
+2462 compiler.misc.is.duplicated=\u4E0D\u5F97\u5305\u542B\u91CD\u590D\u9879\uFF1A{0}
+2463 
+2464 # 0: type
+2465 compiler.misc.doesnt.extend.sealed=\u5B50\u7C7B {0} \u5FC5\u987B\u6269\u5C55\u5BC6\u5C01\u7C7B
+2466 
+2467 compiler.misc.must.not.be.same.class=permits \u5B50\u53E5\u4E2D\u5B58\u5728\u975E\u6CD5\u81EA\u5F15\u7528
+2468 
+2469 # 0: type
+2470 compiler.misc.must.not.be.supertype=\u5BF9\u8D85\u7C7B\u578B {0} \u7684\u5F15\u7528\u975E\u6CD5
+2471 
+2472 # other sealed types related errors
+2473 
+2474 compiler.err.sealed.class.must.have.subclasses=\u5BC6\u5C01\u7C7B\u5FC5\u987B\u5177\u6709\u5B50\u7C7B
+2475 
+2476 # errors in subclasses of sealed classes
+2477 # 0: symbol
+2478 compiler.err.cant.inherit.from.sealed=\u7C7B\u4E0D\u5F97\u6269\u5C55\u5BC6\u5C01\u7C7B\uFF1A{0}
+2479 
+2480 # 0: symbol
+2481 compiler.err.non.sealed.with.no.sealed.supertype=\u6B64\u5904\u4E0D\u5141\u8BB8\u4F7F\u7528\u975E\u5BC6\u5C01\u4FEE\u9970\u7B26\n\uFF08\u7C7B {0} \u4E0D\u5177\u6709\u4EFB\u4F55\u5BC6\u5C01\u7684\u8D85\u7C7B\u578B\uFF09
+2482 
+2483 compiler.err.non.sealed.sealed.or.final.expected=\u9700\u8981\u5BC6\u5C01\u3001\u975E\u5BC6\u5C01\u6216\u6700\u7EC8\u4FEE\u9970\u7B26
+2484 
+2485 compiler.err.non.sealed.or.sealed.expected=\u9700\u8981\u5BC6\u5C01\u6216\u975E\u5BC6\u5C01\u4FEE\u9970\u7B26
+2486 
+2487 compiler.err.sealed.or.non.sealed.local.classes.not.allowed=\u4E0D\u5141\u8BB8\u4F7F\u7528\u5BC6\u5C01\u6216\u975E\u5BC6\u5C01\u672C\u5730\u7C7B
+2488 
+2489 compiler.err.local.classes.cant.extend.sealed=\u672C\u5730\u7C7B\u4E0D\u5F97\u6269\u5C55\u5BC6\u5C01\u7C7B
+2490 
+2491 ###
+2492 # errors related to records
+2493 
+2494 # record components
+2495 compiler.err.record.cant.declare.field.modifiers=\u8BB0\u5F55\u7EC4\u4EF6\u4E0D\u80FD\u5177\u6709\u9650\u5B9A\u7B26
+2496 
+2497 # 0: symbol
+2498 compiler.err.illegal.record.component.name=\u8BB0\u5F55\u7EC4\u4EF6\u540D\u79F0 {0} \u975E\u6CD5
+2499 
+2500 # accessor methods
+2501 # 0: symbol, 1: fragment
+2502 compiler.err.invalid.accessor.method.in.record=\u8BB0\u5F55 {0} \u4E2D\u7684\u5B58\u53D6\u65B9\u6CD5\u65E0\u6548\n({1})
+2503 
+2504 compiler.misc.method.must.be.public=\u5B58\u53D6\u65B9\u6CD5\u5FC5\u987B\u662F\u516C\u5171\u7684
+2505 
+2506 # 0: symbol, 1: symbol
+2507 compiler.misc.accessor.return.type.doesnt.match=\u5B58\u53D6\u65B9\u6CD5 {0} \u7684\u8FD4\u56DE\u7C7B\u578B\u5FC5\u987B\u4E0E\u8BB0\u5F55\u7EC4\u4EF6 {1} \u7684\u7C7B\u578B\u76F8\u5339\u914D
+2508 
+2509 compiler.misc.accessor.method.cant.throw.exception=\u5BF9\u4E8E\u5B58\u53D6\u65B9\u6CD5\u4E0D\u5141\u8BB8\u4F7F\u7528 throws \u5B50\u53E5
+2510 
+2511 compiler.misc.accessor.method.must.not.be.generic=\u5B58\u53D6\u65B9\u6CD5\u4E0D\u80FD\u4E3A\u6CDB\u578B\u65B9\u6CD5
+2512 
+2513 compiler.misc.accessor.method.must.not.be.static=\u5B58\u53D6\u65B9\u6CD5\u4E0D\u80FD\u4E3A\u9759\u6001\u65B9\u6CD5
+2514 
+2515 # canonical constructors
+2516 # 0: fragment, 1: name, 2: fragment
+2517 compiler.err.invalid.canonical.constructor.in.record=\u8BB0\u5F55 {1} \u4E2D\u7684 {0} \u6784\u9020\u5668\u65E0\u6548\n({2})
+2518 
+2519 compiler.misc.canonical=\u89C4\u8303
+2520 
+2521 compiler.misc.compact=\u7CBE\u7B80
+2522 
+2523 # 0: fragment
+2524 compiler.misc.throws.clause.not.allowed.for.canonical.constructor=\u5BF9\u4E8E {0} \u6784\u9020\u5668\uFF0C\u4E0D\u5141\u8BB8\u4F7F\u7528 throws \u5B50\u53E5
+2525 
+2526 compiler.misc.canonical.with.name.mismatch=\u89C4\u8303\u6784\u9020\u5668\u4E2D\u7684\u53C2\u6570\u540D\u79F0\u65E0\u6548
+2527 
+2528 compiler.misc.canonical.cant.have.return.statement=\u7CBE\u7B80\u6784\u9020\u5668\u4E0D\u5F97\u5305\u542B\u8FD4\u56DE\u8BED\u53E5
+2529 
+2530 compiler.misc.canonical.must.not.declare.type.variables=\u89C4\u8303\u6784\u9020\u5668\u4E0D\u5F97\u58F0\u660E\u7C7B\u578B\u53D8\u91CF
+2531 
+2532 compiler.misc.type.must.be.identical.to.corresponding.record.component.type=\u7C7B\u578B\u548C\u5143\u6570\u5FC5\u987B\u4E0E\u76F8\u5E94\u8BB0\u5F55\u7EC4\u4EF6\u7684\u7C7B\u578B\u548C\u5143\u6570\u76F8\u5339\u914D
+2533 compiler.misc.canonical.must.not.contain.explicit.constructor.invocation=\u89C4\u8303\u6784\u9020\u5668\u4E0D\u5F97\u5305\u542B\u663E\u5F0F\u6784\u9020\u5668\u8C03\u7528
+2534 
+2535 # 0: set of flag or string
+2536 compiler.misc.canonical.must.not.have.stronger.access=\u6B63\u5728\u5C1D\u8BD5\u5206\u914D\u66F4\u5F3A\u7684\u8BBF\u95EE\u6743\u9650\uFF1B\u4EE5\u524D\u4E3A {0}
+2537 
+2538 # other
+2539 compiler.err.record.cannot.declare.instance.fields=\u5B57\u6BB5\u58F0\u660E\u5FC5\u987B\u4E3A\u9759\u6001\n\uFF08\u8003\u8651\u5C06\u5B57\u6BB5\u66FF\u6362\u4E3A\u8BB0\u5F55\u7EC4\u4EF6\uFF09
+2540 
+2541 # 0: symbol
+2542 compiler.err.invalid.supertype.record=\u7C7B\u65E0\u6CD5\u76F4\u63A5\u6269\u5C55 {0}
+2543 
+2544 compiler.err.first.statement.must.be.call.to.another.constructor=\u6784\u9020\u5668\u4E0D\u662F\u89C4\u8303\u7684\uFF0C\u56E0\u6B64\u5B83\u7684\u7B2C\u4E00\u4E2A\u8BED\u53E5\u5FC5\u987B\u8C03\u7528\u53E6\u4E00\u4E2A\u6784\u9020\u5668
+2545 
+2546 compiler.err.instance.initializer.not.allowed.in.records=\u8BB0\u5F55\u4E2D\u4E0D\u5141\u8BB8\u4F7F\u7528\u5B9E\u4F8B\u521D\u59CB\u5316\u7A0B\u5E8F
+2547 
+2548 compiler.err.static.declaration.not.allowed.in.inner.classes=\u5185\u90E8\u7C7B\u4E2D\u4E0D\u5141\u8BB8\u4F7F\u7528\u9759\u6001\u58F0\u660E
+2549 
+2550 compiler.err.record.header.expected=\u9700\u8981\u8BB0\u5F55\u6807\u5934
+2551 
+2552 ############################################
+2553 # messages previously at javac.properties
+2554 
+2555 compiler.err.empty.A.argument=-A \u9700\u8981\u4E00\u4E2A\u53C2\u6570; \u4F7F\u7528 &#39;&#39;-Akey&#39;&#39; \u6216 &#39;&#39;-Akey=value&#39;&#39;
+2556 
+2557 # 0: string
+2558 compiler.err.invalid.A.key=\u6CE8\u91CA\u5904\u7406\u7A0B\u5E8F\u9009\u9879 &#39;&#39;{0}&#39;&#39; \u4E2D\u7684\u5173\u952E\u5B57\u4E0D\u662F\u4EE5\u70B9\u5206\u9694\u7684\u6807\u8BC6\u7B26\u5E8F\u5217
+2559 
+2560 # 0: string
+2561 compiler.err.invalid.flag=\u65E0\u6548\u7684\u6807\u8BB0: {0}
+2562 
+2563 compiler.err.profile.bootclasspath.conflict=\u6982\u8981\u4FE1\u606F\u548C\u5F15\u5BFC\u7C7B\u8DEF\u5F84\u9009\u9879\u4E0D\u80FD\u540C\u65F6\u4F7F\u7528
+2564 
+2565 # 0: string
+2566 compiler.err.invalid.profile=\u65E0\u6548\u7684\u914D\u7F6E\u6587\u4EF6\uFF1A{0}
+2567 
+2568 # 0: string
+2569 compiler.err.invalid.target=\u65E0\u6548\u7684\u76EE\u6807\u53D1\u884C\u7248\uFF1A{0}
+2570 
+2571 # 0: option name, 1: target
+2572 compiler.err.option.not.allowed.with.target=\u76EE\u6807 {1} \u4E0D\u5141\u8BB8\u9009\u9879 {0}
+2573 
+2574 # 0: string
+2575 compiler.err.option.too.many=\u9009\u9879 {0} \u53EA\u80FD\u6307\u5B9A\u4E00\u6B21
+2576 
+2577 compiler.err.no.source.files=\u65E0\u6E90\u6587\u4EF6
+2578 
+2579 compiler.err.no.source.files.classes=\u65E0\u6E90\u6587\u4EF6\u6216\u7C7B\u540D
+2580 
+2581 # 0: string
+2582 compiler.err.req.arg={0} \u9700\u8981\u53C2\u6570
+2583 
+2584 # 0: string
+2585 compiler.err.invalid.source=\u65E0\u6548\u7684\u6E90\u53D1\u884C\u7248\uFF1A{0}
+2586 
+2587 # 0: string, 1: string
+2588 compiler.err.error.writing.file=\u5199\u5165 {0} \u65F6\u51FA\u9519\uFF1B{1}
+2589 
+2590 compiler.err.sourcepath.modulesourcepath.conflict=\u65E0\u6CD5\u540C\u65F6\u6307\u5B9A --source-path \u4E0E --module-source-path
+2591 
+2592 # 0: string, 1: target
+2593 compiler.warn.source.target.conflict=\u6E90\u53D1\u884C\u7248 {0} \u9700\u8981\u76EE\u6807\u53D1\u884C\u7248 {1}
+2594 
+2595 # 0: string, 1: target
+2596 compiler.warn.target.default.source.conflict=\u76EE\u6807\u53D1\u884C\u7248 {0} \u4E0E\u9ED8\u8BA4\u7684\u6E90\u53D1\u884C\u7248 {1} \u51B2\u7A81
+2597 
+2598 # 0: profile, 1: target
+2599 compiler.warn.profile.target.conflict=\u914D\u7F6E\u6587\u4EF6{0}\u5BF9\u4E8E\u76EE\u6807\u53D1\u884C\u7248 {1} \u65E0\u6548
+2600 
+2601 # 0: string
+2602 compiler.err.file.not.directory=\u4E0D\u662F\u76EE\u5F55\uFF1A{0}
+2603 
+2604 # 0: object
+2605 compiler.err.file.not.file=\u4E0D\u662F\u6587\u4EF6\uFF1A{0}
+2606 
+2607 compiler.err.two.class.loaders.1=javac \u5728\u591A\u4E2A\u7C7B\u52A0\u8F7D\u5668\u4E4B\u95F4\u62C6\u5206: \u8BF7\u68C0\u67E5\u914D\u7F6E
+2608 
+2609 # 0: url, 1: url
+2610 compiler.err.two.class.loaders.2=javac \u5728\u591A\u4E2A\u7C7B\u52A0\u8F7D\u5668\u4E4B\u95F4\u62C6\u5206:\n\u4E00\u4E2A\u7C7B\u6765\u81EA\u6587\u4EF6: {0}\n\u800C javac \u6765\u81EA {1}
+2611 
+2612 # 0: string, 1: string
+2613 compiler.err.bad.value.for.option={0} \u9009\u9879\u7684\u503C\u9519\u8BEF: &#39;&#39;{1}&#39;&#39;
+2614 
+2615 # 0: string
+2616 compiler.err.no.value.for.option={0} \u9009\u9879\u6CA1\u6709\u503C
+2617 
+2618 # 0: string
+2619 compiler.err.repeated.value.for.patch.module=\u4E3A\u6A21\u5757 {0} \u591A\u6B21\u6307\u5B9A\u4E86 --patch-module
+2620 
+2621 # 0: string
+2622 compiler.err.repeated.value.for.module.source.path=\u4E3A\u6A21\u5757 {0} \u591A\u6B21\u6307\u5B9A\u4E86 --module-source-path
+2623 
+2624 compiler.err.multiple.values.for.module.source.path=\u4F7F\u7528\u6A21\u5F0F\u53C2\u6570\u591A\u6B21\u6307\u5B9A\u4E86 --module-source-path
+2625 
+2626 # 0: string
+2627 compiler.err.unmatched.quote=\u73AF\u5883\u53D8\u91CF {0} \u4E2D\u7684\u5F15\u53F7\u4E0D\u6210\u5BF9
+2628 
+2629 # 0: option name
+2630 compiler.err.release.bootclasspath.conflict=\u9009\u9879 {0} \u4E0D\u80FD\u4E0E --release \u4E00\u8D77\u4F7F\u7528
+2631 
+2632 # 0: string
+2633 compiler.err.unsupported.release.version=\u4E0D\u652F\u6301\u53D1\u884C\u7248\u672C {0}
+2634 
+2635 # 0: string
+2636 compiler.err.file.not.found=\u627E\u4E0D\u5230\u6587\u4EF6: {0}
+2637 
+2638 # 0: string, 1: source
+2639 compiler.err.preview.not.latest=\u6E90\u53D1\u884C\u7248 {0} \u4E0E --enable-preview \u4E00\u8D77\u4F7F\u7528\u65F6\u65E0\u6548\n\uFF08\u4EC5\u53D1\u884C\u7248 {1} \u652F\u6301\u9884\u89C8\u8BED\u8A00\u529F\u80FD\uFF09
+2640 
+2641 compiler.err.preview.without.source.or.release=--enable-preview \u5FC5\u987B\u4E0E -source \u6216 --release \u4E00\u8D77\u4F7F\u7528
+<a name="2" id="anc2"></a><b style="font-size: large; color: red">--- EOF ---</b>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</pre>
+<input id="eof" value="2" type="hidden" />
+</body>
+</html>

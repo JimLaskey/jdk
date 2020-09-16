@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>New src/jdk.compiler/share/classes/com/sun/tools/javac/parser/JavadocTokenizer.java</title>
+    <link rel="stylesheet" href="../../../../../../../../../style.css" />
+  </head>
+  <body>
+    <pre>
+  1 /*
+  2  * Copyright (c) 2004, 2020, Oracle and/or its affiliates. All rights reserved.
+  3  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
+  4  *
+  5  * This code is free software; you can redistribute it and/or modify it
+  6  * under the terms of the GNU General Public License version 2 only, as
+  7  * published by the Free Software Foundation.  Oracle designates this
+  8  * particular file as subject to the &quot;Classpath&quot; exception as provided
+  9  * by Oracle in the LICENSE file that accompanied this code.
+ 10  *
+ 11  * This code is distributed in the hope that it will be useful, but WITHOUT
+ 12  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ 13  * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+ 14  * version 2 for more details (a copy is included in the LICENSE file that
+ 15  * accompanied this code).
+ 16  *
+ 17  * You should have received a copy of the GNU General Public License version
+ 18  * 2 along with this work; if not, write to the Free Software Foundation,
+ 19  * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
+ 20  *
+ 21  * Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
+ 22  * or visit www.oracle.com if you need additional information or have any
+ 23  * questions.
+ 24  */
+ 25 
+ 26 package com.sun.tools.javac.parser;
+ 27 
+ 28 import com.sun.tools.javac.parser.Tokens.Comment;
+ 29 import com.sun.tools.javac.parser.Tokens.Comment.CommentStyle;
+ 30 import com.sun.tools.javac.util.*;
+ 31 
+ 32 import java.nio.CharBuffer;
+ 33 import java.util.Arrays;
+ 34 import java.util.regex.Pattern;
+ 35 
+ 36 /**
+ 37  * An extension to the base lexical analyzer (JavaTokenizer) that
+ 38  * captures and processes the contents of doc comments. It does
+ 39  * so by stripping the leading whitespace and comment starts from
+ 40  * each line of the Javadoc comment.
+ 41  *
+ 42  *  &lt;p&gt;&lt;b&gt;This is NOT part of any supported API.
+ 43  *  If you write code that depends on this, you do so at your own risk.
+ 44  *  This code and its internal interfaces are subject to change or
+ 45  *  deletion without notice.&lt;/b&gt;
+ 46  */
+ 47 public class JavadocTokenizer extends JavaTokenizer {
+ 48     /**
+ 49      * The factory that created this Scanner.
+ 50      */
+ 51     final ScannerFactory fac;
+ 52 
+ 53     /**
+ 54      * Create a tokenizer from the input character buffer. The input buffer
+ 55      * content would typically be a Javadoc comment extracted by
+ 56      * JavaTokenizer.
+ 57      *
+ 58      * @param fac  the factory which created this Scanner.
+ 59      * @param cb   the input character buffer.
+ 60      */
+ 61     protected JavadocTokenizer(ScannerFactory fac, CharBuffer cb) {
+ 62         super(fac, cb);
+ 63         this.fac = fac;
+ 64     }
+ 65 
+ 66     /**
+ 67      * Create a tokenizer from the input array. The input buffer
+ 68      * content would typically be a Javadoc comment extracted by
+ 69      * JavaTokenizer.
+ 70      *
+ 71      * @param fac     factory which created this Scanner
+ 72      * @param array   input character array.
+ 73      * @param length  length of the meaningful content in the array.
+ 74      */
+ 75     protected JavadocTokenizer(ScannerFactory fac, char[] array, int length) {
+ 76         super(fac, array, length);
+ 77         this.fac = fac;
+ 78     }
+ 79 
+ 80     @Override
+ 81     protected Comment processComment(int pos, int endPos, CommentStyle style) {
+ 82         char[] buf = getRawCharacters(pos, endPos);
+ 83         return new JavadocComment(style, fac, buf, pos);
+ 84     }
+ 85 
+ 86     /**
+ 87      * An extension of BasicComment used to extract the relevant portion
+ 88      * of a Javadoc comment.
+ 89      */
+ 90     protected static class JavadocComment extends BasicComment {
+ 91         /**
+ 92          * Pattern used to detect a well formed @deprecated tag in a JaavDoc
+ 93          * comment.
+ 94          */
+ 95         private static final Pattern DEPRECATED_PATTERN =
+ 96             Pattern.compile(&quot;(?sm).*^\\s*@deprecated( |$).*&quot;);
+ 97 
+ 98         /**
+ 99          * The relevant portion of the comment that is of interest to Javadoc.
+100          * Produced by invoking scanDocComment.
+101          */
+102         private String docComment = null;
+103 
+104         /**
+105          * StringBuilder used to extract the relevant portion of the Javadoc comment.
+106          */
+107         private StringBuilder sb;
+108 
+109         /**
+110          * Map used to map the extracted Javadoc comment&#39;s character positions back to
+111          * the original source.
+112          */
+113         OffsetMap offsetMap = new OffsetMap();
+114 
+115         JavadocComment(CommentStyle cs, ScannerFactory sf, char[] array, int offset) {
+116             super( cs, sf, array, offset);
+117             this.sb = new StringBuilder();
+118         }
+119 
+120         /**
+121          * Add a character to the extraction buffer.
+122          *
+123          * @param ch  character to add.
+124          */
+125         protected void put(char ch) {
+126             offsetMap.add(sb.length(), offsetPosition());
+127             sb.append(ch);
+128         }
+129 
+130         /**
+131          * Add a code point to the extraction buffer.
+132          *
+133          * @param codePoint  code point to add.
+134          */
+135         protected void putCodePoint(int codePoint) {
+136             offsetMap.add(sb.length(), offsetPosition());
+137             sb.appendCodePoint(codePoint);
+138         }
+139 
+140         /**
+141          * Add current character or code point to the extraction buffer.
+142          */
+143         protected void put() {
+144             if (isSurrogate()) {
+145                 putCodePoint(getCodepoint());
+146             } else {
+147                 put(get());
+148             }
+149         }
+150 
+151         @Override
+152         public String getText() {
+153             if (!scanned &amp;&amp; cs == CommentStyle.JAVADOC) {
+154                 scanDocComment();
+155             }
+156             return docComment;
+157         }
+158 
+159         @Override
+160         public int getSourcePos(int pos) {
+161             if (pos == Position.NOPOS) {
+162                 return Position.NOPOS;
+163             }
+164 
+165             if (pos &lt; 0 || pos &gt; docComment.length()) {
+166                 throw new StringIndexOutOfBoundsException(String.valueOf(pos));
+167             }
+168 
+169             return offsetMap.getSourcePos(pos);
+170         }
+171 
+172         @Override
+173         protected void scanDocComment() {
+174              try {
+175                  boolean firstLine = true;
+176 
+177                  // Skip over /*
+178                  accept(&quot;/*&quot;);
+179 
+180                  // Consume any number of stars
+181                  skip(&#39;*&#39;);
+182 
+183                  // Is the comment in the form /**/, /***/, /****/, etc. ?
+184                  if (is(&#39;/&#39;)) {
+185                      docComment = &quot;&quot;;
+186                      return;
+187                  }
+188 
+189                  // Skip line terminator on the first line of the comment.
+190                  if (isOneOf(&#39;\n&#39;, &#39;\r&#39;)) {
+191                      accept(&#39;\r&#39;);
+192                      accept(&#39;\n&#39;);
+193                      firstLine = false;
+194                  }
+195 
+196              outerLoop:
+197                  // The outerLoop processes the doc comment, looping once
+198                  // for each line.  For each line, it first strips off
+199                  // whitespace, then it consumes any stars, then it
+200                  // puts the rest of the line into the extraction buffer.
+201                  while (isAvailable()) {
+202                      int begin_pos = position();
+203                      // Consume  whitespace from the beginning of each line.
+204                      skipWhitespace();
+205                      // Are there stars here?  If so, consume them all
+206                      // and check for the end of comment.
+207                      if (is(&#39;*&#39;)) {
+208                          // skip all of the stars
+209                          skip(&#39;*&#39;);
+210 
+211                          // check for the closing slash.
+212                          if (accept(&#39;/&#39;)) {
+213                              // We&#39;re done with the Javadoc comment
+214                              break outerLoop;
+215                          }
+216                      } else if (!firstLine) {
+217                          // The current line does not begin with a &#39;*&#39; so we will
+218                          // treat it as comment
+219                          reset(begin_pos);
+220                      }
+221 
+222                  textLoop:
+223                      // The textLoop processes the rest of the characters
+224                      // on the line, adding them to the extraction buffer.
+225                      while (isAvailable()) {
+226                          if (accept(&quot;*/&quot;)) {
+227                              // This is the end of the comment, return
+228                              // the contents of the extraction buffer.
+229                              break outerLoop;
+230                          } else if (isOneOf(&#39;\n&#39;, &#39;\r&#39;)) {
+231                              // We&#39;ve seen a newline.  Add it to our
+232                              // buffer and break out of this loop,
+233                              // starting fresh on a new line.
+234                              put(&#39;\n&#39;);
+235                              accept(&#39;\r&#39;);
+236                              accept(&#39;\n&#39;);
+237                              break textLoop;
+238                          } else if (is(&#39;\f&#39;)){
+239                              next();
+240                              break textLoop; // treat as end of line
+241 
+242                          } else {
+243                              // Add the character to our buffer.
+244                              put();
+245                              next();
+246                          }
+247                      } // end textLoop
+248                      firstLine = false;
+249                  } // end outerLoop
+250 
+251                  // If extraction buffer is not empty.
+252                  if (sb.length() &gt; 0) {
+253                      // Remove trailing asterisks.
+254                      int i = sb.length() - 1;
+255                      while (i &gt; -1 &amp;&amp; sb.charAt(i) == &#39;*&#39;) {
+256                          i--;
+257                      }
+258                      sb.setLength(i + 1) ;
+259 
+260                      // Store the text of the doc comment
+261                     docComment = sb.toString();
+262                  } else {
+263                     docComment = &quot;&quot;;
+264                 }
+265             } finally {
+266                 scanned = true;
+267 
+268                 // Check if comment contains @deprecated comment.
+269                 if (docComment != null &amp;&amp; DEPRECATED_PATTERN.matcher(docComment).matches()) {
+270                     deprecatedFlag = true;
+271                 }
+272             }
+273         }
+274     }
+275 
+276     /**
+277      * Build a map for translating between line numbers and positions in the input.
+278      * Overridden to expand tabs.
+279      *
+280      * @return a LineMap
+281      */
+282     @Override
+283     public Position.LineMap getLineMap() {
+284         char[] buf = getRawCharacters();
+285         return Position.makeLineMap(buf, buf.length, true);
+286     }
+287 
+288     /**
+289      * Build an int table to mapping positions in extracted Javadoc comment
+290      * to positions in the JavaTokenizer source buffer.
+291      *
+292      * The array is organized as a series of pairs of integers: the first
+293      * number in each pair specifies a position in the comment text,
+294      * the second number in each pair specifies the corresponding position
+295      * in the source buffer. The pairs are sorted in ascending order.
+296      *
+297      * Since the mapping function is generally continuous, with successive
+298      * positions in the string corresponding to successive positions in the
+299      * source buffer, the table only needs to record discontinuities in
+300      * the mapping. The values of intermediate positions can be inferred.
+301      *
+302      * Discontinuities may occur in a number of places: when a newline
+303      * is followed by whitespace and asterisks (which are ignored),
+304      * when a tab is expanded into spaces, and when unicode escapes
+305      * are used in the source buffer.
+306      *
+307      * Thus, to find the source position of any position, p, in the comment
+308      * string, find the index, i, of the pair whose string offset
+309      * ({@code map[i + SB_OFFSET] }) is closest to but not greater than p. Then,
+310      * {@code sourcePos(p) = map[i + POS_OFFSET] + (p - map[i + SB_OFFSET]) }.
+311      */
+312     static class OffsetMap {
+313         /**
+314          * map entry offset for comment offset member of pair.
+315          */
+316         private static final int SB_OFFSET = 0;
+317 
+318         /**
+319          * map entry offset of input offset member of pair.
+320          */
+321         private static final int POS_OFFSET = 1;
+322 
+323         /**
+324          * Number of elements in each entry.
+325          */
+326         private static final int NOFFSETS = 2;
+327 
+328         /**
+329          * Array storing entries in map.
+330          */
+331         private int[] map;
+332 
+333         /**
+334          * Logical size of map (number of valid entries.)
+335          */
+336         private int size;
+337 
+338         /**
+339          * Constructor.
+340          */
+341         OffsetMap() {
+342             this.map = new int[128];
+343             this.size = 0;
+344         }
+345 
+346         /**
+347          * Returns true if it is worthwhile adding the entry pair to the map. That is
+348          * if there is a change in relative offset.
+349          *
+350          * @param sbOffset  comment offset member of pair.
+351          * @param posOffet  input offset member of pair.
+352          *
+353          * @return true if it is worthwhile adding the entry pair.
+354          */
+355         boolean shouldAdd(int sbOffset, int posOffet) {
+356             return sbOffset - lastSBOffset() != posOffet - lastPosOffset();
+357         }
+358 
+359         /**
+360          * Adds entry pair if worthwhile.
+361          *
+362          * @param sbOffset  comment offset member of pair.
+363          * @param posOffet  input offset member of pair.
+364          */
+365         void add(int sbOffset, int posOffet) {
+366             if (size == 0 || shouldAdd(sbOffset, posOffet)) {
+367                 ensure(NOFFSETS);
+368                 map[size + SB_OFFSET] = sbOffset;
+369                 map[size + POS_OFFSET] = posOffet;
+370                 size += NOFFSETS;
+371             }
+372         }
+373 
+374         /**
+375          * Returns the previous comment offset.
+376          *
+377          * @return the previous comment offset.
+378          */
+379         private int lastSBOffset() {
+380             return size == 0 ? 0 : map[size - NOFFSETS + SB_OFFSET];
+381         }
+382 
+383         /**
+384          * Returns the previous input offset.
+385          *
+386          * @return the previous input offset.
+387          */
+388         private int lastPosOffset() {
+389             return size == 0 ? 0 : map[size - NOFFSETS + POS_OFFSET];
+390         }
+391 
+392         /**
+393          * Ensures there is enough space for a new entry.
+394          *
+395          * @param need  number of array slots needed.
+396          */
+397         private void ensure(int need) {
+398             need += size;
+399             int grow = map.length;
+400 
+401             while (need &gt; grow) {
+402                 grow &lt;&lt;= 1;
+403             }
+404 
+405             // Handle overflow.
+406             if (grow &lt; map.length) {
+407                 throw new IndexOutOfBoundsException();
+408             } else if (grow != map.length) {
+409                 map = Arrays.copyOf(map, grow);
+410             }
+411         }
+412 
+413         /**
+414          * Binary search to find the entry for which the string index is less
+415          * than pos. Since the map is a list of pairs of integers we must make
+416          * sure the index is always NOFFSETS scaled. If we find an exact match
+417          * for pos, the other item in the pair gives the source pos; otherwise,
+418          * compute the source position relative to the best match found in the
+419          * array.
+420          */
+421         int getSourcePos(int pos) {
+422             if (size == 0) {
+423                 return Position.NOPOS;
+424             }
+425 
+426             int start = 0;
+427             int end = size / NOFFSETS;
+428 
+429             while (start &lt; end - NOFFSETS) {
+430                 // find an index midway between start and end
+431                 int index = (start + end) / 2;
+432                 int indexScaled = index * NOFFSETS;
+433 
+434                 if (map[indexScaled + SB_OFFSET] &lt; pos) {
+435                     start = index;
+436                 } else if (map[indexScaled + SB_OFFSET] == pos) {
+437                     return map[indexScaled + POS_OFFSET];
+438                 } else {
+439                     end = index;
+440                 }
+441             }
+442 
+443             int startScaled = start * NOFFSETS;
+444 
+445             return map[startScaled + POS_OFFSET] + (pos - map[startScaled + SB_OFFSET]);
+446         }
+447     }
+448 }
+    </pre>
+  </body>
+</html>

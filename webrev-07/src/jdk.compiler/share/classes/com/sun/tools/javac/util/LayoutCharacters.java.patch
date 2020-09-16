@@ -1,0 +1,25 @@
+diff a/src/jdk.compiler/share/classes/com/sun/tools/javac/util/LayoutCharacters.java b/src/jdk.compiler/share/classes/com/sun/tools/javac/util/LayoutCharacters.java
+--- a/src/jdk.compiler/share/classes/com/sun/tools/javac/util/LayoutCharacters.java
++++ b/src/jdk.compiler/share/classes/com/sun/tools/javac/util/LayoutCharacters.java
+@@ -1,7 +1,7 @@
+ /*
+- * Copyright (c) 1999, 2010, Oracle and/or its affiliates. All rights reserved.
++ * Copyright (c) 1999, 2020, Oracle and/or its affiliates. All rights reserved.
+  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
+  *
+  * This code is free software; you can redistribute it and/or modify it
+  * under the terms of the GNU General Public License version 2 only, as
+  * published by the Free Software Foundation.  Oracle designates this
+@@ -66,6 +66,12 @@
+     /** End of input character.  Used as a sentinel to denote the
+      *  character one beyond the last defined character in a
+      *  source file.
+      */
+     final static byte EOI   = 0x1A;
++
++    /** Bump column to the next tab.
++     */
++    static int tabulate(int column) {
++        return (column / TabInc * TabInc) + TabInc;
++    }
+ }

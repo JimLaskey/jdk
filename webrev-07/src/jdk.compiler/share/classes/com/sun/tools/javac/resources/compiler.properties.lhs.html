@@ -1,0 +1,3840 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Frames src/jdk.compiler/share/classes/com/sun/tools/javac/resources/compiler.properties</title>
+    <link rel="stylesheet" href="../../../../../../../../../style.css" />
+    <script type="text/javascript" src="../../../../../../../../../navigation.js"></script>
+  </head>
+<body onkeypress="keypress(event);">
+<a name="0"></a>
+<hr />
+<pre>   1 #
+   2 # Copyright (c) 1999, 2020, Oracle and/or its affiliates. All rights reserved.
+   3 # DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
+   4 #
+   5 # This code is free software; you can redistribute it and/or modify it
+   6 # under the terms of the GNU General Public License version 2 only, as
+   7 # published by the Free Software Foundation.  Oracle designates this
+   8 # particular file as subject to the &quot;Classpath&quot; exception as provided
+   9 # by Oracle in the LICENSE file that accompanied this code.
+  10 #
+  11 # This code is distributed in the hope that it will be useful, but WITHOUT
+  12 # ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+  13 # FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+  14 # version 2 for more details (a copy is included in the LICENSE file that
+  15 # accompanied this code).
+  16 #
+  17 # You should have received a copy of the GNU General Public License version
+  18 # 2 along with this work; if not, write to the Free Software Foundation,
+  19 # Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
+  20 #
+  21 # Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
+  22 # or visit www.oracle.com if you need additional information or have any
+  23 # questions.
+  24 #
+  25 
+  26 # Messages in this file which use &quot;placeholders&quot; for values (e.g. {0}, {1})
+  27 # are preceded by a stylized comment describing the type of the corresponding
+  28 # values.
+  29 # The simple types currently in use are:
+  30 #
+  31 # annotation        annotation compound
+  32 # boolean           true or false
+  33 # diagnostic        a sub-message; see compiler.misc.*
+  34 # fragment          similar to &#39;message segment&#39;, but with more specific type
+  35 # modifier          a Java modifier; e.g. public, private, protected
+  36 # file              a file URL
+  37 # file object       a file URL - similar to &#39;file&#39; but typically used for source/class files, hence more specific
+  38 # flag              a Flags.Flag instance
+  39 # name              a name, typically a Java identifier
+  40 # number            an integer
+  41 # option name       the name of a command line option
+  42 # path              a path
+  43 # profile           a profile name
+  44 # source            a source version number, such as 1.5, 1.6, 1.7, taken from a com.sun.tools.javac.code.Source
+  45 # source version    a source version number, such as 1.5, 1.6, 1.7, taken from a javax.lang.model.SourceVersion
+  46 # string            a general string
+  47 # symbol            the name of a declared type
+  48 # symbol kind       the kind of a symbol (i.e. method, variable)
+  49 # kind name         an informative description of the kind of a declaration; see compiler.misc.kindname.*
+  50 # target            a target version number, such as 1.5, 1.6, 1.7, taken from a com.sun.tools.javac.jvm.Target
+  51 # token             the name of a non-terminal in source code; see compiler.misc.token.*
+  52 # tree tag          the name of a non-terminal in source code; see compiler.misc.token.*
+  53 # type              a Java type; e.g. int, X, X&lt;T&gt;
+  54 # url               a URL
+  55 # object            a Java object (unspecified)
+  56 # unused            the value is not used in this message
+  57 #
+  58 # The following compound types are also used:
+  59 #
+  60 # collection of X   a comma-separated collection of items; e.g. collection of type
+  61 # list of X         a comma-separated list of items; e.g. list of type
+  62 # set of X          a comma-separated set of items; e.g. set of modifier
+  63 #
+  64 # These may be composed:
+  65 #
+  66 # list of type or message segment
+  67 #
+  68 # The following type aliases are supported:
+  69 #
+  70 # message segment --&gt; diagnostic or fragment
+  71 # file name --&gt; file, path or file object
+  72 #
+  73 # Custom comments are supported in parenthesis i.e.
+  74 #
+  75 # number (classfile major version)
+  76 #
+  77 # These comments are used internally in order to generate an enum-like class declaration containing
+  78 # a method/field for each of the diagnostic keys listed here. Those methods/fields can then be used
+  79 # by javac code to build diagnostics in a type-safe fashion.
+  80 #
+  81 # In addition, these comments are verified by the jtreg test test/tools/javac/diags/MessageInfo,
+  82 # using info derived from the collected set of examples in test/tools/javac/diags/examples.
+  83 # MessageInfo can also be run as a standalone utility providing more facilities
+  84 # for manipulating this file. For more details, see MessageInfo.java.
+  85 
+  86 ##
+  87 ## errors
+  88 ##
+  89 
+  90 # 0: symbol
+  91 compiler.err.abstract.cant.be.instantiated=\
+  92     {0} is abstract; cannot be instantiated
+  93 
+  94 compiler.err.abstract.meth.cant.have.body=\
+  95     abstract methods cannot have a body
+  96 
+  97 # 0: kind name, 1: symbol
+  98 compiler.err.already.annotated=\
+  99     {0} {1} has already been annotated
+ 100 
+ 101 # 0: kind name, 1: symbol, 2: kind name, 3: symbol
+ 102 compiler.err.already.defined=\
+ 103     {0} {1} is already defined in {2} {3}
+ 104 
+ 105 # 0: kind name, 1: symbol, 2: kind name, 3: kind name, 4: symbol
+ 106 compiler.err.already.defined.in.clinit=\
+ 107     {0} {1} is already defined in {2} of {3} {4}
+ 108 
+ 109 # 0: symbol
+ 110 compiler.err.already.defined.single.import=\
+ 111     a type with the same simple name is already defined by the single-type-import of {0}
+ 112 
+ 113 # 0: symbol
+ 114 compiler.err.already.defined.static.single.import=\
+ 115     a type with the same simple name is already defined by the static single-type-import of {0}
+ 116 
+ 117 # 0: symbol
+ 118 compiler.err.already.defined.this.unit=\
+ 119     {0} is already defined in this compilation unit
+ 120 
+ 121 # 0: type, 1: list of name
+ 122 compiler.err.annotation.missing.default.value=\
+ 123     annotation @{0} is missing a default value for the element &#39;&#39;{1}&#39;&#39;
+ 124 
+ 125 # 0: type, 1: list of name
+ 126 compiler.err.annotation.missing.default.value.1=\
+ 127     annotation @{0} is missing default values for elements {1}
+ 128 
+ 129 # 0: type
+ 130 compiler.err.annotation.not.valid.for.type=\
+ 131     annotation not valid for an element of type {0}
+ 132 
+ 133 compiler.err.annotation.type.not.applicable=\
+ 134     annotation type not applicable to this kind of declaration
+ 135 
+ 136 # 0: type
+ 137 compiler.err.annotation.type.not.applicable.to.type=\
+ 138     annotation @{0} not applicable in this type context
+ 139 
+ 140 compiler.err.annotation.value.must.be.annotation=\
+ 141     annotation value must be an annotation
+ 142 
+ 143 compiler.err.annotation.value.must.be.class.literal=\
+ 144     annotation value must be a class literal
+ 145 
+ 146 compiler.err.annotation.value.must.be.name.value=\
+ 147     annotation values must be of the form &#39;&#39;name=value&#39;&#39;
+ 148 
+ 149 compiler.err.annotation.value.not.allowable.type=\
+ 150     annotation value not of an allowable type
+ 151 
+ 152 compiler.err.expression.not.allowable.as.annotation.value=\
+ 153     expression not allowed as annotation value
+ 154 
+ 155 compiler.err.anon.class.impl.intf.no.args=\
+ 156     anonymous class implements interface; cannot have arguments
+ 157 
+ 158 compiler.err.anon.class.impl.intf.no.typeargs=\
+ 159     anonymous class implements interface; cannot have type arguments
+ 160 
+ 161 compiler.err.anon.class.impl.intf.no.qual.for.new=\
+ 162     anonymous class implements interface; cannot have qualifier for new
+ 163 
+ 164 compiler.err.cant.inherit.from.anon=\
+ 165     cannot inherit from anonymous class
+ 166 
+ 167 # 0: symbol, 1: symbol, 2: symbol
+ 168 compiler.err.array.and.varargs=\
+ 169     cannot declare both {0} and {1} in {2}
+ 170 
+ 171 compiler.err.array.dimension.missing=\
+ 172     array dimension missing
+ 173 
+ 174 compiler.err.illegal.array.creation.both.dimension.and.initialization=\
+ 175     array creation with both dimension expression and initialization is illegal
+ 176 
+ 177 # 0: type
+ 178 compiler.err.array.req.but.found=\
+ 179     array required, but {0} found
+ 180 
+ 181 compiler.err.attribute.value.must.be.constant=\
+ 182     element value must be a constant expression
+ 183 
+ 184 # 0: string (statement type)
+ 185 compiler.err.bad.initializer=\
+ 186     bad initializer for {0}
+ 187 
+ 188 compiler.err.break.outside.switch.loop=\
+ 189     break outside switch or loop
+ 190 
+ 191 compiler.err.break.outside.switch.expression=\
+ 192     attempt to break out of a switch expression
+ 193 
+ 194 compiler.err.continue.outside.switch.expression=\
+ 195     attempt to continue out of a switch expression
+ 196 
+ 197 compiler.err.return.outside.switch.expression=\
+ 198     attempt to return out of a switch expression
+ 199 
+ 200 compiler.err.rule.completes.normally=\
+ 201     switch rule completes without providing a value\n\
+ 202     (switch rules in switch expressions must either provide a value or throw)
+ 203 
+ 204 compiler.err.switch.expression.completes.normally=\
+ 205     switch expression completes without providing a value\n\
+ 206     (switch expressions must either provide a value or throw for all possible input values)
+ 207 
+ 208 compiler.err.no.switch.expression =\
+ 209     yield outside of switch expression
+ 210 
+ 211 compiler.err.no.switch.expression.qualify=\
+ 212     yield outside of switch expression\n\
+ 213     (to invoke a method called yield, qualify the yield with a receiver or type name)
+ 214 
+ 215 compiler.err.invalid.yield=\
+ 216     invalid use of a restricted identifier &#39;&#39;yield&#39;&#39;\n\
+ 217     (to invoke a method called yield, qualify the yield with a receiver or type name)
+ 218 
+ 219 compiler.warn.invalid.yield=\
+ 220     &#39;&#39;yield&#39;&#39; may become a restricted identifier in a future release\n\
+ 221     (to invoke a method called yield, qualify the yield with a receiver or type name)
+ 222 
+ 223 compiler.err.switch.expression.empty=\
+ 224     switch expression does not have any case clauses
+ 225 
+ 226 compiler.err.switch.expression.no.result.expressions=\
+ 227     switch expression does not have any result expressions
+ 228 
+ 229 # 0: name
+ 230 compiler.err.call.must.be.first.stmt.in.ctor=\
+ 231     call to {0} must be first statement in constructor
+ 232 
+ 233 # 0: symbol kind, 1: name, 2: list of type or message segment, 3: list of type or message segment, 4: symbol kind, 5: type, 6: message segment
+ 234 compiler.err.cant.apply.symbol=\
+ 235     {0} {1} in {4} {5} cannot be applied to given types;\n\
+ 236     required: {2}\n\
+ 237     found:    {3}\n\
+ 238     reason: {6}
+ 239 
+ 240 # 0: symbol kind, 1: name, 2: list of type
+ 241 compiler.err.cant.apply.symbols=\
+ 242     no suitable {0} found for {1}({2})
+ 243 
+ 244 # 0: symbol kind, 1: name, 2: list of type or message segment, 3: list of type or message segment, 4: symbol kind, 5: type, 6: message segment
+ 245 compiler.misc.cant.apply.symbol=\
+ 246     {0} {1} in {4} {5} cannot be applied to given types\n\
+ 247     required: {2}\n\
+ 248     found:    {3}\n\
+ 249     reason: {6}
+ 250 
+ 251 # 0: symbol kind, 1: name, 2: list of type
+ 252 compiler.misc.cant.apply.symbols=\
+ 253     no suitable {0} found for {1}({2})
+ 254 
+ 255 # 0: kind name, 1: symbol
+ 256 compiler.misc.no.abstracts=\
+ 257     no abstract method found in {0} {1}
+ 258 
+ 259 # 0: kind name, 1: symbol
+ 260 compiler.misc.incompatible.abstracts=\
+ 261     multiple non-overriding abstract methods found in {0} {1}
+ 262 
+ 263 compiler.err.bad.functional.intf.anno=\
+ 264     Unexpected @FunctionalInterface annotation
+ 265 
+ 266 # 0: message segment
+ 267 compiler.err.bad.functional.intf.anno.1=\
+ 268     Unexpected @FunctionalInterface annotation\n\
+ 269     {0}
+ 270 
+ 271 # 0: message segment
+ 272 compiler.err.anonymous.diamond.method.does.not.override.superclass=\
+ 273     method does not override or implement a method from a supertype\n\
+ 274     {0}
+ 275 
+ 276 # 0: symbol
+ 277 compiler.misc.not.a.functional.intf=\
+ 278     {0} is not a functional interface
+ 279 
+ 280 # 0: symbol, 1: message segment
+ 281 compiler.misc.not.a.functional.intf.1=\
+ 282     {0} is not a functional interface\n\
+ 283     {1}
+ 284 
+ 285 # 0: type, 1: kind name, 2: symbol
+ 286 compiler.misc.invalid.generic.lambda.target=\
+ 287     invalid functional descriptor for lambda expression\n\
+ 288     method {0} in {1} {2} is generic
+ 289 
+ 290 # 0: kind name, 1: symbol
+ 291 compiler.misc.incompatible.descs.in.functional.intf=\
+ 292     incompatible function descriptors found in {0} {1}
+ 293 
+ 294 # 0: name, 1: list of type, 2: type, 3: list of type
+ 295 compiler.misc.descriptor=\
+ 296     descriptor: {2} {0}({1})
+ 297 
+ 298 # 0: name, 1: list of type, 2: type, 3: list of type
+ 299 compiler.misc.descriptor.throws=\
+ 300     descriptor: {2} {0}({1}) throws {3}
+ 301 
+ 302 # 0: type
+ 303 compiler.misc.no.suitable.functional.intf.inst=\
+ 304     cannot infer functional interface descriptor for {0}
+ 305 
+ 306 # 0: message segment
+ 307 compiler.misc.bad.intersection.target.for.functional.expr=\
+ 308     bad intersection type target for lambda or method reference\n\
+ 309     {0}
+ 310 
+ 311 # 0: symbol or type
+ 312 compiler.misc.not.an.intf.component=\
+ 313     component type {0} is not an interface
+ 314 
+ 315 # 0: kind name, 1: message segment
+ 316 compiler.err.invalid.mref=\
+ 317     invalid {0} reference\n\
+ 318     {1}
+ 319 
+ 320 # 0: kind name, 1: message segment
+ 321 compiler.misc.invalid.mref=\
+ 322     invalid {0} reference\n\
+ 323     {1}
+ 324 
+ 325 compiler.misc.static.mref.with.targs=\
+ 326     parameterized qualifier on static method reference
+ 327 
+ 328 # 0: symbol
+ 329 compiler.err.cant.assign.val.to.final.var=\
+ 330     cannot assign a value to final variable {0}
+ 331 
+ 332 compiler.err.cant.assign.val.to.this=\
+ 333     cannot assign to &#39;&#39;this&#39;&#39;
+ 334 
+ 335 # 0: symbol, 1: message segment
+ 336 compiler.err.cant.ref.non.effectively.final.var=\
+ 337     local variables referenced from {1} must be final or effectively final
+ 338 
+ 339 compiler.err.try.with.resources.expr.needs.var=\
+ 340     the try-with-resources resource must either be a variable declaration or an expression denoting \
+ 341 a reference to a final or effectively final variable
+ 342 
+ 343 # 0: symbol
+ 344 compiler.err.try.with.resources.expr.effectively.final.var=\
+ 345     variable {0} used as a try-with-resources resource neither final nor effectively final
+ 346 
+ 347 
+ 348 compiler.misc.lambda=\
+ 349     a lambda expression
+ 350 
+ 351 compiler.misc.inner.cls=\
+ 352     an inner class
+ 353 
+ 354 # 0: type
+ 355 compiler.err.cant.deref=\
+ 356     {0} cannot be dereferenced
+ 357 
+ 358 compiler.err.cant.extend.intf.annotation=\
+ 359     &#39;&#39;extends&#39;&#39; not allowed for @interfaces
+ 360 
+ 361 compiler.err.annotation.decl.not.allowed.here=\
+ 362     annotation type declaration not allowed here
+ 363 
+ 364 # 0: symbol
+ 365 compiler.err.cant.inherit.from.final=\
+ 366     cannot inherit from final {0}
+ 367 
+ 368 # 0: symbol or string
+ 369 compiler.err.cant.ref.before.ctor.called=\
+ 370     cannot reference {0} before supertype constructor has been called
+ 371 
+ 372 compiler.err.cant.select.static.class.from.param.type=\
+ 373     cannot select a static class from a parameterized type
+ 374 
+ 375 # 0: symbol, 1: string, 2: string
+ 376 compiler.err.cant.inherit.diff.arg=\
+ 377     {0} cannot be inherited with different arguments: &lt;{1}&gt; and &lt;{2}&gt;
+ 378 
+ 379 compiler.err.catch.without.try=\
+ 380     &#39;&#39;catch&#39;&#39; without &#39;&#39;try&#39;&#39;
+ 381 
+ 382 # 0: kind name, 1: symbol
+ 383 compiler.err.clash.with.pkg.of.same.name=\
+ 384     {0} {1} clashes with package of same name
+ 385 
+ 386 compiler.err.class.not.allowed=\
+ 387     class, interface or enum declaration not allowed here
+ 388 
+ 389 compiler.err.const.expr.req=\
+ 390     constant expression required
+ 391 
+ 392 compiler.err.cont.outside.loop=\
+ 393     continue outside of loop
+ 394 
+ 395 # 0: symbol or type
+ 396 compiler.err.cyclic.inheritance=\
+ 397     cyclic inheritance involving {0}
+ 398 
+ 399 # 0: symbol
+ 400 compiler.err.cyclic.annotation.element=\
+ 401     type of element {0} is cyclic
+ 402 
+ 403 # 0: symbol
+ 404 compiler.err.call.to.super.not.allowed.in.enum.ctor=\
+ 405     call to super not allowed in enum constructor
+ 406 
+ 407 # 0: type
+ 408 compiler.err.no.superclass=\
+ 409     {0} has no superclass.
+ 410 
+ 411 # 0: symbol, 1: type, 2: symbol, 3: type, 4: type
+ 412 compiler.err.concrete.inheritance.conflict=\
+ 413     methods {0} from {1} and {2} from {3} are inherited with the same signature
+ 414 
+ 415 compiler.err.default.allowed.in.intf.annotation.member=\
+ 416     default value only allowed in an annotation type declaration
+ 417 
+ 418 # 0: symbol
+ 419 compiler.err.doesnt.exist=\
+ 420     package {0} does not exist
+ 421 
+ 422 # 0: type
+ 423 compiler.err.duplicate.annotation.invalid.repeated=\
+ 424     annotation {0} is not a valid repeatable annotation
+ 425 
+ 426 # 0: name, 1: type
+ 427 compiler.err.duplicate.annotation.member.value=\
+ 428     duplicate element &#39;&#39;{0}&#39;&#39; in annotation @{1}.
+ 429 
+ 430 # 0: type
+ 431 compiler.err.duplicate.annotation.missing.container=\
+ 432     {0} is not a repeatable annotation type
+ 433 
+ 434 # 0: symbol
+ 435 compiler.err.invalid.repeatable.annotation=\
+ 436     duplicate annotation: {0} is annotated with an invalid @Repeatable annotation
+ 437 
+ 438 # 0: symbol or type
+ 439 compiler.err.invalid.repeatable.annotation.no.value=\
+ 440     {0} is not a valid @Repeatable, no value element method declared
+ 441 
+ 442 # 0: type, 1: number
+ 443 compiler.err.invalid.repeatable.annotation.multiple.values=\
+ 444     {0} is not a valid @Repeatable, {1} element methods named &#39;&#39;value&#39;&#39; declared
+ 445 
+ 446 # 0: type
+ 447 compiler.err.invalid.repeatable.annotation.invalid.value=\
+ 448     {0} is not a valid @Repeatable: invalid value element
+ 449 
+ 450 # 0: symbol or type, 1: type, 2: type
+ 451 compiler.err.invalid.repeatable.annotation.value.return=\
+ 452     containing annotation type ({0}) must declare an element named &#39;&#39;value&#39;&#39; of type {2}
+ 453 
+ 454 # 0: symbol or type, 1: symbol
+ 455 compiler.err.invalid.repeatable.annotation.elem.nondefault=\
+ 456     containing annotation type ({0}) does not have a default value for element {1}
+ 457 
+ 458 # 0: symbol, 1: string, 2: symbol, 3: string
+ 459 compiler.err.invalid.repeatable.annotation.retention=\
+ 460     retention of containing annotation type ({0}) is shorter than the retention of repeatable annotation type ({2})
+ 461 
+ 462 # 0: symbol, 1: symbol
+ 463 compiler.err.invalid.repeatable.annotation.not.documented=\
+ 464     repeatable annotation type ({1}) is @Documented while containing annotation type ({0}) is not
+ 465 
+ 466 # 0: symbol, 1: symbol
+ 467 compiler.err.invalid.repeatable.annotation.not.inherited=\
+ 468     repeatable annotation type ({1}) is @Inherited while containing annotation type ({0}) is not
+ 469 
+ 470 # 0: symbol, 1: symbol
+ 471 compiler.err.invalid.repeatable.annotation.incompatible.target=\
+ 472     containing annotation type ({0}) is applicable to more targets than repeatable annotation type ({1})
+ 473 
+ 474 # 0: symbol
+ 475 compiler.err.invalid.repeatable.annotation.repeated.and.container.present=\
+ 476     container {0} must not be present at the same time as the element it contains
+ 477 
+ 478 # 0: type, 1: symbol
+ 479 compiler.err.invalid.repeatable.annotation.not.applicable=\
+ 480     container {0} is not applicable to element {1}
+ 481 
+ 482 # 0: type
+ 483 compiler.err.invalid.repeatable.annotation.not.applicable.in.context=\
+ 484     container {0} is not applicable in this type context
+ 485 
+ 486 # 0: name
+ 487 compiler.err.duplicate.class=\
+ 488     duplicate class: {0}
+ 489 
+ 490 # 0: name, 1: name
+ 491 compiler.err.same.binary.name=\
+ 492     classes: {0} and {1} have the same binary name
+ 493 
+ 494 compiler.err.duplicate.case.label=\
+ 495     duplicate case label
+ 496 
+ 497 compiler.err.duplicate.default.label=\
+ 498     duplicate default label
+ 499 
+ 500 compiler.err.else.without.if=\
+ 501     &#39;&#39;else&#39;&#39; without &#39;&#39;if&#39;&#39;
+ 502 
+ 503 compiler.err.empty.char.lit=\
+ 504     empty character literal
+ 505 
+ 506 # 0: symbol
+ 507 compiler.err.encl.class.required=\
+ 508     an enclosing instance that contains {0} is required
+ 509 
+ 510 compiler.err.enum.annotation.must.be.enum.constant=\
+ 511     an enum annotation value must be an enum constant
+ 512 
+ 513 compiler.err.enum.cant.be.instantiated=\
+ 514     enum types may not be instantiated
+ 515 
+ 516 compiler.err.enum.label.must.be.unqualified.enum=\
+ 517     an enum switch case label must be the unqualified name of an enumeration constant
+ 518 
+ 519 compiler.err.enum.no.subclassing=\
+ 520     classes cannot directly extend java.lang.Enum
+ 521 
+ 522 compiler.err.enum.types.not.extensible=\
+ 523     enum types are not extensible
+ 524 
+ 525 compiler.err.enum.no.finalize=\
+ 526     enums cannot have finalize methods
+ 527 
+ 528 # 0: file name, 1: string
+ 529 compiler.err.error.reading.file=\
+ 530     error reading {0}; {1}
+ 531 
+ 532 # 0: type
+ 533 compiler.err.except.already.caught=\
+ 534     exception {0} has already been caught
+ 535 
+ 536 # 0: type
+ 537 compiler.err.except.never.thrown.in.try=\
+ 538     exception {0} is never thrown in body of corresponding try statement
+ 539 
+ 540 # 0: symbol
+ 541 compiler.err.final.parameter.may.not.be.assigned=\
+ 542     final parameter {0} may not be assigned
+ 543 
+ 544 # 0: symbol
+ 545 compiler.err.try.resource.may.not.be.assigned=\
+ 546     auto-closeable resource {0} may not be assigned
+ 547 
+ 548 # 0: symbol
+ 549 compiler.err.pattern.binding.may.not.be.assigned=\
+ 550     pattern binding {0} may not be assigned
+ 551 
+ 552 # 0: symbol
+ 553 compiler.err.multicatch.parameter.may.not.be.assigned=\
+ 554     multi-catch parameter {0} may not be assigned
+ 555 
+ 556 # 0: type, 1: type
+ 557 compiler.err.multicatch.types.must.be.disjoint=\
+ 558     Alternatives in a multi-catch statement cannot be related by subclassing\n\
+ 559     Alternative {0} is a subclass of alternative {1}
+ 560 
+ 561 compiler.err.finally.without.try=\
+ 562     &#39;&#39;finally&#39;&#39; without &#39;&#39;try&#39;&#39;
+ 563 
+ 564 # 0: type, 1: message segment
+ 565 compiler.err.foreach.not.applicable.to.type=\
+ 566     for-each not applicable to expression type\n\
+ 567     required: {1}\n\
+ 568     found:    {0}
+ 569 
+ 570 compiler.err.fp.number.too.large=\
+ 571     floating point number too large
+ 572 
+ 573 compiler.err.fp.number.too.small=\
+ 574     floating point number too small
+ 575 
+ 576 compiler.err.generic.array.creation=\
+ 577     generic array creation
+ 578 
+ 579 compiler.err.generic.throwable=\
+ 580     a generic class may not extend java.lang.Throwable
+ 581 
+ 582 # 0: symbol
+ 583 compiler.err.icls.cant.have.static.decl=\
+ 584     Illegal static declaration in inner class {0}\n\
+ 585     modifier \&#39;&#39;static\&#39;&#39; is only allowed in constant variable declarations
+ 586 
+ 587 # 0: string
+ 588 compiler.err.illegal.char=\
+ 589     illegal character: &#39;&#39;{0}&#39;&#39;
+ 590 
+ 591 # 0: string, 1: string
+ 592 compiler.err.illegal.char.for.encoding=\
+ 593     unmappable character (0x{0}) for encoding {1}
+ 594 
+ 595 # 0: set of flag, 1: set of flag
+ 596 compiler.err.illegal.combination.of.modifiers=\
+ 597     illegal combination of modifiers: {0} and {1}
+ 598 
+ 599 compiler.err.illegal.enum.static.ref=\
+ 600     illegal reference to static field from initializer
+ 601 
+ 602 compiler.err.illegal.esc.char=\
+ 603     illegal escape character
+ 604 
+ 605 compiler.err.illegal.forward.ref=\
+ 606     illegal forward reference
+ 607 
+ 608 # 0: symbol, 1: object
+ 609 compiler.err.not.in.profile=\
+ 610     {0} is not available in profile &#39;&#39;{1}&#39;&#39;
+ 611 
+ 612 # 0: symbol
+ 613 compiler.warn.forward.ref=\
+ 614     reference to variable &#39;&#39;{0}&#39;&#39; before it has been initialized
+ 615 
+ 616 compiler.err.illegal.self.ref=\
+ 617     self-reference in initializer
+ 618 
+ 619 # 0: symbol
+ 620 compiler.warn.self.ref=\
+ 621     self-reference in initializer of variable &#39;&#39;{0}&#39;&#39;
+ 622 
+ 623 compiler.err.illegal.generic.type.for.instof=\
+ 624     illegal generic type for instanceof
+ 625 
+ 626 # 0: type
+ 627 compiler.err.illegal.initializer.for.type=\
+ 628     illegal initializer for {0}
+ 629 
+ 630 compiler.err.illegal.line.end.in.char.lit=\
+ 631     illegal line end in character literal
+ 632 
+ 633 compiler.err.illegal.text.block.open=\
+ 634     illegal text block open delimiter sequence, missing line terminator
+ 635 
+ 636 compiler.warn.inconsistent.white.space.indentation=\
+ 637     inconsistent white space indentation
+ 638 
+ 639 compiler.warn.trailing.white.space.will.be.removed=\
+ 640     trailing white space will be removed
+ 641 
+ 642 compiler.err.illegal.nonascii.digit=\
+ 643     illegal non-ASCII digit
+ 644 
+ 645 compiler.err.illegal.underscore=\
+ 646     illegal underscore
+ 647 
+ 648 compiler.err.illegal.dot=\
+ 649     illegal &#39;&#39;.&#39;&#39;
+ 650 
+ 651 # 0: symbol
+ 652 compiler.err.illegal.qual.not.icls=\
+ 653     illegal qualifier; {0} is not an inner class
+ 654 
+ 655 compiler.err.illegal.start.of.expr=\
+ 656     illegal start of expression
+ 657 
+ 658 compiler.err.illegal.start.of.stmt=\
+ 659     illegal start of statement
+ 660 
+ 661 compiler.err.illegal.start.of.type=\
+ 662     illegal start of type
+ 663 
+ 664 compiler.err.illegal.parenthesized.expression=\
+ 665     illegal parenthesized expression
+ 666 
+ 667 compiler.err.illegal.unicode.esc=\
+ 668     illegal unicode escape
+ 669 
+ 670 # 0: symbol
+ 671 compiler.err.import.requires.canonical=\
+ 672     import requires canonical name for {0}
+ 673 
+ 674 compiler.err.improperly.formed.type.param.missing=\
+ 675     improperly formed type, some parameters are missing
+ 676 
+ 677 compiler.err.improperly.formed.type.inner.raw.param=\
+ 678     improperly formed type, type arguments given on a raw type
+ 679 
+ 680 # 0: type, 1: type
+ 681 compiler.err.incomparable.types=\
+ 682     incomparable types: {0} and {1}
+ 683 
+ 684 # 0: string
+ 685 compiler.err.int.number.too.large=\
+ 686     integer number too large
+ 687 
+ 688 compiler.err.intf.annotation.members.cant.have.params=\
+ 689     elements in annotation type declarations cannot declare formal parameters
+ 690 
+ 691 # 0: symbol
+ 692 compiler.err.intf.annotation.cant.have.type.params=\
+ 693     annotation type {0} cannot be generic
+ 694 
+ 695 compiler.err.intf.annotation.members.cant.have.type.params=\
+ 696     elements in annotation type declarations cannot be generic methods
+ 697 
+ 698 # 0: symbol, 1: type
+ 699 compiler.err.intf.annotation.member.clash=\
+ 700     annotation type {1} declares an element with the same name as method {0}
+ 701 
+ 702 compiler.err.intf.expected.here=\
+ 703     interface expected here
+ 704 
+ 705 compiler.err.intf.meth.cant.have.body=\
+ 706     interface abstract methods cannot have body
+ 707 
+ 708 compiler.err.invalid.annotation.member.type=\
+ 709     invalid type for annotation type element
+ 710 
+ 711 compiler.err.invalid.binary.number=\
+ 712     binary numbers must contain at least one binary digit
+ 713 
+ 714 compiler.err.invalid.hex.number=\
+ 715     hexadecimal numbers must contain at least one hexadecimal digit
+ 716 
+ 717 compiler.err.invalid.meth.decl.ret.type.req=\
+ 718     invalid method declaration; return type required
+ 719 
+ 720 compiler.err.varargs.and.old.array.syntax=\
+ 721     legacy array notation not allowed on variable-arity parameter
+ 722 
+ 723 compiler.err.varargs.and.receiver =\
+ 724     varargs notation not allowed on receiver parameter
+ 725 
+ 726 compiler.err.varargs.must.be.last =\
+ 727     varargs parameter must be the last parameter
+ 728 
+ 729 compiler.err.array.and.receiver =\
+ 730     legacy array notation not allowed on receiver parameter
+ 731 
+ 732 compiler.err.wrong.receiver =\
+ 733     wrong receiver parameter name
+ 734 
+ 735 compiler.err.variable.not.allowed=\
+ 736     variable declaration not allowed here
+ 737 
+ 738 # 0: name
+ 739 compiler.err.label.already.in.use=\
+ 740     label {0} already in use
+ 741 
+ 742 # 0: symbol
+ 743 compiler.err.local.var.accessed.from.icls.needs.final=\
+ 744     local variable {0} is accessed from within inner class; needs to be declared final
+ 745 
+ 746 compiler.err.local.enum=\
+ 747     enum types must not be local
+ 748 
+ 749 compiler.err.cannot.create.array.with.type.arguments=\
+ 750     cannot create array with type arguments
+ 751 
+ 752 compiler.err.cannot.create.array.with.diamond=\
+ 753     cannot create array with &#39;&#39;&lt;&gt;&#39;&#39;
+ 754 
+ 755 compiler.err.invalid.module.directive=\
+ 756   module directive keyword or &#39;&#39;}&#39;&#39; expected
+ 757 
+ 758 #
+ 759 # limits.  We don&#39;t give the limits in the diagnostic because we expect
+ 760 # them to change, yet we want to use the same diagnostic.  These are all
+ 761 # detected during code generation.
+ 762 #
+ 763 compiler.err.limit.code=\
+ 764     code too large
+ 765 
+ 766 compiler.err.limit.code.too.large.for.try.stmt=\
+ 767     code too large for try statement
+ 768 
+ 769 compiler.err.limit.dimensions=\
+ 770     array type has too many dimensions
+ 771 
+ 772 compiler.err.limit.locals=\
+ 773     too many local variables
+ 774 
+ 775 compiler.err.limit.parameters=\
+ 776     too many parameters
+ 777 
+ 778 compiler.err.limit.pool=\
+ 779     too many constants
+ 780 
+ 781 compiler.err.limit.pool.in.class=\
+ 782     too many constants in class {0}
+ 783 
+ 784 compiler.err.limit.stack=\
+ 785     code requires too much stack
+ 786 
+ 787 compiler.err.limit.string=\
+ 788     constant string too long
+ 789 
+ 790 # 0: string
+ 791 compiler.err.limit.string.overflow=\
+ 792     UTF8 representation for string \&quot;{0}...\&quot; is too long for the constant pool
+ 793 
+ 794 compiler.err.malformed.fp.lit=\
+ 795     malformed floating point literal
+ 796 
+ 797 compiler.err.method.does.not.override.superclass=\
+ 798     method does not override or implement a method from a supertype
+ 799 
+ 800 compiler.err.static.methods.cannot.be.annotated.with.override=\
+ 801     static methods cannot be annotated with @Override
+ 802 
+ 803 compiler.err.missing.meth.body.or.decl.abstract=\
+ 804     missing method body, or declare abstract
+ 805 
+ 806 compiler.err.missing.ret.stmt=\
+ 807     missing return statement
+ 808 
+ 809 # 0: type
+ 810 compiler.misc.missing.ret.val=\
+ 811     missing return value
+ 812 
+ 813 compiler.misc.unexpected.ret.val=\
+ 814     unexpected return value
+ 815 
+ 816 # 0: set of flag
+ 817 compiler.err.mod.not.allowed.here=\
+ 818     modifier {0} not allowed here
+ 819 
+ 820 # 0: name
+ 821 compiler.err.modifier.not.allowed.here=\
+ 822     modifier {0} not allowed here
+ 823 
+ 824 compiler.err.intf.not.allowed.here=\
+ 825     interface not allowed here
+ 826 
+ 827 # 0: symbol, 1: symbol
+ 828 compiler.err.name.clash.same.erasure=\
+ 829     name clash: {0} and {1} have the same erasure
+ 830 
+ 831 # 0: name, 1: list of type, 2: symbol, 3: name, 4: list of type, 5: symbol
+ 832 compiler.err.name.clash.same.erasure.no.override=\
+ 833     name clash: {0}({1}) in {2} and {3}({4}) in {5} have the same erasure, yet neither overrides the other
+ 834 
+ 835 # 0: string, 1: name, 2: name, 3: list of type, 4: symbol, 5: name, 6: list of type, 7: symbol
+ 836 compiler.err.name.clash.same.erasure.no.override.1=\
+ 837     name clash: {0} {1} has two methods with the same erasure, yet neither overrides the other\n\
+ 838     first method:  {2}({3}) in {4}\n\
+ 839     second method: {5}({6}) in {7}
+ 840 
+ 841 # 0: symbol, 1: symbol, 2: symbol, 3: symbol
+ 842 compiler.err.name.clash.same.erasure.no.hide=\
+ 843     name clash: {0} in {1} and {2} in {3} have the same erasure, yet neither hides the other
+ 844 
+ 845 compiler.err.name.reserved.for.internal.use=\
+ 846     {0} is reserved for internal use
+ 847 
+ 848 compiler.err.native.meth.cant.have.body=\
+ 849     native methods cannot have a body
+ 850 
+ 851 
+ 852 # 0: message segment
+ 853 compiler.misc.incompatible.type.in.conditional=\
+ 854     bad type in conditional expression\n\
+ 855     {0}
+ 856 
+ 857 compiler.misc.conditional.target.cant.be.void=\
+ 858     target-type for conditional expression cannot be void
+ 859 
+ 860 compiler.misc.switch.expression.target.cant.be.void=\
+ 861     target-type for switch expression cannot be void
+ 862 
+ 863 # 0: message segment
+ 864 compiler.misc.incompatible.type.in.switch.expression=\
+ 865     bad type in switch expression\n\
+ 866     {0}
+ 867 
+ 868 # 0: message segment
+ 869 compiler.misc.incompatible.ret.type.in.lambda=\
+ 870     bad return type in lambda expression\n\
+ 871     {0}
+ 872 
+ 873 compiler.misc.stat.expr.expected=\
+ 874     lambda body is not compatible with a void functional interface\n\
+ 875     (consider using a block lambda body, or use a statement expression instead)
+ 876 
+ 877 # 0: message segment
+ 878 compiler.misc.incompatible.ret.type.in.mref=\
+ 879     bad return type in method reference\n\
+ 880     {0}
+ 881 
+ 882 compiler.err.lambda.body.neither.value.nor.void.compatible=\
+ 883     lambda body is neither value nor void compatible
+ 884 
+ 885 # 0: list of type
+ 886 compiler.err.incompatible.thrown.types.in.mref=\
+ 887     incompatible thrown types {0} in functional expression
+ 888 
+ 889 compiler.misc.incompatible.arg.types.in.lambda=\
+ 890     incompatible parameter types in lambda expression
+ 891 
+ 892 compiler.misc.incompatible.arg.types.in.mref=\
+ 893     incompatible parameter types in method reference
+ 894 
+ 895 compiler.err.new.not.allowed.in.annotation=\
+ 896     &#39;&#39;new&#39;&#39; not allowed in an annotation
+ 897 
+ 898 # 0: name, 1: type
+ 899 compiler.err.no.annotation.member=\
+ 900     no annotation member {0} in {1}
+ 901 
+ 902 # 0: symbol
+ 903 compiler.err.no.encl.instance.of.type.in.scope=\
+ 904     no enclosing instance of type {0} is in scope
+ 905 
+ 906 compiler.err.no.intf.expected.here=\
+ 907     no interface expected here
+ 908 
+ 909 compiler.err.no.match.entry=\
+ 910     {0} has no match in entry in {1}; required {2}
+ 911 
+ 912 # 0: type
+ 913 compiler.err.not.annotation.type=\
+ 914     {0} is not an annotation type
+ 915 
+ 916 # 0: symbol, 1: symbol, 2: message segment
+ 917 compiler.err.not.def.access.package.cant.access=\
+ 918     {0} is not visible\n\
+ 919     ({2})
+ 920 
+ 921 # 0: symbol, 1: symbol, 2: message segment
+ 922 compiler.misc.not.def.access.package.cant.access=\
+ 923     {0} is not visible\n\
+ 924     ({2})
+ 925 
+ 926 # 0: symbol, 1: message segment
+ 927 compiler.err.package.not.visible=\
+ 928     package {0} is not visible\n\
+ 929     ({1})
+ 930 
+ 931 # 0: symbol, 1: message segment
+ 932 compiler.misc.package.not.visible=\
+ 933     package {0} is not visible\n\
+ 934     ({1})
+ 935 
+ 936 # {0} - current module
+ 937 # {1} - package in which the invisible class is declared
+ 938 # {2} - module in which {1} is declared
+ 939 # 0: symbol, 1: symbol, 2: symbol
+ 940 compiler.misc.not.def.access.does.not.read=\
+ 941     package {1} is declared in module {2}, but module {0} does not read it
+ 942 
+ 943 # {0} - package in which the invisible class is declared
+ 944 # {1} - module in which {0} is declared
+ 945 # 0: symbol, 1: symbol
+ 946 compiler.misc.not.def.access.does.not.read.from.unnamed=\
+ 947     package {0} is declared in module {1}, which is not in the module graph
+ 948 
+ 949 # {0} - package in which the invisible class is declared
+ 950 # {1} - current module
+ 951 # 0: symbol, 1: symbol
+ 952 compiler.misc.not.def.access.does.not.read.unnamed=\
+ 953     package {0} is declared in the unnamed module, but module {1} does not read it
+ 954 
+ 955 # {0} - package in which the invisible class is declared
+ 956 # {1} - module in which {0} is declared
+ 957 # 0: symbol, 1: symbol
+ 958 compiler.misc.not.def.access.not.exported=\
+ 959     package {0} is declared in module {1}, which does not export it
+ 960 
+ 961 # {0} - package in which the invisible class is declared
+ 962 # {1} - module in which {0} is declared
+ 963 # 0: symbol, 1: symbol
+ 964 compiler.misc.not.def.access.not.exported.from.unnamed=\
+ 965     package {0} is declared in module {1}, which does not export it
+ 966 
+ 967 # {0} - package in which the invisible class is declared
+ 968 # {1} - module in which {0} is declared
+ 969 # {2} - current module
+ 970 # 0: symbol, 1: symbol, 2: symbol
+ 971 compiler.misc.not.def.access.not.exported.to.module=\
+ 972     package {0} is declared in module {1}, which does not export it to module {2}
+ 973 
+ 974 # {0} - package in which the invisible class is declared
+ 975 # {1} - module in which {0} is declared
+ 976 # 0: symbol, 1: symbol
+ 977 compiler.misc.not.def.access.not.exported.to.module.from.unnamed=\
+ 978     package {0} is declared in module {1}, which does not export it to the unnamed module
+ 979 
+ 980 # 0: symbol, 1: symbol
+ 981 compiler.err.not.def.access.class.intf.cant.access=\
+ 982     {1}.{0} is defined in an inaccessible class or interface
+ 983 
+ 984 # 0: symbol, 1: symbol
+ 985 compiler.misc.not.def.access.class.intf.cant.access=\
+ 986     {1}.{0} is defined in an inaccessible class or interface
+ 987 
+ 988 # 0: symbol, 1: symbol, 2: symbol, 3: message segment
+ 989 compiler.err.not.def.access.class.intf.cant.access.reason=\
+ 990     {1}.{0} in package {2} is not accessible\n\
+ 991     ({3})
+ 992 
+ 993 # 0: symbol, 1: symbol, 2: symbol, 3: message segment
+ 994 compiler.misc.not.def.access.class.intf.cant.access.reason=\
+ 995     {1}.{0} in package {2} is not accessible\n\
+ 996     ({3})
+ 997 
+ 998 # 0: symbol, 1: list of type, 2: type
+ 999 compiler.misc.cant.access.inner.cls.constr=\
+1000     cannot access constructor {0}({1})\n\
+1001     an enclosing instance of type {2} is not in scope
+1002 
+1003 # 0: symbol, 1: symbol
+1004 compiler.err.not.def.public.cant.access=\
+1005     {0} is not public in {1}; cannot be accessed from outside package
+1006 
+1007 # 0: symbol, 1: symbol
+1008 compiler.err.not.def.public=\
+1009     {0} is not public in {1}
+1010 
+1011 # 0: symbol, 1: symbol
+1012 compiler.misc.not.def.public.cant.access=\
+1013     {0} is not public in {1}; cannot be accessed from outside package
+1014 
+1015 # 0: name
+1016 compiler.err.not.loop.label=\
+1017     not a loop label: {0}
+1018 
+1019 compiler.err.not.stmt=\
+1020     not a statement
+1021 
+1022 # 0: symbol
+1023 compiler.err.not.encl.class=\
+1024     not an enclosing class: {0}
+1025 
+1026 # 0: name, 1: type
+1027 compiler.err.operator.cant.be.applied=\
+1028     bad operand type {1} for unary operator &#39;&#39;{0}&#39;&#39;
+1029 
+1030 # 0: name, 1: type, 2: type
+1031 compiler.err.operator.cant.be.applied.1=\
+1032     bad operand types for binary operator &#39;&#39;{0}&#39;&#39;\n\
+1033     first type:  {1}\n\
+1034     second type: {2}
+1035 
+1036 compiler.err.pkg.annotations.sb.in.package-info.java=\
+1037     package annotations should be in file package-info.java
+1038 
+1039 compiler.err.no.pkg.in.module-info.java=\
+1040     package declarations not allowed in file module-info.java
+1041 
+1042 # 0: symbol
+1043 compiler.err.pkg.clashes.with.class.of.same.name=\
+1044     package {0} clashes with class of same name
+1045 
+1046 compiler.err.warnings.and.werror=\
+1047     warnings found and -Werror specified
+1048 
+1049 # Errors related to annotation processing
+1050 
+1051 # 0: symbol, 1: message segment, 2: string (stack-trace)
+1052 compiler.err.proc.cant.access=\
+1053     cannot access {0}\n\
+1054     {1}\n\
+1055     Consult the following stack trace for details.\n\
+1056     {2}
+1057 
+1058 # 0: symbol, 1: message segment
+1059 compiler.err.proc.cant.access.1=\
+1060     cannot access {0}\n\
+1061     {1}
+1062 
+1063 # 0: string
+1064 compiler.err.proc.cant.find.class=\
+1065     Could not find class file for &#39;&#39;{0}&#39;&#39;.
+1066 
+1067 # 0: string
+1068 compiler.err.proc.cant.load.class=\
+1069     Could not load processor class file due to &#39;&#39;{0}&#39;&#39;.
+1070 
+1071 # Print a client-generated error message; assumed to be localized, no translation required
+1072 # 0: string
+1073 compiler.err.proc.messager=\
+1074     {0}
+1075 
+1076 # 0: string
+1077 compiler.misc.exception.message=\
+1078     {0}
+1079 
+1080 compiler.misc.user.selected.completion.failure=\
+1081     user-selected completion failure by class name
+1082 
+1083 # 0: collection of string
+1084 compiler.err.proc.no.explicit.annotation.processing.requested=\
+1085     Class names, &#39;&#39;{0}&#39;&#39;, are only accepted if annotation processing is explicitly requested
+1086 
+1087 compiler.err.proc.no.service=\
+1088     A ServiceLoader was not usable and is required for annotation processing.
+1089 
+1090 # 0: string, 1: string
+1091 compiler.err.proc.processor.bad.option.name=\
+1092     Bad option name &#39;&#39;{0}&#39;&#39; provided by processor &#39;&#39;{1}&#39;&#39;
+1093 
+1094 # 0: string
+1095 compiler.err.proc.processor.cant.instantiate=\
+1096     Could not instantiate an instance of processor &#39;&#39;{0}&#39;&#39;
+1097 
+1098 # 0: string
+1099 compiler.err.proc.processor.not.found=\
+1100     Annotation processor &#39;&#39;{0}&#39;&#39; not found
+1101 
+1102 # 0: string
+1103 compiler.err.proc.processor.wrong.type=\
+1104     Annotation processor &#39;&#39;{0}&#39;&#39; does not implement javax.annotation.processing.Processor
+1105 
+1106 compiler.err.proc.service.problem=\
+1107     Error creating a service loader to load Processors.
+1108 
+1109 # 0: string
+1110 compiler.err.proc.bad.config.file=\
+1111     Bad service configuration file, or exception thrown while constructing Processor object: {0}
+1112 
+1113 compiler.err.proc.cant.create.loader=\
+1114     Could not create class loader for annotation processors: {0}
+1115 
+1116 # 0: symbol
+1117 compiler.err.qualified.new.of.static.class=\
+1118     qualified new of static class
+1119 
+1120 compiler.err.recursive.ctor.invocation=\
+1121     recursive constructor invocation
+1122 
+1123 # 0: name, 1: symbol kind, 2: symbol, 3: symbol, 4: symbol kind, 5: symbol, 6: symbol
+1124 compiler.err.ref.ambiguous=\
+1125     reference to {0} is ambiguous\n\
+1126     both {1} {2} in {3} and {4} {5} in {6} match
+1127 
+1128 # 0: name, 1: symbol kind, 2: symbol, 3: symbol, 4: symbol kind, 5: symbol, 6: symbol
+1129 compiler.misc.ref.ambiguous=\
+1130     reference to {0} is ambiguous\n\
+1131     both {1} {2} in {3} and {4} {5} in {6} match
+1132 
+1133 compiler.err.repeated.annotation.target=\
+1134     repeated annotation target
+1135 
+1136 compiler.err.repeated.interface=\
+1137     repeated interface
+1138 
+1139 compiler.err.repeated.modifier=\
+1140     repeated modifier
+1141 
+1142 # 0: symbol, 1: set of modifier, 2: symbol
+1143 compiler.err.report.access=\
+1144     {0} has {1} access in {2}
+1145 
+1146 # 0: symbol, 1: set of modifier, 2: symbol
+1147 compiler.misc.report.access=\
+1148     {0} has {1} access in {2}
+1149 
+1150 compiler.err.ret.outside.meth=\
+1151     return outside method
+1152 
+1153 compiler.err.signature.doesnt.match.supertype=\
+1154     signature does not match {0}; incompatible supertype
+1155 
+1156 compiler.err.signature.doesnt.match.intf=\
+1157     signature does not match {0}; incompatible interfaces
+1158 
+1159 # 0: symbol, 1: symbol, 2: symbol
+1160 compiler.err.does.not.override.abstract=\
+1161     {0} is not abstract and does not override abstract method {1} in {2}
+1162 
+1163 # 0: file object
+1164 compiler.err.source.cant.overwrite.input.file=\
+1165     error writing source; cannot overwrite input file {0}
+1166 
+1167 # 0: symbol
+1168 compiler.err.stack.sim.error=\
+1169     Internal error: stack sim error on {0}
+1170 
+1171 compiler.err.static.imp.only.classes.and.interfaces=\
+1172     static import only from classes and interfaces
+1173 
+1174 compiler.err.string.const.req=\
+1175     constant string expression required
+1176 
+1177 # 0: symbol, 1: fragment
+1178 compiler.err.cannot.generate.class=\
+1179     error while generating class {0}\n\
+1180     ({1})
+1181 
+1182 # 0: symbol, 1: symbol
+1183 compiler.misc.synthetic.name.conflict=\
+1184     the symbol {0} conflicts with a compiler-synthesized symbol in {1}
+1185 
+1186 # 0: symbol, 1: type
+1187 compiler.misc.illegal.signature=\
+1188     illegal signature attribute for type {1}
+1189 
+1190 compiler.err.throws.not.allowed.in.intf.annotation=\
+1191     throws clause not allowed in @interface members
+1192 
+1193 compiler.err.try.without.catch.finally.or.resource.decls=\
+1194     &#39;&#39;try&#39;&#39; without &#39;&#39;catch&#39;&#39;, &#39;&#39;finally&#39;&#39; or resource declarations
+1195 
+1196 # 0: symbol
+1197 compiler.err.type.doesnt.take.params=\
+1198     type {0} does not take parameters
+1199 
+1200 compiler.err.type.var.cant.be.deref=\
+1201     cannot select from a type variable
+1202 
+1203 compiler.err.type.var.may.not.be.followed.by.other.bounds=\
+1204     a type variable may not be followed by other bounds
+1205 
+1206 compiler.err.type.var.more.than.once=\
+1207     type variable {0} occurs more than once in result type of {1}; cannot be left uninstantiated
+1208 
+1209 compiler.err.type.var.more.than.once.in.result=\
+1210     type variable {0} occurs more than once in type of {1}; cannot be left uninstantiated
+1211 
+1212 # 0: type, 1: type, 2: fragment
+1213 compiler.err.types.incompatible=\
+1214     types {0} and {1} are incompatible;\n\
+1215     {2}
+1216 
+1217 # 0: name, 1: list of type
+1218 compiler.misc.incompatible.diff.ret=\
+1219     both define {0}({1}), but with unrelated return types
+1220 
+1221 # 0: kind name, 1: type, 2: name, 3: list of type, 4: symbol, 5: symbol
+1222 compiler.misc.incompatible.unrelated.defaults=\
+1223     {0} {1} inherits unrelated defaults for {2}({3}) from types {4} and {5}
+1224 
+1225 # 0: kind name, 1: type, 2: name, 3: list of type, 4: symbol, 5: symbol
+1226 compiler.misc.incompatible.abstract.default=\
+1227     {0} {1} inherits abstract and default for {2}({3}) from types {4} and {5}
+1228 
+1229 # 0: name, 1: kind name, 2: symbol
+1230 compiler.err.default.overrides.object.member=\
+1231     default method {0} in {1} {2} overrides a member of java.lang.Object
+1232 
+1233 # 0: type
+1234 compiler.err.illegal.static.intf.meth.call=\
+1235     illegal static interface method call\n\
+1236     the receiver expression should be replaced with the type qualifier &#39;&#39;{0}&#39;&#39;
+1237 
+1238 # 0: symbol or type, 1: message segment
+1239 compiler.err.illegal.default.super.call=\
+1240     bad type qualifier {0} in default super call\n\
+1241     {1}
+1242 
+1243 # 0: symbol, 1: type
+1244 compiler.misc.overridden.default=\
+1245     method {0} is overridden in {1}
+1246 
+1247 # 0: symbol, 1: type or symbol
+1248 compiler.misc.redundant.supertype=\
+1249     redundant interface {0} is extended by {1}
+1250 
+1251 compiler.err.unclosed.char.lit=\
+1252     unclosed character literal
+1253 
+1254 compiler.err.unclosed.comment=\
+1255     unclosed comment
+1256 
+1257 compiler.err.unclosed.str.lit=\
+1258     unclosed string literal
+1259 
+1260 compiler.err.unclosed.text.block=\
+1261     unclosed text block
+1262 
+1263 # 0: string
+1264 compiler.err.unsupported.encoding=\
+1265     unsupported encoding: {0}
+1266 
+1267 compiler.err.io.exception=\
+1268     error reading source file: {0}
+1269 
+1270 # 0: name
+1271 compiler.err.undef.label=\
+1272     undefined label: {0}
+1273 
+1274 # 0: name
+1275 compiler.err.illegal.ref.to.restricted.type=\
+1276     illegal reference to restricted type &#39;&#39;{0}&#39;&#39;
+1277 
+1278 # 0: name
+1279 compiler.warn.illegal.ref.to.restricted.type=\
+1280     illegal reference to restricted type &#39;&#39;{0}&#39;&#39;
+1281 
+1282 # 0: name, 1: source
+1283 compiler.err.restricted.type.not.allowed=\
+1284     &#39;&#39;{0}&#39;&#39; not allowed here\n\
+1285     as of release {1}, &#39;&#39;{0}&#39;&#39; is a restricted type name and cannot be used for type declarations
+1286 
+1287 # 0: name, 1: source
+1288 compiler.warn.restricted.type.not.allowed=\
+1289     as of release {1}, &#39;&#39;{0}&#39;&#39; is a restricted type name and cannot be used for type declarations or as the element type of an array
+1290 
+1291 # 0: name, 1: source
+1292 compiler.warn.restricted.type.not.allowed.preview=\
+1293     &#39;&#39;{0}&#39;&#39; may become a restricted type name in a future release and may be unusable for type declarations or as the element type of an array
+1294 
+1295 # 0: name (variable), 1: message segment
+1296 compiler.err.cant.infer.local.var.type=\
+1297     cannot infer type for local variable {0}\n\
+1298     ({1})
+1299 
+1300 # 0: name
+1301 compiler.err.restricted.type.not.allowed.here=\
+1302     &#39;&#39;{0}&#39;&#39; is not allowed here
+1303 
+1304 # 0: name
+1305 compiler.err.restricted.type.not.allowed.array=\
+1306     &#39;&#39;{0}&#39;&#39; is not allowed as an element type of an array
+1307 
+1308 # 0: name
+1309 compiler.err.restricted.type.not.allowed.compound=\
+1310     &#39;&#39;{0}&#39;&#39; is not allowed in a compound declaration
+1311 
+1312 # 0: fragment
+1313 compiler.err.invalid.lambda.parameter.declaration=\
+1314     invalid lambda parameter declaration\n\
+1315     ({0})
+1316 
+1317 compiler.misc.implicit.and.explicit.not.allowed=\
+1318     cannot mix implicitly-typed and explicitly-typed parameters
+1319 
+1320 compiler.misc.var.and.explicit.not.allowed=\
+1321     cannot mix &#39;&#39;var&#39;&#39; and explicitly-typed parameters
+1322 
+1323 compiler.misc.var.and.implicit.not.allowed=\
+1324     cannot mix &#39;&#39;var&#39;&#39; and implicitly-typed parameters
+1325 
+1326 compiler.misc.local.cant.infer.null=\
+1327     variable initializer is &#39;&#39;null&#39;&#39;
+1328 
+1329 compiler.misc.local.cant.infer.void=\
+1330     variable initializer is &#39;&#39;void&#39;&#39;
+1331 
+1332 compiler.misc.local.missing.init=\
+1333     cannot use &#39;&#39;var&#39;&#39; on variable without initializer
+1334 
+1335 compiler.misc.local.lambda.missing.target=\
+1336     lambda expression needs an explicit target-type
+1337 
+1338 compiler.misc.local.mref.missing.target=\
+1339     method reference needs an explicit target-type
+1340 
+1341 compiler.misc.local.array.missing.target=\
+1342     array initializer needs an explicit target-type
+1343 
+1344 compiler.misc.local.self.ref=\
+1345     cannot use &#39;&#39;var&#39;&#39; on self-referencing variable
+1346 
+1347 # 0: message segment, 1: unused
+1348 compiler.err.cant.apply.diamond=\
+1349     cannot infer type arguments for {0}
+1350 
+1351 # 0: message segment or type, 1: message segment
+1352 compiler.err.cant.apply.diamond.1=\
+1353     cannot infer type arguments for {0}\n\
+1354     reason: {1}
+1355 
+1356 # 0: message segment or type, 1: message segment
+1357 compiler.misc.cant.apply.diamond.1=\
+1358     cannot infer type arguments for {0}\n\
+1359     reason: {1}
+1360 
+1361 compiler.err.unreachable.stmt=\
+1362     unreachable statement
+1363 
+1364 compiler.err.not.exhaustive=\
+1365     the switch expression does not cover all possible input values
+1366 
+1367 compiler.err.initializer.must.be.able.to.complete.normally=\
+1368     initializer must be able to complete normally
+1369 
+1370 compiler.err.initializer.not.allowed=\
+1371     initializers not allowed in interfaces
+1372 
+1373 # 0: type
+1374 compiler.err.unreported.exception.need.to.catch.or.throw=\
+1375     unreported exception {0}; must be caught or declared to be thrown
+1376 
+1377 # 0: type
+1378 compiler.err.unreported.exception.default.constructor=\
+1379     unreported exception {0} in default constructor
+1380 
+1381 # 0: type, 1: name
+1382 compiler.err.unreported.exception.implicit.close=\
+1383     unreported exception {0}; must be caught or declared to be thrown\n\
+1384     exception thrown from implicit call to close() on resource variable &#39;&#39;{1}&#39;&#39;
+1385 
+<a name="1" id="anc1"></a><span class="line-removed">1386 compiler.err.unsupported.cross.fp.lit=\</span>
+<span class="line-removed">1387     hexadecimal floating-point literals are not supported on this VM</span>
+<span class="line-removed">1388 </span>
+1389 compiler.err.void.not.allowed.here=\
+1390     &#39;&#39;void&#39;&#39; type not allowed here
+1391 
+1392 # 0: string
+1393 compiler.err.wrong.number.type.args=\
+1394     wrong number of type arguments; required {0}
+1395 
+1396 # 0: symbol
+1397 compiler.err.var.might.already.be.assigned=\
+1398     variable {0} might already have been assigned
+1399 
+1400 # 0: symbol
+1401 compiler.err.var.might.not.have.been.initialized=\
+1402     variable {0} might not have been initialized
+1403 
+1404 # 0: symbol
+1405 compiler.err.var.not.initialized.in.default.constructor=\
+1406     variable {0} not initialized in the default constructor
+1407 
+1408 # 0: symbol
+1409 compiler.err.var.might.be.assigned.in.loop=\
+1410     variable {0} might be assigned in loop
+1411 
+1412 # 0: symbol, 1: message segment
+1413 compiler.err.varargs.invalid.trustme.anno=\
+1414     Invalid {0} annotation. {1}
+1415 
+1416 # 0: type
+1417 compiler.misc.varargs.trustme.on.reifiable.varargs=\
+1418     Varargs element type {0} is reifiable.
+1419 
+1420 # 0: type, 1: type
+1421 compiler.err.instanceof.reifiable.not.safe=\
+1422     {0} cannot be safely cast to {1}
+1423 
+1424 # 0: symbol
+1425 compiler.misc.varargs.trustme.on.non.varargs.meth=\
+1426     Method {0} is not a varargs method.
+1427 
+1428 # 0: symbol
+1429 compiler.misc.varargs.trustme.on.virtual.varargs=\
+1430     Instance method {0} is neither final nor private.
+1431 
+1432 # 0: symbol
+1433 compiler.misc.varargs.trustme.on.virtual.varargs.final.only=\
+1434     Instance method {0} is not final.
+1435 
+1436 # 0: type, 1: symbol kind, 2: symbol
+1437 compiler.misc.inaccessible.varargs.type=\
+1438     formal varargs element type {0} is not accessible from {1} {2}
+1439 
+1440 # In the following string, {1} will always be the detail message from
+1441 # java.io.IOException.
+1442 # 0: symbol, 1: string
+1443 compiler.err.class.cant.write=\
+1444     error while writing {0}: {1}
+1445 
+1446 # In the following string, {0} is the name of the class in the Java source.
+1447 # It really should be used two times..
+1448 # 0: kind name, 1: name
+1449 compiler.err.class.public.should.be.in.file=\
+1450     {0} {1} is public, should be declared in a file named {1}.java
+1451 
+1452 ## All errors which do not refer to a particular line in the source code are
+1453 ## preceded by this string.
+1454 compiler.err.error=\
+1455     error:\u0020
+1456 
+1457 # The following error messages do not refer to a line in the source code.
+1458 compiler.err.cant.read.file=\
+1459     cannot read: {0}
+1460 
+1461 # 0: string
+1462 compiler.err.plugin.not.found=\
+1463     plug-in not found: {0}
+1464 
+1465 # 0: path
+1466 compiler.warn.locn.unknown.file.on.module.path=\
+1467     unknown file on module path: {0}
+1468 
+1469 
+1470 # 0: path
+1471 compiler.err.locn.bad.module-info=\
+1472     problem reading module-info.class in {0}
+1473 
+1474 # 0: path
+1475 compiler.err.locn.cant.read.directory=\
+1476     cannot read directory {0}
+1477 
+1478 # 0: path
+1479 compiler.err.locn.cant.read.file=\
+1480     cannot read file {0}
+1481 
+1482 # 0: path
+1483 compiler.err.locn.cant.get.module.name.for.jar=\
+1484     cannot determine module name for {0}
+1485 
+1486 # 0: path
+1487 compiler.err.multi-module.outdir.cannot.be.exploded.module=\
+1488     in multi-module mode, the output directory cannot be an exploded module: {0}
+1489 
+1490 # 0: path
+1491 compiler.warn.outdir.is.in.exploded.module=\
+1492     the output directory is within an exploded module: {0}
+1493 
+1494 # 0: file object
+1495 compiler.err.locn.module-info.not.allowed.on.patch.path=\
+1496     module-info.class not allowed on patch path: {0}
+1497 
+1498 # 0: string
+1499 compiler.err.locn.invalid.arg.for.xpatch=\
+1500     invalid argument for --patch-module option: {0}
+1501 
+1502 compiler.err.file.sb.on.source.or.patch.path.for.module=\
+1503     file should be on source path, or on patch path for module
+1504 
+1505 #####
+1506 
+1507 # Fatal Errors
+1508 
+1509 compiler.misc.fatal.err.no.java.lang=\
+1510     Fatal Error: Unable to find package java.lang in classpath or bootclasspath
+1511 
+1512 # 0: name
+1513 compiler.misc.fatal.err.cant.locate.meth=\
+1514     Fatal Error: Unable to find method {0}
+1515 
+1516 # 0: name
+1517 compiler.misc.fatal.err.cant.locate.field=\
+1518     Fatal Error: Unable to find field {0}
+1519 
+1520 # 0: type
+1521 compiler.misc.fatal.err.cant.locate.ctor=\
+1522     Fatal Error: Unable to find constructor for {0}
+1523 
+1524 compiler.misc.fatal.err.cant.close=\
+1525     Fatal Error: Cannot close compiler resources
+1526 
+1527 #####
+1528 
+1529 ##
+1530 ## miscellaneous strings
+1531 ##
+1532 
+1533 compiler.misc.diamond.anonymous.methods.implicitly.override=\
+1534     (due to &lt;&gt;, every non-private method declared in this anonymous class must override or implement a method from a supertype)
+1535 
+1536 compiler.misc.source.unavailable=\
+1537     (source unavailable)
+1538 
+1539 compiler.misc.base.membership=\
+1540     all your base class are belong to us
+1541 
+1542 # 0: string, 1: string, 2: boolean
+1543 compiler.misc.x.print.processor.info=\
+1544     Processor {0} matches {1} and returns {2}.
+1545 
+1546 # 0: number, 1: string, 2: set of symbol, 3: boolean
+1547 compiler.misc.x.print.rounds=\
+1548     Round {0}:\n\tinput files: {1}\n\tannotations: {2}\n\tlast round: {3}
+1549 
+1550 # 0: file name
+1551 compiler.warn.file.from.future=\
+1552     Modification date is in the future for file {0}
+1553 
+1554 #####
+1555 
+1556 ## The following string will appear before all messages keyed as:
+1557 ## &quot;compiler.note&quot;.
+1558 
+1559 compiler.note.compressed.diags=\
+1560     Some messages have been simplified; recompile with -Xdiags:verbose to get full output
+1561 
+1562 # 0: boolean, 1: symbol
+1563 compiler.note.lambda.stat=\
+1564     Translating lambda expression\n\
+1565     alternate metafactory = {0}\n\
+1566     synthetic method = {1}
+1567 
+1568 # 0: boolean, 1: unused
+1569 compiler.note.mref.stat=\
+1570     Translating method reference\n\
+1571     alternate metafactory = {0}\n\
+1572 
+1573 # 0: boolean, 1: symbol
+1574 compiler.note.mref.stat.1=\
+1575     Translating method reference\n\
+1576     alternate metafactory = {0}\n\
+1577     bridge method = {1}
+1578 
+1579 compiler.note.note=\
+1580     Note:\u0020
+1581 
+1582 # 0: file name
+1583 compiler.note.deprecated.filename=\
+1584     {0} uses or overrides a deprecated API.
+1585 
+1586 compiler.note.deprecated.plural=\
+1587     Some input files use or override a deprecated API.
+1588 
+1589 # The following string may appear after one of the above deprecation
+1590 # messages.
+1591 compiler.note.deprecated.recompile=\
+1592     Recompile with -Xlint:deprecation for details.
+1593 
+1594 # 0: file name
+1595 compiler.note.deprecated.filename.additional=\
+1596     {0} has additional uses or overrides of a deprecated API.
+1597 
+1598 compiler.note.deprecated.plural.additional=\
+1599     Some input files additionally use or override a deprecated API.
+1600 
+1601 # 0: file name
+1602 compiler.note.removal.filename=\
+1603     {0} uses or overrides a deprecated API that is marked for removal.
+1604 
+1605 compiler.note.removal.plural=\
+1606     Some input files use or override a deprecated API that is marked for removal.
+1607 
+1608 # The following string may appear after one of the above removal messages.
+1609 compiler.note.removal.recompile=\
+1610     Recompile with -Xlint:removal for details.
+1611 
+1612 # 0: file name
+1613 compiler.note.removal.filename.additional=\
+1614     {0} has additional uses or overrides of a deprecated API that is marked for removal.
+1615 
+1616 compiler.note.removal.plural.additional=\
+1617     Some input files additionally use or override a deprecated API that is marked for removal.
+1618 
+1619 # 0: file name
+1620 compiler.note.unchecked.filename=\
+1621     {0} uses unchecked or unsafe operations.
+1622 
+1623 compiler.note.unchecked.plural=\
+1624     Some input files use unchecked or unsafe operations.
+1625 
+1626 # The following string may appear after one of the above unchecked messages.
+1627 compiler.note.unchecked.recompile=\
+1628     Recompile with -Xlint:unchecked for details.
+1629 
+1630 # 0: file name
+1631 compiler.note.unchecked.filename.additional=\
+1632     {0} has additional unchecked or unsafe operations.
+1633 
+1634 compiler.note.unchecked.plural.additional=\
+1635     Some input files additionally use unchecked or unsafe operations.
+1636 
+1637 # 0: file name
+1638 compiler.note.preview.filename=\
+1639     {0} uses preview language features.
+1640 
+1641 compiler.note.preview.plural=\
+1642     Some input files use preview language features.
+1643 
+1644 # The following string may appear after one of the above deprecation
+1645 # messages.
+1646 compiler.note.preview.recompile=\
+1647     Recompile with -Xlint:preview for details.
+1648 
+1649 # 0: file name
+1650 compiler.note.preview.filename.additional=\
+1651     {0} has additional uses of preview language features.
+1652 
+1653 compiler.note.preview.plural.additional=\
+1654     Some input files additionally use preview language features.
+1655 
+1656 # Notes related to annotation processing
+1657 
+1658 # Print a client-generated note; assumed to be localized, no translation required
+1659 # 0: string
+1660 compiler.note.proc.messager=\
+1661     {0}
+1662 
+1663 # 0: string, 1: string, 2: string
+1664 compiler.note.multiple.elements=\
+1665     Multiple elements named &#39;&#39;{1}&#39;&#39; in modules &#39;&#39;{2}&#39;&#39; were found by javax.lang.model.util.Elements.{0}.
+1666 
+1667 #####
+1668 
+1669 # 0: number
+1670 compiler.misc.count.error=\
+1671     {0} error
+1672 
+1673 # 0: number
+1674 compiler.misc.count.error.plural=\
+1675     {0} errors
+1676 
+1677 # 0: number, 1: number
+1678 compiler.misc.count.error.recompile=\
+1679     only showing the first {0} errors, of {1} total; use -Xmaxerrs if you would like to see more
+1680 
+1681 # 0: number, 1: number
+1682 compiler.misc.count.warn.recompile=\
+1683     only showing the first {0} warnings, of {1} total; use -Xmaxwarns if you would like to see more
+1684 
+1685 # 0: number
+1686 compiler.misc.count.warn=\
+1687     {0} warning
+1688 
+1689 # 0: number
+1690 compiler.misc.count.warn.plural=\
+1691     {0} warnings
+1692 
+1693 compiler.misc.version.not.available=\
+1694     (version info not available)
+1695 
+1696 ## extra output when using -verbose (JavaCompiler)
+1697 
+1698 # 0: symbol
+1699 compiler.misc.verbose.checking.attribution=\
+1700     [checking {0}]
+1701 
+1702 # 0: string
+1703 compiler.misc.verbose.parsing.done=\
+1704     [parsing completed {0}ms]
+1705 
+1706 # 0: file name
+1707 compiler.misc.verbose.parsing.started=\
+1708     [parsing started {0}]
+1709 
+1710 # 0: string
+1711 compiler.misc.verbose.total=\
+1712     [total {0}ms]
+1713 
+1714 # 0: file name
+1715 compiler.misc.verbose.wrote.file=\
+1716     [wrote {0}]
+1717 
+1718 ## extra output when using -verbose (code/ClassReader)
+1719 # 0: string
+1720 compiler.misc.verbose.loading=\
+1721     [loading {0}]
+1722 
+1723 # 0: string
+1724 compiler.misc.verbose.sourcepath=\
+1725     [search path for source files: {0}]
+1726 
+1727 # 0: string
+1728 compiler.misc.verbose.classpath=\
+1729     [search path for class files: {0}]
+1730 
+1731 ## extra output when using -prompt (util/Log)
+1732 compiler.misc.resume.abort=\
+1733     R)esume, A)bort&gt;
+1734 
+1735 #####
+1736 
+1737 ##
+1738 ## warnings
+1739 ##
+1740 
+1741 ## All warning messages are preceded by the following string.
+1742 compiler.warn.warning=\
+1743     warning:\u0020
+1744 
+1745 ## Warning messages may also include the following prefix to identify a
+1746 ## lint option
+1747 # 0: option name
+1748 compiler.warn.lintOption=\
+1749     [{0}]\u0020
+1750 
+1751 # 0: symbol
+1752 compiler.warn.constant.SVUID=\
+1753     serialVersionUID must be constant in class {0}
+1754 
+1755 # 0: path
+1756 compiler.warn.dir.path.element.not.found=\
+1757     bad path element &quot;{0}&quot;: no such directory
+1758 
+1759 # 0: file name
+1760 compiler.warn.dir.path.element.not.directory=\
+1761     bad path element &quot;{0}&quot;: not a directory
+1762 
+1763 # 0: symbol, 1: symbol, 2: symbol
+1764 compiler.warn.missing-explicit-ctor=\
+1765     class {0} in exported package {1} declares no explicit constructors, thereby exposing a default constructor to clients of module {2}
+1766 
+1767 compiler.warn.finally.cannot.complete=\
+1768     finally clause cannot complete normally
+1769 
+1770 # 0: name
+1771 compiler.warn.poor.choice.for.module.name=\
+1772     module name component {0} should avoid terminal digits
+1773 
+1774 # 0: string
+1775 compiler.warn.incubating.modules=\
+1776     using incubating module(s): {0}
+1777 
+1778 # 0: symbol, 1: symbol
+1779 compiler.warn.has.been.deprecated=\
+1780     {0} in {1} has been deprecated
+1781 
+1782 # 0: symbol, 1: symbol
+1783 compiler.warn.has.been.deprecated.for.removal=\
+1784     {0} in {1} has been deprecated and marked for removal
+1785 
+1786 # 0: symbol
+1787 compiler.warn.is.preview=\
+1788     {0} is an API that is part of a preview feature
+1789 
+1790 # 0: symbol
+1791 compiler.err.is.preview=\
+1792     {0} is an API that is part of a preview feature
+1793 
+1794 # 0: symbol
+1795 compiler.warn.has.been.deprecated.module=\
+1796     module {0} has been deprecated
+1797 
+1798 # 0: symbol
+1799 compiler.warn.has.been.deprecated.for.removal.module=\
+1800     module {0} has been deprecated and marked for removal
+1801 
+1802 # 0: symbol
+1803 compiler.warn.sun.proprietary=\
+1804     {0} is internal proprietary API and may be removed in a future release
+1805 
+1806 compiler.warn.illegal.char.for.encoding=\
+1807     unmappable character for encoding {0}
+1808 
+1809 # 0: symbol
+1810 compiler.warn.improper.SVUID=\
+1811     serialVersionUID must be declared static final in class {0}
+1812 
+1813 # 0: type, 1: type
+1814 compiler.warn.inexact.non-varargs.call=\
+1815     non-varargs call of varargs method with inexact argument type for last parameter;\n\
+1816     cast to {0} for a varargs call\n\
+1817     cast to {1} for a non-varargs call and to suppress this warning
+1818 
+1819 # 0: list of type
+1820 compiler.warn.unreachable.catch=\
+1821     unreachable catch clause\n\
+1822     thrown type {0} has already been caught
+1823 
+1824 # 0: list of type
+1825 compiler.warn.unreachable.catch.1=\
+1826     unreachable catch clause\n\
+1827     thrown types {0} have already been caught
+1828 
+1829 # 0: symbol
+1830 compiler.warn.long.SVUID=\
+1831     serialVersionUID must be of type long in class {0}
+1832 
+1833 # 0: symbol
+1834 compiler.warn.missing.SVUID=\
+1835     serializable class {0} has no definition of serialVersionUID
+1836 
+1837 # 0: symbol, 1: symbol, 2: symbol, 3: symbol
+1838 compiler.warn.potentially.ambiguous.overload=\
+1839     {0} in {1} is potentially ambiguous with {2} in {3}
+1840 
+1841 # 0: message segment
+1842 compiler.warn.override.varargs.missing=\
+1843     {0}; overridden method has no &#39;&#39;...&#39;&#39;
+1844 
+1845 # 0: message segment
+1846 compiler.warn.override.varargs.extra=\
+1847     {0}; overriding method is missing &#39;&#39;...&#39;&#39;
+1848 
+1849 # 0: message segment
+1850 compiler.warn.override.bridge=\
+1851     {0}; overridden method is a bridge method
+1852 
+1853 # 0: symbol
+1854 compiler.warn.pkg-info.already.seen=\
+1855     a package-info.java file has already been seen for package {0}
+1856 
+1857 # 0: path
+1858 compiler.warn.path.element.not.found=\
+1859     bad path element &quot;{0}&quot;: no such file or directory
+1860 
+1861 compiler.warn.possible.fall-through.into.case=\
+1862     possible fall-through into case
+1863 
+1864 # 0: type
+1865 compiler.warn.redundant.cast=\
+1866     redundant cast to {0}
+1867 
+1868 # 0: number
+1869 compiler.warn.position.overflow=\
+1870     Position encoding overflows at line {0}
+1871 
+1872 # 0: file name, 1: number, 2: number
+1873 compiler.warn.big.major.version=\
+1874     {0}: major version {1} is newer than {2}, the highest major version supported by this compiler.\n\
+1875     It is recommended that the compiler be upgraded.
+1876 
+1877 # 0: kind name, 1: symbol
+1878 compiler.warn.static.not.qualified.by.type=\
+1879     static {0} should be qualified by type name, {1}, instead of by an expression
+1880 
+1881 # 0: string
+1882 compiler.warn.source.no.bootclasspath=\
+1883     bootstrap class path not set in conjunction with -source {0}
+1884 
+1885 # 0: string
+1886 compiler.warn.source.no.system.modules.path=\
+1887     system modules path not set in conjunction with -source {0}
+1888 
+1889 # 0: string
+1890 compiler.warn.option.obsolete.source=\
+1891     source value {0} is obsolete and will be removed in a future release
+1892 
+1893 # 0: target
+1894 compiler.warn.option.obsolete.target=\
+1895     target value {0} is obsolete and will be removed in a future release
+1896 
+1897 # 0: string, 1: string
+1898 compiler.err.option.removed.source=\
+1899     Source option {0} is no longer supported. Use {1} or later.
+1900 
+1901 # 0: target, 1: target
+1902 compiler.err.option.removed.target=\
+1903     Target option {0} is no longer supported. Use {1} or later.
+1904 
+1905 
+1906 # 0: target, 1: target
+1907 compiler.warn.option.parameters.unsupported=\
+1908     -parameters is not supported for target value {0}. Use {1} or later.
+1909 
+1910 compiler.warn.option.obsolete.suppression=\
+1911     To suppress warnings about obsolete options, use -Xlint:-options.
+1912 
+1913 # 0: name, 1: number, 2: number, 3: number, 4: number
+1914 compiler.warn.future.attr=\
+1915     {0} attribute introduced in version {1}.{2} class files is ignored in version {3}.{4} class files
+1916 
+1917 compiler.warn.requires.automatic=\
+1918     requires directive for an automatic module
+1919 
+1920 compiler.warn.requires.transitive.automatic=\
+1921     requires transitive directive for an automatic module
+1922 
+1923 # Warnings related to annotation processing
+1924 # 0: string
+1925 compiler.warn.proc.package.does.not.exist=\
+1926     package {0} does not exist
+1927 
+1928 # 0: string
+1929 compiler.warn.proc.file.reopening=\
+1930     Attempt to create a file for &#39;&#39;{0}&#39;&#39; multiple times
+1931 
+1932 # 0: string
+1933 compiler.warn.proc.type.already.exists=\
+1934     A file for type &#39;&#39;{0}&#39;&#39; already exists on the sourcepath or classpath
+1935 
+1936 # 0: string
+1937 compiler.warn.proc.type.recreate=\
+1938     Attempt to create a file for type &#39;&#39;{0}&#39;&#39; multiple times
+1939 
+1940 # 0: string
+1941 compiler.warn.proc.illegal.file.name=\
+1942     Cannot create file for illegal name &#39;&#39;{0}&#39;&#39;.
+1943 
+1944 # 0: string, 1: string
+1945 compiler.warn.proc.suspicious.class.name=\
+1946     Creating file for a type whose name ends in {1}: &#39;&#39;{0}&#39;&#39;
+1947 
+1948 # 0: string
+1949 compiler.warn.proc.file.create.last.round=\
+1950     File for type &#39;&#39;{0}&#39;&#39; created in the last round will not be subject to annotation processing.
+1951 
+1952 # 0: string, 1: string
+1953 compiler.warn.proc.malformed.supported.string=\
+1954     Malformed string &#39;&#39;{0}&#39;&#39; for a supported annotation type returned by processor &#39;&#39;{1}&#39;&#39;
+1955 
+1956 # 0: set of string
+1957 compiler.warn.proc.annotations.without.processors=\
+1958     No processor claimed any of these annotations: {0}
+1959 
+1960 # 0: source version, 1: string, 2: string
+1961 compiler.warn.proc.processor.incompatible.source.version=\
+1962     Supported source version &#39;&#39;{0}&#39;&#39; from annotation processor &#39;&#39;{1}&#39;&#39; less than -source &#39;&#39;{2}&#39;&#39;
+1963 
+1964 # 0: string, 1: string
+1965 compiler.warn.proc.duplicate.option.name=\
+1966     Duplicate supported option &#39;&#39;{0}&#39;&#39; returned by annotation processor &#39;&#39;{1}&#39;&#39;
+1967 
+1968 # 0: string, 1: string
+1969 compiler.warn.proc.duplicate.supported.annotation=\
+1970     Duplicate supported annotation type &#39;&#39;{0}&#39;&#39; returned by annotation processor &#39;&#39;{1}&#39;&#39;
+1971 
+1972 # 0: string
+1973 compiler.warn.proc.redundant.types.with.wildcard=\
+1974     Annotation processor &#39;&#39;{0}&#39;&#39; redundantly supports both &#39;&#39;*&#39;&#39; and other annotation types
+1975 
+1976 compiler.warn.proc.proc-only.requested.no.procs=\
+1977     Annotation processing without compilation requested but no processors were found.
+1978 
+1979 compiler.warn.proc.use.implicit=\
+1980     Implicitly compiled files were not subject to annotation processing.\n\
+1981     Use -implicit to specify a policy for implicit compilation.
+1982 
+1983 compiler.warn.proc.use.proc.or.implicit=\
+1984     Implicitly compiled files were not subject to annotation processing.\n\
+1985     Use -proc:none to disable annotation processing or -implicit to specify a policy for implicit compilation.
+1986 
+1987 # Print a client-generated warning; assumed to be localized, no translation required
+1988 # 0: string
+1989 compiler.warn.proc.messager=\
+1990     {0}
+1991 
+1992 # 0: set of string
+1993 compiler.warn.proc.unclosed.type.files=\
+1994     Unclosed files for the types &#39;&#39;{0}&#39;&#39;; these types will not undergo annotation processing
+1995 
+1996 # 0: string
+1997 compiler.warn.proc.unmatched.processor.options=\
+1998     The following options were not recognized by any processor: &#39;&#39;{0}&#39;&#39;
+1999 
+2000 compiler.warn.try.explicit.close.call=\
+2001     explicit call to close() on an auto-closeable resource
+2002 
+2003 # 0: symbol
+2004 compiler.warn.try.resource.not.referenced=\
+2005     auto-closeable resource {0} is never referenced in body of corresponding try statement
+2006 
+2007 # 0: type
+2008 compiler.warn.try.resource.throws.interrupted.exc=\
+2009     auto-closeable resource {0} has a member method close() that could throw InterruptedException
+2010 
+2011 compiler.warn.unchecked.assign=\
+2012     unchecked assignment: {0} to {1}
+2013 
+2014 # 0: symbol, 1: type
+2015 compiler.warn.unchecked.assign.to.var=\
+2016     unchecked assignment to variable {0} as member of raw type {1}
+2017 
+2018 # 0: symbol, 1: type
+2019 compiler.warn.unchecked.call.mbr.of.raw.type=\
+2020     unchecked call to {0} as a member of the raw type {1}
+2021 
+2022 compiler.warn.unchecked.cast.to.type=\
+2023     unchecked cast to type {0}
+2024 
+2025 # 0: kind name, 1: name, 2: object, 3: object, 4: kind name, 5: symbol
+2026 compiler.warn.unchecked.meth.invocation.applied=\
+2027     unchecked method invocation: {0} {1} in {4} {5} is applied to given types\n\
+2028     required: {2}\n\
+2029     found:    {3}
+2030 
+2031 # 0: type
+2032 compiler.warn.unchecked.generic.array.creation=\
+2033     unchecked generic array creation for varargs parameter of type {0}
+2034 
+2035 # 0: type
+2036 compiler.warn.unchecked.varargs.non.reifiable.type=\
+2037     Possible heap pollution from parameterized vararg type {0}
+2038 
+2039 # 0: symbol
+2040 compiler.warn.varargs.unsafe.use.varargs.param=\
+2041     Varargs method could cause heap pollution from non-reifiable varargs parameter {0}
+2042 
+2043 compiler.warn.missing.deprecated.annotation=\
+2044     deprecated item is not annotated with @Deprecated
+2045 
+2046 # 0: kind name
+2047 compiler.warn.deprecated.annotation.has.no.effect=\
+2048     @Deprecated annotation has no effect on this {0} declaration
+2049 
+2050 # 0: string
+2051 compiler.warn.invalid.path=\
+2052     Invalid filename: {0}
+2053 
+2054 # 0: string
+2055 compiler.err.invalid.path=\
+2056     Invalid filename: {0}
+2057 
+2058 
+2059 # 0: path
+2060 compiler.warn.invalid.archive.file=\
+2061     Unexpected file on path: {0}
+2062 
+2063 # 0: path
+2064 compiler.warn.unexpected.archive.file=\
+2065     Unexpected extension for archive file: {0}
+2066 
+2067 # 0: path
+2068 compiler.err.no.zipfs.for.archive=\
+2069     No file system provider is available to handle this file: {0}
+2070 
+2071 compiler.warn.div.zero=\
+2072     division by zero
+2073 
+2074 compiler.warn.empty.if=\
+2075     empty statement after if
+2076 
+2077 # 0: type, 1: name
+2078 compiler.warn.annotation.method.not.found=\
+2079     Cannot find annotation method &#39;&#39;{1}()&#39;&#39; in type &#39;&#39;{0}&#39;&#39;
+2080 
+2081 # 0: type, 1: name, 2: message segment
+2082 compiler.warn.annotation.method.not.found.reason=\
+2083     Cannot find annotation method &#39;&#39;{1}()&#39;&#39; in type &#39;&#39;{0}&#39;&#39;: {2}
+2084 
+2085 # 0: file object, 1: symbol, 2: name
+2086 compiler.warn.unknown.enum.constant=\
+2087     unknown enum constant {1}.{2}
+2088 
+2089 # 0: file object, 1: symbol, 2: name, 3: message segment
+2090 compiler.warn.unknown.enum.constant.reason=\
+2091     unknown enum constant {1}.{2}\n\
+2092     reason: {3}
+2093 
+2094 # 0: type, 1: type
+2095 compiler.warn.raw.class.use=\
+2096     found raw type: {0}\n\
+2097     missing type arguments for generic class {1}
+2098 
+2099 compiler.warn.diamond.redundant.args=\
+2100     Redundant type arguments in new expression (use diamond operator instead).
+2101 
+2102 compiler.warn.local.redundant.type=\
+2103     Redundant type for local variable (replace explicit type with &#39;&#39;var&#39;&#39;).
+2104 
+2105 compiler.warn.potential.lambda.found=\
+2106     This anonymous inner class creation can be turned into a lambda expression.
+2107 
+2108 compiler.warn.method.redundant.typeargs=\
+2109     Redundant type arguments in method call.
+2110 
+2111 # 0: symbol, 1: message segment
+2112 compiler.warn.varargs.redundant.trustme.anno=\
+2113     Redundant {0} annotation. {1}
+2114 
+2115 # 0: symbol
+2116 compiler.warn.access.to.member.from.serializable.element=\
+2117     access to member {0} from serializable element can be publicly accessible to untrusted code
+2118 
+2119 # 0: symbol
+2120 compiler.warn.access.to.member.from.serializable.lambda=\
+2121     access to member {0} from serializable lambda can be publicly accessible to untrusted code
+2122 
+2123 #####
+2124 
+2125 ## The following are tokens which are non-terminals in the language. They should
+2126 ## be named as JLS3 calls them when translated to the appropriate language.
+2127 compiler.misc.token.identifier=\
+2128     &lt;identifier&gt;
+2129 
+2130 compiler.misc.token.character=\
+2131     &lt;character&gt;
+2132 
+2133 compiler.misc.token.string=\
+2134     &lt;string&gt;
+2135 
+2136 compiler.misc.token.integer=\
+2137     &lt;integer&gt;
+2138 
+2139 compiler.misc.token.long-integer=\
+2140     &lt;long integer&gt;
+2141 
+2142 compiler.misc.token.float=\
+2143     &lt;float&gt;
+2144 
+2145 compiler.misc.token.double=\
+2146     &lt;double&gt;
+2147 
+2148 compiler.misc.token.bad-symbol=\
+2149     &lt;bad symbol&gt;
+2150 
+2151 compiler.misc.token.end-of-input=\
+2152     &lt;end of input&gt;
+2153 
+2154 ## The argument to the following string will always be one of the following:
+2155 ## 1. one of the above non-terminals
+2156 ## 2. a keyword (JLS1.8)
+2157 ## 3. a boolean literal (JLS3.10.3)
+2158 ## 4. the null literal (JLS3.10.7)
+2159 ## 5. a Java separator (JLS3.11)
+2160 ## 6. an operator (JLS3.12)
+2161 ##
+2162 ## This is the only place these tokens will be used.
+2163 # 0: token
+2164 compiler.err.expected=\
+2165     {0} expected
+2166 
+2167 # 0: string
+2168 compiler.err.expected.str=\
+2169     {0} expected
+2170 
+2171 # 0: token, 1: token
+2172 compiler.err.expected2=\
+2173     {0} or {1} expected
+2174 
+2175 # 0: token, 1: token, 2: token
+2176 compiler.err.expected3=\
+2177     {0}, {1}, or {2} expected
+2178 
+2179 # 0: token, 1: token, 2: token, 3: string
+2180 compiler.err.expected4=\
+2181     {0}, {1}, {2}, or {3} expected
+2182 
+2183 compiler.err.premature.eof=\
+2184     reached end of file while parsing
+2185 
+2186 compiler.err.enum.constant.expected=\
+2187     enum constant expected here
+2188 
+2189 compiler.err.enum.constant.not.expected=\
+2190     enum constant not expected here
+2191 
+2192 ## The following are related in form, but do not easily fit the above paradigm.
+2193 compiler.err.expected.module=\
+2194     &#39;&#39;module&#39;&#39; expected
+2195 
+2196 compiler.err.expected.module.or.open=\
+2197     &#39;&#39;module&#39;&#39; or &#39;&#39;open&#39;&#39; expected
+2198 
+2199 compiler.err.dot.class.expected=\
+2200     &#39;&#39;.class&#39;&#39; expected
+2201 
+2202 ## The argument to this string will always be either &#39;case&#39; or &#39;default&#39;.
+2203 # 0: token
+2204 compiler.err.orphaned=\
+2205     orphaned {0}
+2206 
+2207 # 0: name
+2208 compiler.misc.anonymous.class=\
+2209     &lt;anonymous {0}&gt;
+2210 
+2211 # 0: name, 1: type
+2212 compiler.misc.type.captureof=\
+2213     capture#{0} of {1}
+2214 
+2215 compiler.misc.type.captureof.1=\
+2216     capture#{0}
+2217 
+2218 compiler.misc.type.none=\
+2219     &lt;none&gt;
+2220 
+2221 compiler.misc.unnamed.package=\
+2222     unnamed package
+2223 
+2224 compiler.misc.unnamed.module=\
+2225     unnamed module
+2226 
+2227 #####
+2228 
+2229 # 0: symbol, 1: message segment
+2230 compiler.err.cant.access=\
+2231     cannot access {0}\n\
+2232     {1}
+2233 
+2234 # 0: name
+2235 compiler.misc.bad.class.file=\
+2236     class file is invalid for class {0}
+2237 
+2238 # 0: file name, 1: string (expected constant pool entry type), 2: number (constant pool index)
+2239 compiler.misc.bad.const.pool.entry=\
+2240     bad constant pool entry in {0}\n\
+2241     expected {1} at index {2}
+2242 
+2243 # 0: file name, 1: number (constant pool index), 2: number (constant pool size)
+2244 compiler.misc.bad.const.pool.index=\
+2245     bad constant pool index in {0}\n\
+2246     index {1} is not within pool size {2}.
+2247 
+2248 # 0: file name, 1: message segment
+2249 compiler.misc.bad.class.file.header=\
+2250     bad class file: {0}\n\
+2251     {1}\n\
+2252     Please remove or make sure it appears in the correct subdirectory of the classpath.
+2253 
+2254 # 0: file name, 1: message segment
+2255 compiler.misc.bad.source.file.header=\
+2256     bad source file: {0}\n\
+2257     {1}\n\
+2258     Please remove or make sure it appears in the correct subdirectory of the sourcepath.
+2259 
+2260 ## The following are all possible strings for the second argument ({1}) of the
+2261 ## above strings.
+2262 compiler.misc.bad.class.signature=\
+2263     bad class signature: {0}
+2264 
+2265 #0: symbol, 1: symbol
+2266 compiler.misc.bad.enclosing.class=\
+2267     bad enclosing class for {0}: {1}
+2268 
+2269 # 0: symbol
+2270 compiler.misc.bad.enclosing.method=\
+2271     bad enclosing method attribute for class {0}
+2272 
+2273 compiler.misc.bad.runtime.invisible.param.annotations=\
+2274     bad RuntimeInvisibleParameterAnnotations attribute: {0}
+2275 
+2276 compiler.misc.bad.const.pool.tag=\
+2277     bad constant pool tag: {0}
+2278 
+2279 compiler.misc.bad.const.pool.tag.at=\
+2280     bad constant pool tag: {0} at {1}
+2281 
+2282 compiler.misc.unexpected.const.pool.tag.at=\
+2283     unexpected constant pool tag: {0} at {1}
+2284 
+2285 compiler.misc.bad.signature=\
+2286     bad signature: {0}
+2287 
+2288 compiler.misc.bad.type.annotation.value=\
+2289     bad type annotation target type value: {0}
+2290 
+2291 compiler.misc.bad.module-info.name=\
+2292     bad class name
+2293 
+2294 compiler.misc.class.file.wrong.class=\
+2295     class file contains wrong class: {0}
+2296 
+2297 compiler.misc.module.info.invalid.super.class=\
+2298     module-info with invalid super class
+2299 
+2300 # 0: name
+2301 compiler.misc.class.file.not.found=\
+2302     class file for {0} not found
+2303 
+2304 # 0: string (constant value), 1: symbol (constant field), 2: type (field type)
+2305 compiler.misc.bad.constant.range=\
+2306     constant value &#39;&#39;{0}&#39;&#39; for {1} is outside the expected range for {2}
+2307 
+2308 # 0: string (constant value), 1: symbol (constant field), 2: string (expected class)
+2309 compiler.misc.bad.constant.value=\
+2310     bad constant value &#39;&#39;{0}&#39;&#39; for {1}, expected {2}
+2311 
+2312 # 0: type (field type)
+2313 compiler.misc.bad.constant.value.type=\
+2314     variable of type &#39;&#39;{0}&#39;&#39; cannot have a constant value, but has one specified
+2315 
+2316 # 0: string (classfile major version), 1: string (classfile minor version)
+2317 compiler.misc.invalid.default.interface=\
+2318     default method found in version {0}.{1} classfile
+2319 
+2320 # 0: string (classfile major version), 1: string (classfile minor version)
+2321 compiler.misc.invalid.static.interface=\
+2322     static method found in version {0}.{1} classfile
+2323 
+2324 # 0: string (classfile major version), 1: string (classfile minor version)
+2325 compiler.misc.anachronistic.module.info=\
+2326     module declaration found in version {0}.{1} classfile
+2327 
+2328 compiler.misc.module.info.definition.expected=\
+2329     module-info definition expected
+2330 
+2331 # 0: name
+2332 compiler.misc.file.doesnt.contain.class=\
+2333     file does not contain class {0}
+2334 
+2335 # 0: symbol
+2336 compiler.misc.file.does.not.contain.package=\
+2337     file does not contain package {0}
+2338 
+2339 compiler.misc.file.does.not.contain.module=\
+2340     file does not contain module declaration
+2341 
+2342 compiler.misc.illegal.start.of.class.file=\
+2343     illegal start of class file
+2344 
+2345 # 0: name
+2346 compiler.misc.method.descriptor.invalid=\
+2347     method descriptor invalid for {0}
+2348 
+2349 compiler.misc.unable.to.access.file=\
+2350     unable to access file: {0}
+2351 
+2352 compiler.misc.unicode.str.not.supported=\
+2353     unicode string in class file not supported
+2354 
+2355 compiler.misc.undecl.type.var=\
+2356     undeclared type variable: {0}
+2357 
+2358 compiler.misc.malformed.vararg.method=\
+2359     class file contains malformed variable arity method: {0}
+2360 
+2361 compiler.misc.wrong.version=\
+2362     class file has wrong version {0}.{1}, should be {2}.{3}
+2363 
+2364 #####
+2365 
+2366 # 0: type, 1: type or symbol
+2367 compiler.err.not.within.bounds=\
+2368     type argument {0} is not within bounds of type-variable {1}
+2369 
+2370 ## The following are all possible strings for the second argument ({1}) of the
+2371 ## above string.
+2372 
+2373 ## none yet...
+2374 
+2375 #####
+2376 
+2377 # 0: message segment
+2378 compiler.err.prob.found.req=\
+2379     incompatible types: {0}
+2380 
+2381 # 0: message segment
+2382 compiler.misc.prob.found.req=\
+2383     incompatible types: {0}
+2384 
+2385 # 0: message segment, 1: type, 2: type
+2386 compiler.warn.prob.found.req=\
+2387     {0}\n\
+2388     required: {2}\n\
+2389     found:    {1}
+2390 
+2391 # 0: type, 1: type
+2392 compiler.misc.inconvertible.types=\
+2393     {0} cannot be converted to {1}
+2394 
+2395 # 0: type, 1: type
+2396 compiler.misc.possible.loss.of.precision=\
+2397     possible lossy conversion from {0} to {1}
+2398 
+2399 compiler.misc.unchecked.assign=\
+2400     unchecked conversion
+2401 
+2402 # compiler.misc.storecheck=\
+2403 #     assignment might cause later store checks to fail
+2404 # compiler.misc.unchecked=\
+2405 #     assigned array cannot dynamically check its stores
+2406 compiler.misc.unchecked.cast.to.type=\
+2407     unchecked cast
+2408 
+2409 # compiler.err.star.expected=\
+2410 #     &#39;&#39;*&#39;&#39; expected
+2411 # compiler.err.no.elem.type=\
+2412 #     \[\*\] cannot have a type
+2413 
+2414 # 0: message segment
+2415 compiler.misc.try.not.applicable.to.type=\
+2416     try-with-resources not applicable to variable type\n\
+2417     ({0})
+2418 
+2419 #####
+2420 
+2421 # 0: object, 1: message segment
+2422 compiler.err.type.found.req=\
+2423     unexpected type\n\
+2424     required: {1}\n\
+2425     found:    {0}
+2426 
+2427 ## The following are all possible strings for the first argument ({0}) of the
+2428 ## above string.
+2429 compiler.misc.type.req.class=\
+2430     class
+2431 
+2432 compiler.misc.type.req.class.array=\
+2433     class or array
+2434 
+2435 compiler.misc.type.req.array.or.iterable=\
+2436     array or java.lang.Iterable
+2437 
+2438 compiler.misc.type.req.ref=\
+2439     reference
+2440 
+2441 compiler.misc.type.req.exact=\
+2442     class or interface without bounds
+2443 
+2444 # 0: type
+2445 compiler.misc.type.parameter=\
+2446     type parameter {0}
+2447 
+2448 #####
+2449 
+2450 ## The following are all possible strings for the last argument of all those
+2451 ## diagnostics whose key ends in &quot;.1&quot;
+2452 
+2453 # 0: type, 1: list of type
+2454 compiler.misc.no.unique.maximal.instance.exists=\
+2455     no unique maximal instance exists for type variable {0} with upper bounds {1}
+2456 
+2457 # 0: type, 1: list of type
+2458 compiler.misc.no.unique.minimal.instance.exists=\
+2459     no unique minimal instance exists for type variable {0} with lower bounds {1}
+2460 
+2461 # 0: type, 1: list of type
+2462 compiler.misc.incompatible.upper.bounds=\
+2463     inference variable {0} has incompatible upper bounds {1}
+2464 
+2465 # 0: type, 1: list of type
+2466 compiler.misc.incompatible.eq.bounds=\
+2467     inference variable {0} has incompatible equality constraints {1}
+2468 
+2469 # 0: type, 1: fragment, 2: fragment
+2470 compiler.misc.incompatible.bounds=\
+2471     inference variable {0} has incompatible bounds\n\
+2472     {1}\n\
+2473     {2}
+2474 
+2475 # 0: list of type
+2476 compiler.misc.lower.bounds=\
+2477         lower bounds: {0}
+2478 
+2479 # 0: list of type
+2480 compiler.misc.eq.bounds=\
+2481         equality constraints: {0}
+2482 
+2483 # 0: list of type
+2484 compiler.misc.upper.bounds=\
+2485         lower bounds: {0}
+2486 
+2487 # 0: list of type, 1: type, 2: type
+2488 compiler.misc.infer.no.conforming.instance.exists=\
+2489     no instance(s) of type variable(s) {0} exist so that {1} conforms to {2}
+2490 
+2491 # 0: list of type, 1: message segment
+2492 compiler.misc.infer.no.conforming.assignment.exists=\
+2493     cannot infer type-variable(s) {0}\n\
+2494     (argument mismatch; {1})
+2495 
+2496 # 0: list of type
+2497 compiler.misc.infer.arg.length.mismatch=\
+2498     cannot infer type-variable(s) {0}\n\
+2499     (actual and formal argument lists differ in length)
+2500 
+2501 # 0: list of type, 1: message segment
+2502 compiler.misc.infer.varargs.argument.mismatch=\
+2503     cannot infer type-variable(s) {0}\n\
+2504     (varargs mismatch; {1})
+2505 
+2506 # 0: type, 1: list of type
+2507 compiler.misc.inferred.do.not.conform.to.upper.bounds=\
+2508     inferred type does not conform to upper bound(s)\n\
+2509     inferred: {0}\n\
+2510     upper bound(s): {1}
+2511 
+2512 # 0: type, 1: list of type
+2513 compiler.misc.inferred.do.not.conform.to.lower.bounds=\
+2514     inferred type does not conform to lower bound(s)\n\
+2515     inferred: {0}\n\
+2516     lower bound(s): {1}
+2517 
+2518 # 0: type, 1: list of type
+2519 compiler.misc.inferred.do.not.conform.to.eq.bounds=\
+2520     inferred type does not conform to equality constraint(s)\n\
+2521     inferred: {0}\n\
+2522     equality constraints(s): {1}
+2523 
+2524 # 0: symbol
+2525 compiler.misc.diamond=\
+2526     {0}&lt;&gt;
+2527 
+2528 # 0: type
+2529 compiler.misc.diamond.non.generic=\
+2530     cannot use &#39;&#39;&lt;&gt;&#39;&#39; with non-generic class {0}
+2531 
+2532 # 0: list of type, 1: message segment
+2533 compiler.misc.diamond.invalid.arg=\
+2534     type argument {0} inferred for {1} is not allowed in this context\n\
+2535     inferred argument is not expressible in the Signature attribute
+2536 
+2537 # 0: list of type, 1: message segment
+2538 compiler.misc.diamond.invalid.args=\
+2539     type arguments {0} inferred for {1} are not allowed in this context\n\
+2540     inferred arguments are not expressible in the Signature attribute
+2541 
+2542 # 0: type
+2543 compiler.misc.diamond.and.explicit.params=\
+2544     cannot use &#39;&#39;&lt;&gt;&#39;&#39; with explicit type parameters for constructor
+2545 
+2546 compiler.misc.mref.infer.and.explicit.params=\
+2547     cannot use raw constructor reference with explicit type parameters for constructor
+2548 
+2549 # 0: type, 1: list of type
+2550 compiler.misc.explicit.param.do.not.conform.to.bounds=\
+2551     explicit type argument {0} does not conform to declared bound(s) {1}
+2552 
+2553 compiler.misc.arg.length.mismatch=\
+2554     actual and formal argument lists differ in length
+2555 
+2556 # 0: string
+2557 compiler.misc.wrong.number.type.args=\
+2558     wrong number of type arguments; required {0}
+2559 
+2560 # 0: message segment
+2561 compiler.misc.no.conforming.assignment.exists=\
+2562     argument mismatch; {0}
+2563 
+2564 # 0: message segment
+2565 compiler.misc.varargs.argument.mismatch=\
+2566     varargs mismatch; {0}
+2567 
+2568 #####
+2569 
+2570 # 0: symbol or type, 1: file name
+2571 compiler.warn.auxiliary.class.accessed.from.outside.of.its.source.file=\
+2572     auxiliary class {0} in {1} should not be accessed from outside its own source file
+2573 
+2574 ## The first argument ({0}) is a &quot;kindname&quot;.
+2575 # 0: kind name, 1: symbol, 2: symbol
+2576 compiler.err.abstract.cant.be.accessed.directly=\
+2577     abstract {0} {1} in {2} cannot be accessed directly
+2578 
+2579 ## The first argument ({0}) is a &quot;kindname&quot;.
+2580 # 0: symbol kind, 1: symbol
+2581 compiler.err.non-static.cant.be.ref=\
+2582     non-static {0} {1} cannot be referenced from a static context
+2583 
+2584 # 0: symbol kind, 1: symbol
+2585 compiler.misc.bad.static.method.in.unbound.lookup=\
+2586     unexpected static {0} {1} found in unbound lookup
+2587 
+2588 # 0: symbol kind, 1: symbol
+2589 compiler.misc.bad.instance.method.in.unbound.lookup=\
+2590     unexpected instance {0} {1} found in unbound lookup
+2591 
+2592 # 0: symbol kind, 1: symbol
+2593 compiler.misc.bad.static.method.in.bound.lookup=\
+2594     unexpected static {0} {1} found in bound lookup
+2595 
+2596 ## Both arguments ({0}, {1}) are &quot;kindname&quot;s.  {0} is a comma-separated list
+2597 ## of kindnames (the list should be identical to that provided in source.
+2598 # 0: set of kind name, 1: set of kind name
+2599 compiler.err.unexpected.type=\
+2600     unexpected type\n\
+2601     required: {0}\n\
+2602     found:    {1}
+2603 
+2604 compiler.err.unexpected.lambda=\
+2605    lambda expression not expected here
+2606 
+2607 compiler.err.unexpected.mref=\
+2608    method reference not expected here
+2609 
+2610 ## The first argument {0} is a &quot;kindname&quot; (e.g. &#39;constructor&#39;, &#39;field&#39;, etc.)
+2611 ## The second argument {1} is the non-resolved symbol
+2612 ## The third argument {2} is a list of type parameters (non-empty if {1} is a method)
+2613 ## The fourth argument {3} is a list of argument types (non-empty if {1} is a method)
+2614 # 0: kind name, 1: name, 2: unused, 3: unused
+2615 compiler.err.cant.resolve=\
+2616     cannot find symbol\n\
+2617     symbol: {0} {1}
+2618 
+2619 # 0: kind name, 1: name, 2: unused, 3: list of type
+2620 compiler.err.cant.resolve.args=\
+2621     cannot find symbol\n\
+2622     symbol: {0} {1}({3})
+2623 
+2624 # 0: kind name, 1: name, 2: unused, 3: list of type
+2625 compiler.misc.cant.resolve.args=\
+2626     cannot find symbol\n\
+2627     symbol: {0} {1}({3})
+2628 
+2629 # 0: kind name, 1: name, 2: list of type, 3: list of type
+2630 compiler.err.cant.resolve.args.params=\
+2631     cannot find symbol\n\
+2632     symbol: {0} &lt;{2}&gt;{1}({3})
+2633 
+2634 ## arguments from {0} to {3} have the same meaning as above
+2635 ## The fifth argument {4} is a location subdiagnostic (see below)
+2636 # 0: kind name, 1: name, 2: unused, 3: unused, 4: message segment
+2637 compiler.err.cant.resolve.location=\
+2638     cannot find symbol\n\
+2639     symbol:   {0} {1}\n\
+2640     location: {4}
+2641 
+2642 # 0: kind name, 1: name, 2: unused, 3: list of type, 4: message segment
+2643 compiler.err.cant.resolve.location.args=\
+2644     cannot find symbol\n\
+2645     symbol:   {0} {1}({3})\n\
+2646     location: {4}
+2647 
+2648 # 0: kind name, 1: name, 2: list of type, 3: list, 4: message segment
+2649 compiler.err.cant.resolve.location.args.params=\
+2650     cannot find symbol\n\
+2651     symbol:   {0} &lt;{2}&gt;{1}({3})\n\
+2652     location: {4}
+2653 
+2654 ### Following are replicated/used for method reference diagnostics
+2655 
+2656 # 0: kind name, 1: name, 2: unused, 3: list of type, 4: message segment
+2657 compiler.misc.cant.resolve.location.args=\
+2658     cannot find symbol\n\
+2659     symbol:   {0} {1}({3})\n\
+2660     location: {4}
+2661 
+2662 # 0: kind name, 1: name, 2: list of type, 3: list, 4: message segment
+2663 compiler.misc.cant.resolve.location.args.params=\
+2664     cannot find symbol\n\
+2665     symbol:   {0} &lt;{2}&gt;{1}({3})\n\
+2666     location: {4}
+2667 
+2668 ##a location subdiagnostic is composed as follows:
+2669 ## The first argument {0} is the location &quot;kindname&quot; (e.g. &#39;constructor&#39;, &#39;field&#39;, etc.)
+2670 ## The second argument {1} is the location name
+2671 ## The third argument {2} is the location type (only when {1} is a variable name)
+2672 
+2673 # 0: kind name, 1: type or symbol, 2: unused
+2674 compiler.misc.location=\
+2675     {0} {1}
+2676 
+2677 # 0: kind name, 1: symbol, 2: type
+2678 compiler.misc.location.1=\
+2679     {0} {1} of type {2}
+2680 
+2681 ## The following are all possible string for &quot;kindname&quot;.
+2682 ## They should be called whatever the JLS calls them after it been translated
+2683 ## to the appropriate language.
+2684 # compiler.misc.kindname.constructor=\
+2685 #     static member
+2686 compiler.misc.kindname.annotation=\
+2687     @interface
+2688 
+2689 compiler.misc.kindname.constructor=\
+2690     constructor
+2691 
+2692 compiler.misc.kindname.enum=\
+2693     enum
+2694 
+2695 compiler.misc.kindname.interface=\
+2696     interface
+2697 
+2698 compiler.misc.kindname.static=\
+2699     static
+2700 
+2701 compiler.misc.kindname.type.variable=\
+2702     type variable
+2703 
+2704 compiler.misc.kindname.type.variable.bound=\
+2705     bound of type variable
+2706 
+2707 compiler.misc.kindname.variable=\
+2708     variable
+2709 
+2710 compiler.misc.kindname.value=\
+2711     value
+2712 
+2713 compiler.misc.kindname.method=\
+2714     method
+2715 
+2716 compiler.misc.kindname.class=\
+2717     class
+2718 
+2719 compiler.misc.kindname.package=\
+2720     package
+2721 
+2722 compiler.misc.kindname.module=\
+2723     module
+2724 
+2725 compiler.misc.kindname.static.init=\
+2726     static initializer
+2727 
+2728 compiler.misc.kindname.instance.init=\
+2729     instance initializer
+2730 
+2731 compiler.misc.kindname.record.component=\
+2732     record component
+2733 
+2734 compiler.misc.kindname.record=\
+2735     record
+2736 
+2737 #####
+2738 
+2739 compiler.misc.no.args=\
+2740     no arguments
+2741 
+2742 # 0: message segment
+2743 compiler.err.override.static=\
+2744     {0}\n\
+2745     overriding method is static
+2746 
+2747 # 0: message segment, 1: set of flag
+2748 compiler.err.override.meth=\
+2749     {0}\n\
+2750     overridden method is {1}
+2751 
+2752 # 0: message segment, 1: type
+2753 compiler.err.override.meth.doesnt.throw=\
+2754     {0}\n\
+2755     overridden method does not throw {1}
+2756 
+2757 # In the following string {1} is a space separated list of Java Keywords, as
+2758 # they would have been declared in the source code
+2759 # 0: message segment, 1: set of flag or string
+2760 compiler.err.override.weaker.access=\
+2761     {0}\n\
+2762     attempting to assign weaker access privileges; was {1}
+2763 
+2764 # 0: message segment, 1: type, 2: type
+2765 compiler.err.override.incompatible.ret=\
+2766     {0}\n\
+2767     return type {1} is not compatible with {2}
+2768 
+2769 # 0: message segment, 1: type, 2: type
+2770 compiler.warn.override.unchecked.ret=\
+2771     {0}\n\
+2772     return type requires unchecked conversion from {1} to {2}
+2773 
+2774 # 0: message segment, 1: type
+2775 compiler.warn.override.unchecked.thrown=\
+2776     {0}\n\
+2777     overridden method does not throw {1}
+2778 
+2779 # 0: symbol
+2780 compiler.warn.override.equals.but.not.hashcode=\
+2781     Class {0} overrides equals, but neither it nor any superclass overrides hashCode method
+2782 
+2783 ## The following are all possible strings for the first argument ({0}) of the
+2784 ## above strings.
+2785 # 0: symbol, 1: symbol, 2: symbol, 3: symbol
+2786 compiler.misc.cant.override=\
+2787     {0} in {1} cannot override {2} in {3}
+2788 
+2789 # 0: symbol, 1: symbol, 2: symbol, 3: symbol
+2790 compiler.misc.cant.hide=\
+2791     {0} in {1} cannot hide {2} in {3}
+2792 
+2793 # 0: symbol, 1: symbol, 2: symbol, 3: symbol
+2794 compiler.misc.cant.implement=\
+2795     {0} in {1} cannot implement {2} in {3}
+2796 
+2797 # 0: symbol, 1: symbol, 2: symbol, 3: symbol
+2798 compiler.misc.clashes.with=\
+2799     {0} in {1} clashes with {2} in {3}
+2800 
+2801 # 0: symbol, 1: symbol, 2: symbol, 3: symbol
+2802 compiler.misc.unchecked.override=\
+2803     {0} in {1} overrides {2} in {3}
+2804 
+2805 # 0: symbol, 1: symbol, 2: symbol, 3: symbol
+2806 compiler.misc.unchecked.implement=\
+2807     {0} in {1} implements {2} in {3}
+2808 
+2809 # 0: symbol, 1: symbol, 2: symbol, 3: symbol
+2810 compiler.misc.unchecked.clash.with=\
+2811     {0} in {1} overrides {2} in {3}
+2812 
+2813 # 0: symbol, 1: symbol, 2: symbol, 3: symbol
+2814 compiler.misc.varargs.override=\
+2815     {0} in {1} overrides {2} in {3}
+2816 
+2817 # 0: symbol, 1: symbol, 2: symbol, 3: symbol
+2818 compiler.misc.varargs.implement=\
+2819     {0} in {1} implements {2} in {3}
+2820 
+2821 # 0: symbol, 1: symbol, 2: symbol, 3: symbol
+2822 compiler.misc.varargs.clash.with=\
+2823     {0} in {1} overrides {2} in {3}
+2824 
+2825 # 0: kind name, 1: symbol, 2: symbol, 3: message segment
+2826 compiler.misc.inapplicable.method=\
+2827     {0} {1}.{2} is not applicable\n\
+2828     ({3})
+2829 
+2830 ########################################
+2831 # Diagnostics for language feature changes.
+2832 # Such diagnostics have a common template which can be customized by using a feature
+2833 # diagnostic fragment (one of those given below).
+2834 ########################################
+2835 
+2836 # 0: message segment (feature), 1: string (found version), 2: string (expected version)
+2837 compiler.err.feature.not.supported.in.source=\
+2838    {0} is not supported in -source {1}\n\
+2839     (use -source {2} or higher to enable {0})
+2840 
+2841 # 0: message segment (feature), 1: string (found version), 2: string (expected version)
+2842 compiler.err.feature.not.supported.in.source.plural=\
+2843    {0} are not supported in -source {1}\n\
+2844     (use -source {2} or higher to enable {0})
+2845 
+2846 # 0: message segment (feature), 1: string (found version), 2: string (expected version)
+2847 compiler.misc.feature.not.supported.in.source=\
+2848    {0} is not supported in -source {1}\n\
+2849     (use -source {2} or higher to enable {0})
+2850 
+2851 # 0: message segment (feature), 1: string (found version), 2: string (expected version)
+2852 compiler.misc.feature.not.supported.in.source.plural=\
+2853    {0} are not supported in -source {1}\n\
+2854     (use -source {2} or higher to enable {0})
+2855 
+2856 # 0: message segment (feature)
+2857 compiler.err.preview.feature.disabled=\
+2858    {0} is a preview feature and is disabled by default.\n\
+2859    (use --enable-preview to enable {0})
+2860 
+2861 # 0: message segment (feature)
+2862 compiler.err.preview.feature.disabled.plural=\
+2863    {0} are a preview feature and are disabled by default.\n\
+2864    (use --enable-preview to enable {0})
+2865 
+2866 # 0: file object (classfile), 1: string (expected version)
+2867 compiler.err.preview.feature.disabled.classfile=\
+2868    classfile for {0} uses preview features of Java SE {1}.\n\
+2869    (use --enable-preview to allow loading of classfiles which contain preview features)
+2870 
+2871 # 0: message segment (feature)
+2872 compiler.warn.preview.feature.use=\
+2873    {0} is a preview feature and may be removed in a future release.
+2874 
+2875 # 0: message segment (feature)
+2876 compiler.warn.preview.feature.use.plural=\
+2877    {0} are a preview feature and may be removed in a future release.
+2878 
+2879 # 0: file object (classfile), 1: string (expected version)
+2880 compiler.warn.preview.feature.use.classfile=\
+2881    classfile for {0} uses preview features of Java SE {1}.
+2882 
+2883 
+2884 compiler.misc.feature.modules=\
+2885     modules
+2886 
+2887 compiler.misc.feature.diamond.and.anon.class=\
+2888     &#39;&#39;&lt;&gt;&#39;&#39; with anonymous inner classes
+2889 
+2890 compiler.misc.feature.var.in.try.with.resources=\
+2891     variables in try-with-resources
+2892 
+2893 compiler.misc.feature.type.annotations=\
+2894     type annotations
+2895 
+2896 compiler.misc.feature.annotations.after.type.params=\
+2897     annotations after method type parameters
+2898 
+2899 compiler.misc.feature.repeatable.annotations=\
+2900     repeated annotations
+2901 
+2902 compiler.misc.feature.diamond=\
+2903     diamond operator
+2904 
+2905 compiler.misc.feature.lambda=\
+2906     lambda expressions
+2907 
+2908 compiler.misc.feature.method.references=\
+2909     method references
+2910 
+2911 compiler.misc.feature.default.methods=\
+2912     default methods
+2913 
+2914 compiler.misc.feature.intersection.types.in.cast=\
+2915     intersection types
+2916 
+2917 compiler.misc.feature.static.intf.methods=\
+2918     static interface methods
+2919 
+2920 compiler.misc.feature.static.intf.method.invoke=\
+2921     static interface method invocations
+2922 
+2923 compiler.misc.feature.private.intf.methods=\
+2924     private interface methods
+2925 
+2926 compiler.misc.feature.text.blocks=\
+2927     text blocks
+2928 
+2929 compiler.misc.feature.multiple.case.labels=\
+2930     multiple case labels
+2931 
+2932 compiler.misc.feature.switch.rules=\
+2933     switch rules
+2934 
+2935 compiler.misc.feature.switch.expressions=\
+2936     switch expressions
+2937 
+2938 compiler.misc.feature.var.syntax.in.implicit.lambda=\
+2939     var syntax in implicit lambdas
+2940 
+2941 compiler.misc.feature.pattern.matching.instanceof=\
+2942     pattern matching in instanceof
+2943 
+2944 compiler.misc.feature.reifiable.types.instanceof=\
+2945     reifiable types in instanceof
+2946 
+2947 compiler.misc.feature.records=\
+2948     records
+2949 
+2950 compiler.misc.feature.sealed.classes=\
+2951     sealed classes
+2952 
+2953 compiler.warn.underscore.as.identifier=\
+2954     as of release 9, &#39;&#39;_&#39;&#39; is a keyword, and may not be used as an identifier
+2955 
+2956 compiler.err.underscore.as.identifier=\
+2957     as of release 9, &#39;&#39;_&#39;&#39; is a keyword, and may not be used as an identifier
+2958 
+2959 compiler.err.underscore.as.identifier.in.lambda=\
+2960     &#39;&#39;_&#39;&#39; used as an identifier\n\
+2961     (use of &#39;&#39;_&#39;&#39; as an identifier is forbidden for lambda parameters)
+2962 
+2963 compiler.err.enum.as.identifier=\
+2964     as of release 5, &#39;&#39;enum&#39;&#39; is a keyword, and may not be used as an identifier
+2965 
+2966 compiler.err.assert.as.identifier=\
+2967     as of release 1.4, &#39;&#39;assert&#39;&#39; is a keyword, and may not be used as an identifier
+2968 
+2969 # TODO 308: make a better error message
+2970 compiler.err.this.as.identifier=\
+2971     as of release 8, &#39;&#39;this&#39;&#39; is allowed as the parameter name for the receiver type only\n\
+2972     which has to be the first parameter, and cannot be a lambda parameter
+2973 
+2974 compiler.err.receiver.parameter.not.applicable.constructor.toplevel.class=\
+2975     receiver parameter not applicable for constructor of top-level class
+2976 
+2977 # TODO 308: make a better error message
+2978 # 0: annotation
+2979 compiler.err.cant.type.annotate.scoping.1=\
+2980     scoping construct cannot be annotated with type-use annotation: {0}
+2981 
+2982 # TODO 308: make a better error message
+2983 # 0: list of annotation
+2984 compiler.err.cant.type.annotate.scoping=\
+2985     scoping construct cannot be annotated with type-use annotations: {0}
+2986 
+2987 # 0: type, 1: type
+2988 compiler.err.incorrect.receiver.name=\
+2989     the receiver name does not match the enclosing class type\n\
+2990     required: {0}\n\
+2991     found:    {1}
+2992 
+2993 # 0: type, 1: type
+2994 compiler.err.incorrect.receiver.type=\
+2995     the receiver type does not match the enclosing class type\n\
+2996     required: {0}\n\
+2997     found:    {1}
+2998 
+2999 # 0: type, 1: type
+3000 compiler.err.incorrect.constructor.receiver.type=\
+3001     the receiver type does not match the enclosing outer class type\n\
+3002     required: {0}\n\
+3003     found:    {1}
+3004 
+3005 # 0: type, 1: type
+3006 compiler.err.incorrect.constructor.receiver.name=\
+3007     the receiver name does not match the enclosing outer class type\n\
+3008     required: {0}\n\
+3009     found:    {1}
+3010 
+3011 compiler.err.no.annotations.on.dot.class=\
+3012     no annotations are allowed in the type of a class literal
+3013 
+3014 ########################################
+3015 # Diagnostics for verbose resolution
+3016 # used by Resolve (debug only)
+3017 ########################################
+3018 
+3019 # 0: number, 1: symbol, 2: unused
+3020 compiler.misc.applicable.method.found=\
+3021     #{0} applicable method found: {1}
+3022 
+3023 # 0: number, 1: symbol, 2: message segment
+3024 compiler.misc.applicable.method.found.1=\
+3025     #{0} applicable method found: {1}\n\
+3026     ({2})
+3027 
+3028 # 0: number, 1: symbol, 2: message segment
+3029 compiler.misc.not.applicable.method.found=\
+3030     #{0} not applicable method found: {1}\n\
+3031     ({2})
+3032 
+3033 # 0: type
+3034 compiler.misc.partial.inst.sig=\
+3035     partially instantiated to: {0}
+3036 
+3037 # 0: name, 1: symbol, 2: number, 3: string (method resolution phase), 4: list of type or message segment, 5: list of type or message segment
+3038 compiler.note.verbose.resolve.multi=\
+3039     resolving method {0} in type {1} to candidate {2}\n\
+3040     phase: {3}\n\
+3041     with actuals: {4}\n\
+3042     with type-args: {5}\n\
+3043     candidates:
+3044 
+3045 # 0: name, 1: symbol, 2: unused, 3: string (method resolution phase), 4: list of type or message segment, 5: list of type or message segment
+3046 compiler.note.verbose.resolve.multi.1=\
+3047     erroneous resolution for method {0} in type {1}\n\
+3048     phase: {3}\n\
+3049     with actuals: {4}\n\
+3050     with type-args: {5}\n\
+3051     candidates:
+3052 
+3053 # 0: symbol, 1: type, 2: type
+3054 compiler.note.deferred.method.inst=\
+3055     Deferred instantiation of method {0}\n\
+3056     instantiated signature: {1}\n\
+3057     target-type: {2}
+3058 
+3059 ########################################
+3060 # Diagnostics for lambda deduplication
+3061 # used by LambdaToMethod (debug only)
+3062 ########################################
+3063 
+3064 # 0: symbol
+3065 compiler.note.verbose.l2m.deduplicate=\
+3066     deduplicating lambda implementation method {0}
+3067 
+3068 ########################################
+3069 # Diagnostics for where clause implementation
+3070 # used by the RichDiagnosticFormatter.
+3071 ########################################
+3072 
+3073 compiler.misc.type.null=\
+3074     &lt;null&gt;
+3075 
+3076 # X#n (where n is an int id) is disambiguated tvar name
+3077 # 0: name, 1: number
+3078 compiler.misc.type.var=\
+3079     {0}#{1}
+3080 
+3081 # CAP#n (where n is an int id) is an abbreviation for &#39;captured type&#39;
+3082 # 0: number
+3083 compiler.misc.captured.type=\
+3084     CAP#{0}
+3085 
+3086 # &lt;INT#n&gt; (where n is an int id) is an abbreviation for &#39;intersection type&#39;
+3087 # 0: number
+3088 compiler.misc.intersection.type=\
+3089     INT#{0}
+3090 
+3091 # where clause for captured type: contains upper (&#39;extends {1}&#39;) and lower
+3092 # (&#39;super {2}&#39;) bound along with the wildcard that generated this captured type ({3})
+3093 # 0: type, 1: type, 2: type, 3: type
+3094 compiler.misc.where.captured=\
+3095     {0} extends {1} super: {2} from capture of {3}
+3096 
+3097 # compact where clause for captured type: contains upper (&#39;extends {1}&#39;) along
+3098 # with the wildcard that generated this captured type ({3})
+3099 # 0: type, 1: type, 2: unused, 3: type
+3100 compiler.misc.where.captured.1=\
+3101     {0} extends {1} from capture of {3}
+3102 
+3103 # where clause for type variable: contains upper bound(s) (&#39;extends {1}&#39;) along with
+3104 # the kindname ({2}) and location ({3}) in which the typevar has been declared
+3105 # 0: type, 1: list of type, 2: symbol kind, 3: symbol
+3106 compiler.misc.where.typevar=\
+3107     {0} extends {1} declared in {2} {3}
+3108 
+3109 # compact where clause for type variable: contains the kindname ({2}) and location ({3})
+3110 # in which the typevar has been declared
+3111 # 0: type, 1: list of type, 2: symbol kind, 3: symbol
+3112 compiler.misc.where.typevar.1=\
+3113     {0} declared in {2} {3}
+3114 
+3115 # where clause for fresh type variable: contains upper bound(s) (&#39;extends {1}&#39;).
+3116 # Since a fresh type-variable is synthetic - there&#39;s no location/kindname here.
+3117 # 0: type, 1: list of type
+3118 compiler.misc.where.fresh.typevar=\
+3119     {0} extends {1}
+3120 
+3121 # where clause for type variable: contains all the upper bound(s) (&#39;extends {1}&#39;)
+3122 # of this intersection type
+3123 # 0: type, 1: list of type
+3124 compiler.misc.where.intersection=\
+3125     {0} extends {1}
+3126 
+3127 ### Where clause headers ###
+3128 compiler.misc.where.description.captured=\
+3129     where {0} is a fresh type-variable:
+3130 
+3131 # 0: set of type
+3132 compiler.misc.where.description.typevar=\
+3133     where {0} is a type-variable:
+3134 
+3135 # 0: set of type
+3136 compiler.misc.where.description.intersection=\
+3137     where {0} is an intersection type:
+3138 
+3139 # 0: set of type
+3140 compiler.misc.where.description.captured.1=\
+3141     where {0} are fresh type-variables:
+3142 
+3143 # 0: set of type
+3144 compiler.misc.where.description.typevar.1=\
+3145     where {0} are type-variables:
+3146 
+3147 # 0: set of type
+3148 compiler.misc.where.description.intersection.1=\
+3149     where {0} are intersection types:
+3150 
+3151 ###
+3152 # errors related to doc comments
+3153 
+3154 compiler.err.dc.bad.entity=\
+3155     bad HTML entity
+3156 
+3157 compiler.err.dc.bad.inline.tag=\
+3158     incorrect use of inline tag
+3159 
+3160 compiler.err.dc.identifier.expected=\
+3161     identifier expected
+3162 
+3163 compiler.err.dc.malformed.html=\
+3164     malformed HTML
+3165 
+3166 compiler.err.dc.missing.semicolon=\
+3167     semicolon missing
+3168 
+3169 compiler.err.dc.no.content=\
+3170     no content
+3171 
+3172 compiler.err.dc.no.tag.name=\
+3173     no tag name after &#39;@&#39;
+3174 
+3175 compiler.err.dc.gt.expected=\
+3176     &#39;&#39;&gt;&#39;&#39; expected
+3177 
+3178 compiler.err.dc.ref.bad.parens=\
+3179     &#39;&#39;)&#39;&#39; missing in reference
+3180 
+3181 compiler.err.dc.ref.syntax.error=\
+3182     syntax error in reference
+3183 
+3184 compiler.err.dc.ref.unexpected.input=\
+3185     unexpected text
+3186 
+3187 compiler.err.dc.unexpected.content=\
+3188     unexpected content
+3189 
+3190 compiler.err.dc.unterminated.inline.tag=\
+3191     unterminated inline tag
+3192 
+3193 compiler.err.dc.unterminated.signature=\
+3194     unterminated signature
+3195 
+3196 compiler.err.dc.unterminated.string=\
+3197     unterminated string
+3198 
+3199 ###
+3200 # errors related to modules
+3201 
+3202 compiler.err.expected.module=\
+3203     expected &#39;&#39;module&#39;&#39;
+3204 
+3205 # 0: symbol
+3206 compiler.err.module.not.found=\
+3207     module not found: {0}
+3208 
+3209 # 0: symbol
+3210 compiler.warn.module.not.found=\
+3211     module not found: {0}
+3212 
+3213 compiler.err.too.many.modules=\
+3214     too many module declarations found
+3215 
+3216 compiler.err.module.not.found.on.module.source.path=\
+3217     module not found on module source path
+3218 
+3219 compiler.err.not.in.module.on.module.source.path=\
+3220     not in a module on the module source path
+3221 
+3222 # 0: symbol
+3223 compiler.err.duplicate.module=\
+3224     duplicate module: {0}
+3225 
+3226 # 0: symbol
+3227 compiler.err.duplicate.requires=\
+3228     duplicate requires: {0}
+3229 
+3230 # 0: symbol
+3231 compiler.err.conflicting.exports=\
+3232     duplicate or conflicting exports: {0}
+3233 
+3234 # 0: symbol
+3235 compiler.err.conflicting.opens=\
+3236     duplicate or conflicting opens: {0}
+3237 
+3238 # 0: symbol
+3239 compiler.err.conflicting.exports.to.module=\
+3240     duplicate or conflicting exports to module: {0}
+3241 
+3242 # 0: symbol
+3243 compiler.err.conflicting.opens.to.module=\
+3244     duplicate or conflicting opens to module: {0}
+3245 
+3246 compiler.err.no.opens.unless.strong=\
+3247     &#39;&#39;opens&#39;&#39; only allowed in strong modules
+3248 
+3249 # 0: symbol
+3250 compiler.err.repeated.provides.for.service=\
+3251     multiple &#39;&#39;provides&#39;&#39; for service {0}
+3252 
+3253 # 0: symbol, 1: symbol
+3254 compiler.err.duplicate.provides=\
+3255     duplicate provides: service {0}, implementation {1}
+3256 
+3257 # 0: symbol
+3258 compiler.err.duplicate.uses=\
+3259     duplicate uses: {0}
+3260 
+3261 # 0: symbol
+3262 compiler.err.service.implementation.is.abstract=\
+3263     the service implementation is an abstract class: {0}
+3264 
+3265 compiler.err.service.implementation.must.be.subtype.of.service.interface=\
+3266     the service implementation type must be a subtype of the service interface type, or \
+3267     have a public static no-args method named &quot;provider&quot; returning the service implementation
+3268 
+3269 compiler.err.service.implementation.provider.return.must.be.subtype.of.service.interface=\
+3270     the &quot;provider&quot; method return type must be a subtype of the service interface type
+3271 
+3272 # 0: symbol
+3273 compiler.err.service.implementation.is.inner=\
+3274     the service implementation is an inner class: {0}
+3275 
+3276 # 0: symbol
+3277 compiler.err.service.definition.is.enum=\
+3278     the service definition is an enum: {0}
+3279 
+3280 # 0: symbol
+3281 compiler.err.service.implementation.doesnt.have.a.no.args.constructor=\
+3282     the service implementation does not have a default constructor: {0}
+3283 
+3284 # 0: symbol
+3285 compiler.err.service.implementation.no.args.constructor.not.public=\
+3286     the no arguments constructor of the service implementation is not public: {0}
+3287 
+3288 # 0: symbol
+3289 compiler.err.package.empty.or.not.found=\
+3290     package is empty or does not exist: {0}
+3291 
+3292 # 0: symbol
+3293 compiler.warn.package.empty.or.not.found=\
+3294     package is empty or does not exist: {0}
+3295 
+3296 compiler.err.no.output.dir=\
+3297     no class output directory specified
+3298 
+3299 compiler.err.unnamed.pkg.not.allowed.named.modules=\
+3300     unnamed package is not allowed in named modules
+3301 
+3302 # 0: name, 1: name
+3303 compiler.err.module.name.mismatch=\
+3304     module name {0} does not match expected name {1}
+3305 
+3306 # 0: name, 1: name
+3307 compiler.misc.module.name.mismatch=\
+3308     module name {0} does not match expected name {1}
+3309 
+3310 # 0: name
+3311 compiler.err.module.non.zero.opens=\
+3312     open module {0} has non-zero opens_count
+3313 
+3314 # 0: name
+3315 compiler.misc.module.non.zero.opens=\
+3316     open module {0} has non-zero opens_count
+3317 
+3318 compiler.err.module.decl.sb.in.module-info.java=\
+3319     module declarations should be in a file named module-info.java
+3320 
+3321 # 0: set of string
+3322 compiler.err.too.many.patched.modules=\
+3323     too many patched modules ({0}), use --module-source-path
+3324 
+3325 # 0: name, 1: name
+3326 compiler.err.file.patched.and.msp=\
+3327     file accessible from both --patch-module and --module-source-path, \
+3328     but belongs to a different module on each path: {0}, {1}
+3329 
+3330 compiler.err.processorpath.no.processormodulepath=\
+3331     illegal combination of -processorpath and --processor-module-path
+3332 
+3333 # 0: symbol
+3334 compiler.err.package.in.other.module=\
+3335     package exists in another module: {0}
+3336 
+3337 # 0: symbol, 1: name, 2: symbol, 3: symbol
+3338 compiler.err.package.clash.from.requires=\
+3339     module {0} reads package {1} from both {2} and {3}
+3340 
+3341 # 0: name, 1: symbol, 2: symbol
+3342 compiler.err.package.clash.from.requires.in.unnamed=\
+3343     the unnamed module reads package {0} from both {1} and {2}
+3344 
+3345 # 0: string
+3346 compiler.err.module.not.found.in.module.source.path=\
+3347     module {0} not found in module source path
+3348 
+3349 compiler.err.output.dir.must.be.specified.with.dash.m.option=\
+3350     class output directory must be specified if -m option is used
+3351 
+3352 compiler.err.modulesourcepath.must.be.specified.with.dash.m.option=\
+3353     module source path must be specified if -m option is used
+3354 
+3355 # 0: symbol
+3356 compiler.err.service.implementation.not.in.right.module=\
+3357     service implementation must be defined in the same module as the provides directive
+3358 
+3359 # 0: symbol
+3360 compiler.err.cyclic.requires=\
+3361     cyclic dependence involving {0}
+3362 
+3363 # 0: fragment, 1: name
+3364 compiler.err.duplicate.module.on.path=\
+3365     duplicate module on {0}\nmodule in {1}
+3366 
+3367 # 0: option name, 1: string
+3368 compiler.warn.bad.name.for.option=\
+3369     bad name in value for {0} option: &#39;&#39;{1}&#39;&#39;
+3370 
+3371 # 0: option name, 1: string
+3372 compiler.err.bad.name.for.option=\
+3373     bad name in value for {0} option: &#39;&#39;{1}&#39;&#39;
+3374 
+3375 # 0: option name, 1: symbol
+3376 compiler.warn.module.for.option.not.found=\
+3377     module name in {0} option not found: {1}
+3378 
+3379 compiler.err.addmods.all.module.path.invalid=\
+3380     --add-modules ALL-MODULE-PATH can only be used when compiling the unnamed module or \
+3381     when compiling in the context of an automatic module
+3382 
+3383 # 0: symbol
+3384 compiler.err.add.exports.with.release=\
+3385     exporting a package from system module {0} is not allowed with --release
+3386 
+3387 # 0: symbol
+3388 compiler.err.add.reads.with.release=\
+3389     adding read edges for system module {0} is not allowed with --release
+3390 
+3391 compiler.warn.addopens.ignored=\
+3392     --add-opens has no effect at compile time
+3393 
+3394 compiler.misc.locn.module_source_path=\
+3395     module source path
+3396 
+3397 compiler.misc.locn.upgrade_module_path=\
+3398     upgrade module path
+3399 
+3400 compiler.misc.locn.system_modules=\
+3401     system modules
+3402 
+3403 compiler.misc.locn.module_path=\
+3404     application module path
+3405 
+3406 compiler.misc.cant.resolve.modules=\
+3407     cannot resolve modules
+3408 
+3409 compiler.misc.bad.requires.flag=\
+3410     bad requires flag: {0}
+3411 
+3412 # 0: string
+3413 compiler.err.invalid.module.specifier=\
+3414     module specifier not allowed: {0}
+3415 
+3416 # 0: symbol
+3417 compiler.warn.service.provided.but.not.exported.or.used=\
+3418     service interface provided but not exported or used
+3419 
+3420 # 0: kind name, 1: symbol, 2: symbol
+3421 compiler.warn.leaks.not.accessible=\
+3422     {0} {1} in module {2} is not accessible to clients that require this module
+3423 # 0: kind name, 1: symbol, 2: symbol
+3424 compiler.warn.leaks.not.accessible.unexported=\
+3425     {0} {1} in module {2} is not exported
+3426 # 0: kind name, 1: symbol, 2: symbol
+3427 compiler.warn.leaks.not.accessible.not.required.transitive=\
+3428     {0} {1} in module {2} is not indirectly exported using &#39;requires transitive&#39;
+3429 # 0: kind name, 1: symbol, 2: symbol
+3430 compiler.warn.leaks.not.accessible.unexported.qualified=\
+3431     {0} {1} in module {2} may not be visible to all clients that require this module
+3432 
+3433 ###
+3434 # errors related to options
+3435 
+3436 # 0: string, 1: string
+3437 compiler.err.illegal.argument.for.option=\
+3438     illegal argument for {0}: {1}
+3439 
+3440 compiler.err.match.binding.exists=\
+3441     illegal attempt to redefine an existing match binding
+3442 
+3443 compiler.err.switch.null.not.allowed=\
+3444     null label in case is not allowed
+3445 
+3446 compiler.err.switch.case.unexpected.statement=\
+3447     unexpected statement in case, expected is an expression, a block or a throw statement
+3448 
+3449 compiler.err.switch.mixing.case.types=\
+3450     different case kinds used in the switch
+3451 
+3452 ###
+3453 # errors related to sealed classes
+3454 
+3455 # permits clause
+3456 # 0: fragment
+3457 compiler.err.invalid.permits.clause=\
+3458     invalid permits clause\n\
+3459     ({0})
+3460 
+3461 # 0: string
+3462 compiler.misc.class.is.not.sealed=\
+3463     {0} must be sealed
+3464 
+3465 # 0: type
+3466 compiler.misc.is.a.type.variable=\
+3467     must not include type variables: {0}
+3468 
+3469 # 0: type
+3470 compiler.misc.is.duplicated=\
+3471     must not contain duplicates: {0}
+3472 
+3473 # 0: type
+3474 compiler.misc.doesnt.extend.sealed=\
+3475     subclass {0} must extend sealed class
+3476 
+3477 compiler.misc.must.not.be.same.class=\
+3478     illegal self-reference in permits clause
+3479 
+3480 # 0: type
+3481 compiler.misc.must.not.be.supertype=\
+3482     illegal reference to supertype {0}
+3483 
+3484 # other sealed types related errors
+3485 
+3486 compiler.err.sealed.class.must.have.subclasses=\
+3487     sealed class must have subclasses
+3488 
+3489 # errors in subclasses of sealed classes
+3490 # 0: symbol
+3491 compiler.err.cant.inherit.from.sealed=\
+3492     class is not allowed to extend sealed class: {0} \
+3493     (as it is not listed in its &#39;permits&#39; clause)
+3494 
+3495 # 0: symbol
+3496 compiler.err.class.in.unnamed.module.cant.extend.sealed.in.diff.package=\
+3497     class {0} in unnamed module cannot extend a sealed class in a different package
+3498 
+3499 # 0: symbol, 1: symbol
+3500 compiler.err.class.in.module.cant.extend.sealed.in.diff.module=\
+3501     class {0} in module {1} cannot extend a sealed class in a different module
+3502 
+3503 # 0: symbol
+3504 compiler.err.non.sealed.with.no.sealed.supertype=\
+3505     non-sealed modifier not allowed here\n\
+3506     (class {0} does not have any sealed supertypes)
+3507 
+3508 compiler.err.non.sealed.sealed.or.final.expected=\
+3509     sealed, non-sealed or final modifiers expected
+3510 
+3511 compiler.err.non.sealed.or.sealed.expected=\
+3512     sealed or non-sealed modifiers expected
+3513 
+3514 compiler.err.sealed.or.non.sealed.local.classes.not.allowed=\
+3515     sealed or non-sealed local classes are not allowed
+3516 
+3517 # 0: fragment
+3518 compiler.err.local.classes.cant.extend.sealed=\
+3519     {0} classes must not extend sealed classes\
+3520 
+3521 compiler.misc.anonymous=\
+3522     anonymous
+3523 
+3524 compiler.misc.local=\
+3525     local
+3526 
+3527 ###
+3528 # errors related to records
+3529 
+3530 # record components
+3531 compiler.err.record.cant.declare.field.modifiers=\
+3532     record components cannot have modifiers
+3533 
+3534 # 0: symbol
+3535 compiler.err.illegal.record.component.name=\
+3536     illegal record component name {0}
+3537 
+3538 compiler.err.record.component.and.old.array.syntax=\
+3539     legacy array notation not allowed on record components
+3540 
+3541 # accessor methods
+3542 # 0: symbol, 1: fragment
+3543 compiler.err.invalid.accessor.method.in.record=\
+3544     invalid accessor method in record {0}\n\
+3545     ({1})
+3546 
+3547 compiler.misc.method.must.be.public=\
+3548     accessor method must be public
+3549 
+3550 # 0: symbol, 1: symbol
+3551 compiler.misc.accessor.return.type.doesnt.match=\
+3552     return type of accessor method {0} must match the type of record component {1}
+3553 
+3554 compiler.misc.accessor.method.cant.throw.exception=\
+3555     throws clause not allowed for accessor method
+3556 
+3557 compiler.misc.accessor.method.must.not.be.generic=\
+3558     accessor method must not be generic
+3559 
+3560 compiler.misc.accessor.method.must.not.be.static=\
+3561     accessor method must not be static
+3562 
+3563 # canonical constructors
+3564 # 0: fragment, 1: name, 2: fragment
+3565 compiler.err.invalid.canonical.constructor.in.record=\
+3566     invalid {0} constructor in record {1}\n\
+3567     ({2})
+3568 
+3569 compiler.misc.canonical=\
+3570     canonical
+3571 
+3572 compiler.misc.compact=\
+3573     compact
+3574 
+3575 # 0: fragment
+3576 compiler.misc.throws.clause.not.allowed.for.canonical.constructor=\
+3577     throws clause not allowed for {0} constructor
+3578 
+3579 compiler.misc.canonical.with.name.mismatch=\
+3580     invalid parameter names in canonical constructor
+3581 
+3582 compiler.misc.canonical.cant.have.return.statement=\
+3583     compact constructor must not have return statements
+3584 
+3585 compiler.misc.canonical.must.not.declare.type.variables=\
+3586     canonical constructor must not declare type variables
+3587 
+3588 compiler.misc.type.must.be.identical.to.corresponding.record.component.type=\
+3589     type and arity must match that of the corresponding record component\
+3590 
+3591 compiler.misc.canonical.must.not.contain.explicit.constructor.invocation=\
+3592     canonical constructor must not contain explicit constructor invocation
+3593 
+3594 # 0: set of flag or string
+3595 compiler.misc.canonical.must.not.have.stronger.access=\
+3596     attempting to assign stronger access privileges; was {0}
+3597 
+3598 # other
+3599 compiler.err.record.cannot.declare.instance.fields=\
+3600     field declaration must be static\n\
+3601     (consider replacing field with record component)
+3602 
+3603 # 0: symbol
+3604 compiler.err.invalid.supertype.record=\
+3605     classes cannot directly extend {0}
+3606 
+3607 # 0: symbol
+3608 compiler.err.first.statement.must.be.call.to.another.constructor=\
+3609     constructor is not canonical, so its first statement must invoke another constructor of class {0}
+3610 
+3611 compiler.err.instance.initializer.not.allowed.in.records=\
+3612     instance initializers not allowed in records
+3613 
+3614 compiler.err.static.declaration.not.allowed.in.inner.classes=\
+3615     static declarations not allowed in inner classes
+3616 
+3617 compiler.err.record.header.expected=\
+3618     record header expected
+3619 
+3620 ############################################
+3621 # messages previously at javac.properties
+3622 
+3623 compiler.err.empty.A.argument=\
+3624     -A requires an argument; use &#39;&#39;-Akey&#39;&#39; or &#39;&#39;-Akey=value&#39;&#39;
+3625 
+3626 # 0: string
+3627 compiler.err.invalid.A.key=\
+3628     key in annotation processor option &#39;&#39;{0}&#39;&#39; is not a dot-separated sequence of identifiers
+3629 
+3630 # 0: string
+3631 compiler.err.invalid.flag=\
+3632     invalid flag: {0}
+3633 
+3634 compiler.err.profile.bootclasspath.conflict=\
+3635     profile and bootclasspath options cannot be used together
+3636 
+3637 # 0: string
+3638 compiler.err.invalid.profile=\
+3639     invalid profile: {0}
+3640 
+3641 # 0: string
+3642 compiler.err.invalid.target=\
+3643     invalid target release: {0}
+3644 
+3645 # 0: option name, 1: target
+3646 compiler.err.option.not.allowed.with.target=\
+3647     option {0} not allowed with target {1}
+3648 
+3649 # 0: string
+3650 compiler.err.option.too.many=\
+3651     option {0} can only be specified once
+3652 
+3653 compiler.err.no.source.files=\
+3654     no source files
+3655 
+3656 compiler.err.no.source.files.classes=\
+3657     no source files or class names
+3658 
+3659 # 0: string
+3660 compiler.err.req.arg=\
+3661     {0} requires an argument
+3662 
+3663 # 0: string
+3664 compiler.err.invalid.source=\
+3665     invalid source release: {0}
+3666 
+3667 # 0: string, 1: string
+3668 compiler.err.error.writing.file=\
+3669     error writing {0}; {1}
+3670 
+3671 compiler.err.sourcepath.modulesourcepath.conflict=\
+3672     cannot specify both --source-path and --module-source-path
+3673 
+3674 # 0: string, 1: target
+3675 compiler.warn.source.target.conflict=\
+3676     source release {0} requires target release {1}
+3677 
+3678 # 0: string, 1: target
+3679 compiler.warn.target.default.source.conflict=\
+3680     target release {0} conflicts with default source release {1}
+3681 
+3682 # 0: profile, 1: target
+3683 compiler.warn.profile.target.conflict=\
+3684     profile {0} is not valid for target release {1}
+3685 
+3686 # 0: string
+3687 compiler.err.file.not.directory=\
+3688     not a directory: {0}
+3689 
+3690 # 0: object
+3691 compiler.err.file.not.file=\
+3692     not a file: {0}
+3693 
+3694 compiler.err.two.class.loaders.1=\
+3695     javac is split between multiple class loaders: check your configuration
+3696 
+3697 # 0: url, 1: url
+3698 compiler.err.two.class.loaders.2=\
+3699     javac is split between multiple class loaders:\n\
+3700     one class comes from file: {0}\n\
+3701     while javac comes from {1}
+3702 
+3703 # 0: string, 1: string
+3704 compiler.err.bad.value.for.option=\
+3705     bad value for {0} option: &#39;&#39;{1}&#39;&#39;
+3706 
+3707 # 0: string
+3708 compiler.err.no.value.for.option=\
+3709     no value for {0} option
+3710 
+3711 # 0: string
+3712 compiler.err.repeated.value.for.patch.module=\
+3713     --patch-module specified more than once for module {0}
+3714 
+3715 # 0: string
+3716 compiler.err.repeated.value.for.module.source.path=\
+3717     --module-source-path specified more than once for module {0}
+3718 
+3719 compiler.err.multiple.values.for.module.source.path=\
+3720     --module-source-path specified more than once with a pattern argument
+3721 
+3722 # 0: string
+3723 compiler.err.unmatched.quote=\
+3724     unmatched quote in environment variable {0}
+3725 
+3726 # 0: option name
+3727 compiler.err.release.bootclasspath.conflict=\
+3728     option {0} cannot be used together with --release
+3729 
+3730 # 0: string
+3731 compiler.err.unsupported.release.version=\
+3732     release version {0} not supported
+3733 
+3734 # 0: string
+3735 compiler.err.file.not.found=\
+3736     file not found: {0}
+3737 
+3738 # 0: string, 1: source
+3739 compiler.err.preview.not.latest=\
+3740     invalid source release {0} with --enable-preview\n\
+3741     (preview language features are only supported for release {1})
+3742 
+3743 compiler.err.preview.without.source.or.release=\
+3744     --enable-preview must be used with either -source or --release
+<a name="2" id="anc2"></a><b style="font-size: large; color: red">--- EOF ---</b>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</pre>
+<input id="eof" value="2" type="hidden" />
+</body>
+</html>

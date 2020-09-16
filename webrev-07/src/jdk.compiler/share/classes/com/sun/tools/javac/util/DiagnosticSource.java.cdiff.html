@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Cdiff src/jdk.compiler/share/classes/com/sun/tools/javac/util/DiagnosticSource.java</title>
+    <link rel="stylesheet" href="../../../../../../../../../style.css" />
+  </head>
+<body>
+<center><a href="../resources/compiler_zh_CN.properties.cdiff.html" target="_top">&lt; prev</a> <a href="../../../../../../../../../index.html" target="_top">index</a> <a href="LayoutCharacters.java.cdiff.html" target="_top">next &gt;</a></center>    <h2>src/jdk.compiler/share/classes/com/sun/tools/javac/util/DiagnosticSource.java</h2>
+     <a class="print" href="javascript:print()">Print this page</a>
+<hr />
+<pre>
+<span class="line-old-header">*** 1,7 ***</span>
+  /*
+<span class="line-modified">!  * Copyright (c) 1999, 2012, Oracle and/or its affiliates. All rights reserved.</span>
+   * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
+   *
+   * This code is free software; you can redistribute it and/or modify it
+   * under the terms of the GNU General Public License version 2 only, as
+   * published by the Free Software Foundation.  Oracle designates this
+<span class="line-new-header">--- 1,7 ---</span>
+  /*
+<span class="line-modified">!  * Copyright (c) 1999, 2020, Oracle and/or its affiliates. All rights reserved.</span>
+   * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
+   *
+   * This code is free software; you can redistribute it and/or modify it
+   * under the terms of the GNU General Public License version 2 only, as
+   * published by the Free Software Foundation.  Oracle designates this
+</pre>
+<hr />
+<pre>
+<span class="line-old-header">*** 94,11 ***</span>
+                  for (int bp = lineStart; bp &lt; pos; bp++) {
+                      if (bp &gt;= bufLen) {
+                          return 0;
+                      }
+                      if (buf[bp] == &#39;\t&#39; &amp;&amp; expandTabs) {
+<span class="line-modified">!                         column = (column / TabInc * TabInc) + TabInc;</span>
+                      } else {
+                          column++;
+                      }
+                  }
+                  return column + 1; // positions are one-based
+<span class="line-new-header">--- 94,11 ---</span>
+                  for (int bp = lineStart; bp &lt; pos; bp++) {
+                      if (bp &gt;= bufLen) {
+                          return 0;
+                      }
+                      if (buf[bp] == &#39;\t&#39; &amp;&amp; expandTabs) {
+<span class="line-modified">!                         column = tabulate(column);</span>
+                      } else {
+                          column++;
+                      }
+                  }
+                  return column + 1; // positions are one-based
+</pre>
+<center><a href="../resources/compiler_zh_CN.properties.cdiff.html" target="_top">&lt; prev</a> <a href="../../../../../../../../../index.html" target="_top">index</a> <a href="LayoutCharacters.java.cdiff.html" target="_top">next &gt;</a></center>  </body>
+</html>

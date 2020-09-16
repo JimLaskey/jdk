@@ -1,0 +1,1362 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Sdiff src/jdk.compiler/share/classes/com/sun/tools/javac/parser/UnicodeReader.java</title>
+    <link rel="stylesheet" href="../../../../../../../../../style.css" />
+  </head>
+<body>
+<center><a href="JavadocTokenizer.java.sdiff.html" target="_top">&lt; prev</a> <a href="../../../../../../../../../index.html" target="_top">index</a> <a href="../resources/compiler.properties.sdiff.html" target="_top">next &gt;</a></center>    <h2>src/jdk.compiler/share/classes/com/sun/tools/javac/parser/UnicodeReader.java</h2>
+     <a class="print" href="javascript:print()">Print this page</a>
+<table>
+<tr valign="top">
+<td>
+<hr />
+<pre>
+  1 /*
+<span class="line-modified">  2  * Copyright (c) 2011, 2018, Oracle and/or its affiliates. All rights reserved.</span>
+  3  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
+  4  *
+  5  * This code is free software; you can redistribute it and/or modify it
+  6  * under the terms of the GNU General Public License version 2 only, as
+  7  * published by the Free Software Foundation.  Oracle designates this
+  8  * particular file as subject to the &quot;Classpath&quot; exception as provided
+  9  * by Oracle in the LICENSE file that accompanied this code.
+ 10  *
+ 11  * This code is distributed in the hope that it will be useful, but WITHOUT
+ 12  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ 13  * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+ 14  * version 2 for more details (a copy is included in the LICENSE file that
+ 15  * accompanied this code).
+ 16  *
+ 17  * You should have received a copy of the GNU General Public License version
+ 18  * 2 along with this work; if not, write to the Free Software Foundation,
+ 19  * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
+ 20  *
+ 21  * Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
+ 22  * or visit www.oracle.com if you need additional information or have any
+ 23  * questions.
+ 24  */
+ 25 
+ 26 package com.sun.tools.javac.parser;
+ 27 
+<span class="line-removed"> 28 import java.nio.CharBuffer;</span>
+ 29 import java.util.Arrays;
+ 30 
+<span class="line-removed"> 31 import com.sun.tools.javac.file.JavacFileManager;</span>
+ 32 import com.sun.tools.javac.resources.CompilerProperties.Errors;
+<span class="line-removed"> 33 import com.sun.tools.javac.util.ArrayUtils;</span>
+ 34 import com.sun.tools.javac.util.Log;
+<span class="line-removed"> 35 import com.sun.tools.javac.util.Name;</span>
+<span class="line-removed"> 36 import com.sun.tools.javac.util.Names;</span>
+ 37 
+<span class="line-modified"> 38 import static com.sun.tools.javac.util.LayoutCharacters.*;</span>
+
+ 39 
+<span class="line-modified"> 40 /** The char reader used by the javac lexer/tokenizer. Returns the sequence of</span>
+<span class="line-modified"> 41  * characters contained in the input stream, handling unicode escape accordingly.</span>
+<span class="line-modified"> 42  * Additionally, it provides features for saving chars into a buffer and to retrieve</span>
+<span class="line-removed"> 43  * them at a later stage.</span>
+ 44  *
+ 45  *  &lt;p&gt;&lt;b&gt;This is NOT part of any supported API.
+ 46  *  If you write code that depends on this, you do so at your own risk.
+ 47  *  This code and its internal interfaces are subject to change or
+<span class="line-modified"> 48  *  deletion without notice.&lt;/b&gt;</span>
+ 49  */
+ 50 public class UnicodeReader {
+
+
+
+
+
+ 51 
+<span class="line-modified"> 52     /** The input buffer, index of next character to be read,</span>
+<span class="line-modified"> 53      *  index of one past last character in buffer.</span>
+ 54      */
+<span class="line-modified"> 55     protected char[] buf;</span>
+<span class="line-removed"> 56     protected int bp;</span>
+<span class="line-removed"> 57     protected final int buflen;</span>
+ 58 
+<span class="line-modified"> 59     /** The current character.</span>
+
+ 60      */
+<span class="line-modified"> 61     protected char ch;</span>
+ 62 
+<span class="line-modified"> 63     /** The buffer index of the last converted unicode character</span>
+
+
+
+ 64      */
+<span class="line-modified"> 65     protected int unicodeConversionBp = -1;</span>
+ 66 
+<span class="line-modified"> 67     protected Log log;</span>
+<span class="line-modified"> 68     protected Names names;</span>
+
+
+
+ 69 
+<span class="line-modified"> 70     /** A character buffer for saved chars.</span>
+
+
+
+
+
+
+
+
+
+ 71      */
+<span class="line-modified"> 72     protected char[] sbuf = new char[128];</span>
+<span class="line-removed"> 73     protected int realLength;</span>
+<span class="line-removed"> 74     protected int sp;</span>
+ 75 
+ 76     /**
+<span class="line-modified"> 77      * Create a scanner from the input array.  This method might</span>
+<span class="line-modified"> 78      * modify the array.  To avoid copying the input array, ensure</span>
+<span class="line-modified"> 79      * that {@code inputLength &lt; input.length} or</span>
+<span class="line-modified"> 80      * {@code input[input.length -1]} is a white space character.</span>
+
+
+ 81      *
+<span class="line-modified"> 82      * @param sf the factory which created this Scanner</span>
+<span class="line-modified"> 83      * @param buffer the input, might be modified</span>
+<span class="line-modified"> 84      * Must be positive and less than or equal to input.length.</span>
+ 85      */
+<span class="line-modified"> 86     protected UnicodeReader(ScannerFactory sf, CharBuffer buffer) {</span>
+<span class="line-modified"> 87         this(sf, JavacFileManager.toArray(buffer), buffer.limit());</span>
+
+
+
+
+
+
+
+
+
+ 88     }
+ 89 
+<span class="line-modified"> 90     protected UnicodeReader(ScannerFactory sf, char[] input, int inputLength) {</span>
+<span class="line-modified"> 91         log = sf.log;</span>
+<span class="line-modified"> 92         names = sf.names;</span>
+<span class="line-modified"> 93         realLength = inputLength;</span>
+<span class="line-modified"> 94         if (inputLength == input.length) {</span>
+<span class="line-modified"> 95             if (input.length &gt; 0 &amp;&amp; Character.isWhitespace(input[input.length - 1])) {</span>
+<span class="line-modified"> 96                 inputLength--;</span>
+<span class="line-modified"> 97             } else {</span>
+<span class="line-modified"> 98                 input = Arrays.copyOf(input, inputLength + 1);</span>
+<span class="line-modified"> 99             }</span>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+100         }
+<span class="line-removed">101         buf = input;</span>
+<span class="line-removed">102         buflen = inputLength;</span>
+<span class="line-removed">103         buf[buflen] = EOI;</span>
+<span class="line-removed">104         bp = -1;</span>
+<span class="line-removed">105         scanChar();</span>
+106     }
+107 
+<span class="line-modified">108     /** Read next character.</span>
+
+
+109      */
+<span class="line-modified">110     protected void scanChar() {</span>
+<span class="line-modified">111         if (bp &lt; buflen) {</span>
+<span class="line-modified">112             ch = buf[++bp];</span>
+<span class="line-modified">113             if (ch == &#39;\\&#39;) {</span>
+<span class="line-modified">114                 convertUnicode();</span>
+<span class="line-modified">115             }</span>
+
+
+
+
+
+
+
+
+
+
+116         }
+
+
+
+117     }
+118 
+<span class="line-modified">119     /** Read next character in comment, skipping over double &#39;\&#39; characters.</span>
+
+
+
+120      */
+<span class="line-modified">121     protected void scanCommentChar() {</span>
+<span class="line-modified">122         scanChar();</span>
+<span class="line-modified">123         if (ch == &#39;\\&#39;) {</span>
+<span class="line-modified">124             if (peekChar() == &#39;\\&#39; &amp;&amp; !isUnicode()) {</span>
+<span class="line-modified">125                 skipChar();</span>
+<span class="line-modified">126             } else {</span>
+<span class="line-modified">127                 convertUnicode();</span>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+128             }
+
+
+
+
+
+
+
+129         }
+
+
+
+
+
+
+130     }
+131 
+<span class="line-modified">132     /** Append a character to sbuf.</span>
+
+
+
+133      */
+<span class="line-modified">134     protected void putChar(char ch, boolean scan) {</span>
+<span class="line-modified">135         sbuf = ArrayUtils.ensureCapacity(sbuf, sp);</span>
+<span class="line-removed">136         sbuf[sp++] = ch;</span>
+<span class="line-removed">137         if (scan)</span>
+<span class="line-removed">138             scanChar();</span>
+139     }
+140 
+<span class="line-modified">141     protected void putChar(char ch) {</span>
+<span class="line-modified">142         putChar(ch, false);</span>
+
+
+
+
+
+
+
+
+
+143     }
+144 
+<span class="line-modified">145     protected void putChar(boolean scan) {</span>
+<span class="line-modified">146         putChar(ch, scan);</span>
+
+
+
+
+
+147     }
+148 
+<span class="line-modified">149     protected void nextChar(boolean skip) {</span>
+<span class="line-modified">150         if (!skip) {</span>
+<span class="line-modified">151             sbuf = ArrayUtils.ensureCapacity(sbuf, sp);</span>
+<span class="line-modified">152             sbuf[sp++] = ch;</span>
+<span class="line-modified">153         }</span>
+
+
+
+154 
+<span class="line-modified">155         scanChar();</span>
+
+
+
+
+
+
+156     }
+157 
+<span class="line-modified">158     Name name() {</span>
+<span class="line-modified">159         return names.fromChars(sbuf, 0, sp);</span>
+
+
+
+
+
+160     }
+161 
+<span class="line-modified">162     String chars() {</span>
+<span class="line-modified">163         return new String(sbuf, 0, sp);</span>
+
+
+
+
+
+
+
+164     }
+165 
+<span class="line-modified">166     /** Add &#39;count&#39; copies of the character &#39;ch&#39; to the string buffer.</span>
+
+
+
+
+
+167      */
+<span class="line-modified">168     protected void repeat(char ch, int count) {</span>
+<span class="line-modified">169         for ( ; 0 &lt; count; count--) {</span>
+<span class="line-removed">170             putChar(ch, false);</span>
+<span class="line-removed">171         }</span>
+172     }
+173 
+<span class="line-modified">174     /** Reset the scan buffer pointer to &#39;pos&#39;.</span>
+
+175      */
+<span class="line-modified">176     protected void reset(int pos) {</span>
+<span class="line-modified">177         bp = pos - 1;</span>
+<span class="line-modified">178         scanChar();</span>
+
+
+
+
+
+179     }
+180 
+<span class="line-modified">181     /** Convert unicode escape; bp points to initial &#39;\&#39; character</span>
+<span class="line-modified">182      *  (Spec 3.3).</span>
+<span class="line-modified">183      */</span>
+<span class="line-modified">184     protected void convertUnicode() {</span>
+<span class="line-modified">185         if (ch == &#39;\\&#39; &amp;&amp; unicodeConversionBp != bp ) {</span>
+<span class="line-modified">186             bp++; ch = buf[bp];</span>
+<span class="line-modified">187             if (ch == &#39;u&#39;) {</span>
+<span class="line-modified">188                 do {</span>
+<span class="line-modified">189                     bp++; ch = buf[bp];</span>
+<span class="line-modified">190                 } while (ch == &#39;u&#39;);</span>
+<span class="line-removed">191                 int limit = bp + 3;</span>
+<span class="line-removed">192                 if (limit &lt; buflen) {</span>
+<span class="line-removed">193                     int d = digit(bp, 16);</span>
+<span class="line-removed">194                     int code = d;</span>
+<span class="line-removed">195                     while (bp &lt; limit &amp;&amp; d &gt;= 0) {</span>
+<span class="line-removed">196                         bp++; ch = buf[bp];</span>
+<span class="line-removed">197                         d = digit(bp, 16);</span>
+<span class="line-removed">198                         code = (code &lt;&lt; 4) + d;</span>
+<span class="line-removed">199                     }</span>
+<span class="line-removed">200                     if (d &gt;= 0) {</span>
+<span class="line-removed">201                         ch = (char)code;</span>
+<span class="line-removed">202                         unicodeConversionBp = bp;</span>
+<span class="line-removed">203                         return;</span>
+<span class="line-removed">204                     }</span>
+<span class="line-removed">205                 }</span>
+<span class="line-removed">206                 log.error(bp, Errors.IllegalUnicodeEsc);</span>
+<span class="line-removed">207             } else {</span>
+<span class="line-removed">208                 bp--;</span>
+<span class="line-removed">209                 ch = &#39;\\&#39;;</span>
+<span class="line-removed">210             }</span>
+<span class="line-removed">211         }</span>
+212     }
+213 
+<span class="line-modified">214     /** Are surrogates supported?</span>
+
+
+
+
+
+215      */
+<span class="line-modified">216     final static boolean surrogatesSupported = surrogatesSupported();</span>
+<span class="line-modified">217     private static boolean surrogatesSupported() {</span>
+<span class="line-modified">218         try {</span>
+<span class="line-modified">219             Character.isHighSurrogate(&#39;a&#39;);</span>
+220             return true;
+<span class="line-removed">221         } catch (NoSuchMethodError ex) {</span>
+<span class="line-removed">222             return false;</span>
+223         }
+
+
+224     }
+225 
+<span class="line-modified">226     /** Scan surrogate pairs.  If &#39;ch&#39; is a high surrogate and</span>
+<span class="line-modified">227      *  the next character is a low surrogate, returns the code point</span>
+<span class="line-removed">228      *  constructed from these surrogates. Otherwise, returns -1.</span>
+<span class="line-removed">229      *  This method will not consume any of the characters.</span>
+230      */
+<span class="line-modified">231     protected int peekSurrogates() {</span>
+<span class="line-modified">232         if (surrogatesSupported &amp;&amp; Character.isHighSurrogate(ch)) {</span>
+<span class="line-modified">233             char high = ch;</span>
+<span class="line-removed">234             int prevBP = bp;</span>
+235 
+<span class="line-modified">236             scanChar();</span>
+
+237 
+<span class="line-modified">238             char low = ch;</span>
+
+239 
+<span class="line-modified">240             ch = high;</span>
+<span class="line-modified">241             bp = prevBP;</span>
+
+242 
+<span class="line-modified">243             if (Character.isLowSurrogate(low)) {</span>
+<span class="line-removed">244                 return Character.toCodePoint(high, low);</span>
+<span class="line-removed">245             }</span>
+246         }
+247 
+<span class="line-modified">248         return -1;</span>
+249     }
+250 
+<span class="line-modified">251     /** Convert an ASCII digit from its base (8, 10, or 16)</span>
+<span class="line-modified">252      *  to its value.</span>
+<span class="line-modified">253      */</span>
+<span class="line-modified">254     protected int digit(int pos, int base) {</span>
+<span class="line-modified">255         char c = ch;</span>
+<span class="line-modified">256         if (&#39;0&#39; &lt;= c &amp;&amp; c &lt;= &#39;9&#39;)</span>
+<span class="line-modified">257             return Character.digit(c, base); //a fast common case</span>
+<span class="line-modified">258         int codePoint = peekSurrogates();</span>
+<span class="line-removed">259         int result = codePoint &gt;= 0 ? Character.digit(codePoint, base) : Character.digit(c, base);</span>
+<span class="line-removed">260         if (result &gt;= 0 &amp;&amp; c &gt; 0x7f) {</span>
+<span class="line-removed">261             log.error(pos + 1, Errors.IllegalNonasciiDigit);</span>
+<span class="line-removed">262             if (codePoint &gt;= 0)</span>
+<span class="line-removed">263                 scanChar();</span>
+<span class="line-removed">264             ch = &quot;0123456789abcdef&quot;.charAt(result);</span>
+265         }
+<span class="line-removed">266         return result;</span>
+267     }
+268 
+<span class="line-modified">269     protected boolean isUnicode() {</span>
+<span class="line-modified">270         return unicodeConversionBp == bp;</span>
+
+
+
+
+
+271     }
+272 
+<span class="line-modified">273     protected void skipChar() {</span>
+<span class="line-modified">274         bp++;</span>
+
+
+
+
+
+
+
+
+
+
+275     }
+276 
+<span class="line-modified">277     protected char peekChar() {</span>
+<span class="line-modified">278         return buf[bp + 1];</span>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+279     }
+280 
+281     /**
+<span class="line-modified">282      * Returns a copy of the input buffer, up to its inputLength.</span>
+<span class="line-modified">283      * Unicode escape sequences are not translated.</span>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+284      */
+285     public char[] getRawCharacters() {
+<span class="line-modified">286         char[] chars = new char[buflen];</span>
+<span class="line-removed">287         System.arraycopy(buf, 0, chars, 0, buflen);</span>
+<span class="line-removed">288         return chars;</span>
+289     }
+290 
+291     /**
+292      * Returns a copy of a character array subset of the input buffer.
+293      * The returned array begins at the {@code beginIndex} and
+294      * extends to the character at index {@code endIndex - 1}.
+295      * Thus the length of the substring is {@code endIndex-beginIndex}.
+296      * This behavior is like
+297      * {@code String.substring(beginIndex, endIndex)}.
+298      * Unicode escape sequences are not translated.
+299      *
+<span class="line-modified">300      * @param beginIndex the beginning index, inclusive.</span>
+<span class="line-modified">301      * @param endIndex the ending index, exclusive.</span>
+
+302      * @throws ArrayIndexOutOfBoundsException if either offset is outside of the
+303      *         array bounds
+304      */
+305     public char[] getRawCharacters(int beginIndex, int endIndex) {
+<span class="line-modified">306         int length = endIndex - beginIndex;</span>
+<span class="line-modified">307         char[] chars = new char[length];</span>
+<span class="line-modified">308         System.arraycopy(buf, beginIndex, chars, 0, length);</span>
+<span class="line-modified">309         return chars;</span>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+310     }
+
+311 }
+</pre>
+</td>
+<td>
+<hr />
+<pre>
+  1 /*
+<span class="line-modified">  2  * Copyright (c) 2011, 2020, Oracle and/or its affiliates. All rights reserved.</span>
+  3  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
+  4  *
+  5  * This code is free software; you can redistribute it and/or modify it
+  6  * under the terms of the GNU General Public License version 2 only, as
+  7  * published by the Free Software Foundation.  Oracle designates this
+  8  * particular file as subject to the &quot;Classpath&quot; exception as provided
+  9  * by Oracle in the LICENSE file that accompanied this code.
+ 10  *
+ 11  * This code is distributed in the hope that it will be useful, but WITHOUT
+ 12  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ 13  * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+ 14  * version 2 for more details (a copy is included in the LICENSE file that
+ 15  * accompanied this code).
+ 16  *
+ 17  * You should have received a copy of the GNU General Public License version
+ 18  * 2 along with this work; if not, write to the Free Software Foundation,
+ 19  * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
+ 20  *
+ 21  * Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
+ 22  * or visit www.oracle.com if you need additional information or have any
+ 23  * questions.
+ 24  */
+ 25 
+ 26 package com.sun.tools.javac.parser;
+ 27 
+
+ 28 import java.util.Arrays;
+ 29 
+
+ 30 import com.sun.tools.javac.resources.CompilerProperties.Errors;
+
+ 31 import com.sun.tools.javac.util.Log;
+
+
+ 32 
+<span class="line-modified"> 33 import static com.sun.tools.javac.util.LayoutCharacters.EOI;</span>
+<span class="line-added"> 34 import static com.sun.tools.javac.util.LayoutCharacters.tabulate;</span>
+ 35 
+<span class="line-modified"> 36 /**</span>
+<span class="line-modified"> 37  * The unicode character reader used by the javac/javadoc lexer/tokenizer, returns characters</span>
+<span class="line-modified"> 38  * one by one as contained in the input stream, handling unicode escape sequences accordingly.</span>
+
+ 39  *
+ 40  *  &lt;p&gt;&lt;b&gt;This is NOT part of any supported API.
+ 41  *  If you write code that depends on this, you do so at your own risk.
+ 42  *  This code and its internal interfaces are subject to change or
+<span class="line-modified"> 43  *  deletion without notice.&lt;/b&gt;&lt;/p&gt;</span>
+ 44  */
+ 45 public class UnicodeReader {
+<span class="line-added"> 46     /**</span>
+<span class="line-added"> 47      * Buffer containing characters from source file. May contain extraneous characters</span>
+<span class="line-added"> 48      * beyond this.length.</span>
+<span class="line-added"> 49      */</span>
+<span class="line-added"> 50     private final char[] buffer;</span>
+ 51 
+<span class="line-modified"> 52     /**</span>
+<span class="line-modified"> 53      * Length of meaningful content in buffer.</span>
+ 54      */
+<span class="line-modified"> 55     private final int length;</span>
+
+
+ 56 
+<span class="line-modified"> 57     /**</span>
+<span class="line-added"> 58      * Character buffer index of character currently being observed.</span>
+ 59      */
+<span class="line-modified"> 60     private int position;</span>
+ 61 
+<span class="line-modified"> 62     /**</span>
+<span class="line-added"> 63      * Number of characters combined to provide character currently being observed. Typically</span>
+<span class="line-added"> 64      * one, but may be more when combinations of surrogate pairs and unicode escape sequences</span>
+<span class="line-added"> 65      * are read.</span>
+ 66      */
+<span class="line-modified"> 67     private int width;</span>
+ 68 
+<span class="line-modified"> 69     /**</span>
+<span class="line-modified"> 70      * Character currently being observed. If a surrogate pair is read then will be the high</span>
+<span class="line-added"> 71      * member of the pair.</span>
+<span class="line-added"> 72      */</span>
+<span class="line-added"> 73     private char character;</span>
+ 74 
+<span class="line-modified"> 75     /**</span>
+<span class="line-added"> 76      * Codepoint of character currently being observed. Typically equivalent to the character</span>
+<span class="line-added"> 77      * but will have a value greater that 0xFFFF when a surrogate pair.</span>
+<span class="line-added"> 78      */</span>
+<span class="line-added"> 79     private int codepoint;</span>
+<span class="line-added"> 80 </span>
+<span class="line-added"> 81     /**</span>
+<span class="line-added"> 82      * true if the last character was a backslash. This is used to handle the special case</span>
+<span class="line-added"> 83      * when a backslash precedes an unicode escape. In that case, the second backslash</span>
+<span class="line-added"> 84      * is treated as a backslash and not part of an unicode escape.</span>
+ 85      */
+<span class="line-modified"> 86     private boolean wasBackslash;</span>
+
+
+ 87 
+ 88     /**
+<span class="line-modified"> 89      * Log for error reporting.</span>
+<span class="line-modified"> 90      */</span>
+<span class="line-modified"> 91     private final Log log;</span>
+<span class="line-modified"> 92 </span>
+<span class="line-added"> 93     /**</span>
+<span class="line-added"> 94      * Constructor.</span>
+ 95      *
+<span class="line-modified"> 96      * @param sf      scan factory.</span>
+<span class="line-modified"> 97      * @param array   array containing contents of source.</span>
+<span class="line-modified"> 98      * @param length  length of meaningful content in buffer.</span>
+ 99      */
+<span class="line-modified">100     protected UnicodeReader(ScannerFactory sf, char[] array, int length) {</span>
+<span class="line-modified">101         this.buffer = array;</span>
+<span class="line-added">102         this.length = length;</span>
+<span class="line-added">103         this.position = 0;</span>
+<span class="line-added">104         this.width = 0;</span>
+<span class="line-added">105         this.character = &#39;\0&#39;;</span>
+<span class="line-added">106         this.codepoint = 0;</span>
+<span class="line-added">107         this.wasBackslash = false;</span>
+<span class="line-added">108         this.log = sf.log;</span>
+<span class="line-added">109 </span>
+<span class="line-added">110         nextCodePoint();</span>
+111     }
+112 
+<span class="line-modified">113     /**</span>
+<span class="line-modified">114      * Returns the length of the buffer. This is length of meaningful content in buffer and</span>
+<span class="line-modified">115      * not the length of the buffer array.</span>
+<span class="line-modified">116      *</span>
+<span class="line-modified">117      * @return length of the buffer.</span>
+<span class="line-modified">118      */</span>
+<span class="line-modified">119     protected int length() {</span>
+<span class="line-modified">120         return length;</span>
+<span class="line-modified">121     }</span>
+<span class="line-modified">122 </span>
+<span class="line-added">123     /**</span>
+<span class="line-added">124      * Return true if current position is within the meaningful part of the buffer.</span>
+<span class="line-added">125      *</span>
+<span class="line-added">126      * @return true if current position is within the meaningful part of the buffer.</span>
+<span class="line-added">127      */</span>
+<span class="line-added">128     protected boolean isAvailable() {</span>
+<span class="line-added">129         return position &lt; length;</span>
+<span class="line-added">130     }</span>
+<span class="line-added">131 </span>
+<span class="line-added">132     /**</span>
+<span class="line-added">133      * Fetches the next 16-bit character from the buffer and places it in this.character.</span>
+<span class="line-added">134      */</span>
+<span class="line-added">135     private void nextCodeUnit() {</span>
+<span class="line-added">136         // Index of next character in buffer.</span>
+<span class="line-added">137         int index = position + width;</span>
+<span class="line-added">138 </span>
+<span class="line-added">139         // If past end of buffer.</span>
+<span class="line-added">140         if (length &lt;= index) {</span>
+<span class="line-added">141             // End of file is marked with EOI.</span>
+<span class="line-added">142             character = EOI;</span>
+<span class="line-added">143         } else {</span>
+<span class="line-added">144             // Next character in buffer.</span>
+<span class="line-added">145             character = buffer[index];</span>
+<span class="line-added">146             // Increment length of codepoint.</span>
+<span class="line-added">147             width++;</span>
+148         }
+
+
+
+
+
+149     }
+150 
+<span class="line-modified">151     /**</span>
+<span class="line-added">152      * Fetches the next 16-bit character from the buffer. If an unicode escape</span>
+<span class="line-added">153      * is detected then converts the unicode escape to a character.</span>
+154      */
+<span class="line-modified">155     private void nextUnicodeInputCharacter() {</span>
+<span class="line-modified">156         // Position to next codepoint.</span>
+<span class="line-modified">157         position += width;</span>
+<span class="line-modified">158         // Codepoint has no characters yet.</span>
+<span class="line-modified">159         width = 0;</span>
+<span class="line-modified">160 </span>
+<span class="line-added">161         // Fetch next character.</span>
+<span class="line-added">162         nextCodeUnit();</span>
+<span class="line-added">163 </span>
+<span class="line-added">164         // If second backslash is detected.</span>
+<span class="line-added">165         if (wasBackslash) {</span>
+<span class="line-added">166             // Treat like a normal character (not part of unicode escape.)</span>
+<span class="line-added">167             wasBackslash = false;</span>
+<span class="line-added">168         } else if (character == &#39;\\&#39;) {</span>
+<span class="line-added">169             // May be an unicode escape.</span>
+<span class="line-added">170             wasBackslash = !unicodeEscape();</span>
+171         }
+<span class="line-added">172 </span>
+<span class="line-added">173         // Codepoint and character match if not surrogate.</span>
+<span class="line-added">174         codepoint = (int)character;</span>
+175     }
+176 
+<span class="line-modified">177     /**</span>
+<span class="line-added">178      * Fetches the nextcode point from the buffer. If an unicode escape is recognized</span>
+<span class="line-added">179      * then converts unicode escape to a character. If two characters are a surrogate pair</span>
+<span class="line-added">180      * then converts to a codepoint.</span>
+181      */
+<span class="line-modified">182     private void nextCodePoint() {</span>
+<span class="line-modified">183         // Next unicode character.</span>
+<span class="line-modified">184         nextUnicodeInputCharacter();</span>
+<span class="line-modified">185 </span>
+<span class="line-modified">186         // Return early if ASCII or not a surrogate pair.</span>
+<span class="line-modified">187         if (isASCII() || !Character.isHighSurrogate(character)) {</span>
+<span class="line-modified">188             return;</span>
+<span class="line-added">189         }</span>
+<span class="line-added">190 </span>
+<span class="line-added">191         // Capture high surrogate and position.</span>
+<span class="line-added">192         char hi = character;</span>
+<span class="line-added">193         int savePosition = position;</span>
+<span class="line-added">194         int saveWidth = width;</span>
+<span class="line-added">195 </span>
+<span class="line-added">196         // Get potential low surrogate.</span>
+<span class="line-added">197         nextUnicodeInputCharacter();</span>
+<span class="line-added">198         char lo = character;</span>
+<span class="line-added">199 </span>
+<span class="line-added">200         if (Character.isLowSurrogate(lo)) {</span>
+<span class="line-added">201             // Start codepoint at start of high surrogate.</span>
+<span class="line-added">202             position = savePosition;</span>
+<span class="line-added">203             width += saveWidth;</span>
+<span class="line-added">204             // Compute codepoint.</span>
+<span class="line-added">205             codepoint = Character.toCodePoint(hi, lo);</span>
+<span class="line-added">206         } else {</span>
+<span class="line-added">207             // Restore to treat high surrogate as just a character.</span>
+<span class="line-added">208             position = savePosition;</span>
+<span class="line-added">209             width = saveWidth;</span>
+<span class="line-added">210             character = hi;</span>
+<span class="line-added">211             codepoint = (int)hi;</span>
+<span class="line-added">212             // Could potential report an error here (old code did not.)</span>
+<span class="line-added">213         }</span>
+<span class="line-added">214     }</span>
+<span class="line-added">215 </span>
+<span class="line-added">216     /**</span>
+<span class="line-added">217      * Converts an unicode escape into a character.</span>
+<span class="line-added">218      *</span>
+<span class="line-added">219      * @return true if was an unicode escape.</span>
+<span class="line-added">220      */</span>
+<span class="line-added">221     private boolean unicodeEscape() {</span>
+<span class="line-added">222         // Start of unicode escape (past backslash.)</span>
+<span class="line-added">223         int start = position + width;</span>
+<span class="line-added">224         int index;</span>
+<span class="line-added">225 </span>
+<span class="line-added">226         // Skip multiple &#39;u&#39;.</span>
+<span class="line-added">227         for (index = start; index &lt; length; index++) {</span>
+<span class="line-added">228             if (buffer[index] != &#39;u&#39;) {</span>
+<span class="line-added">229                 break;</span>
+<span class="line-added">230             }</span>
+<span class="line-added">231         }</span>
+<span class="line-added">232 </span>
+<span class="line-added">233         // Needs to be at least backslash-u.</span>
+<span class="line-added">234         if (index != start) {</span>
+<span class="line-added">235             // If enough characters available.</span>
+<span class="line-added">236             if (index + 4 &lt; length) {</span>
+<span class="line-added">237                 // Convert four hex digits to codepoint. If any digit is invalid then the</span>
+<span class="line-added">238                 // result is negative.</span>
+<span class="line-added">239                 int code = (Character.digit(buffer[index++], 16) &lt;&lt; 12) |</span>
+<span class="line-added">240                            (Character.digit(buffer[index++], 16) &lt;&lt; 8) |</span>
+<span class="line-added">241                            (Character.digit(buffer[index++], 16) &lt;&lt; 4) |</span>
+<span class="line-added">242                             Character.digit(buffer[index++], 16);</span>
+<span class="line-added">243 </span>
+<span class="line-added">244                 // If all digits are good.</span>
+<span class="line-added">245                 if (code &gt;= 0) {</span>
+<span class="line-added">246                     width = index - position;</span>
+<span class="line-added">247                     character = (char)code;</span>
+<span class="line-added">248 </span>
+<span class="line-added">249                     return true;</span>
+<span class="line-added">250                 }</span>
+251             }
+<span class="line-added">252 </span>
+<span class="line-added">253             // Did not work out.</span>
+<span class="line-added">254             log.error(position, Errors.IllegalUnicodeEsc);</span>
+<span class="line-added">255             width = index - position;</span>
+<span class="line-added">256 </span>
+<span class="line-added">257             // Return true so that the invalid unicode escape is skipped.</span>
+<span class="line-added">258             return true;</span>
+259         }
+<span class="line-added">260 </span>
+<span class="line-added">261         // Must be just a backslash.</span>
+<span class="line-added">262         character = &#39;\\&#39;;</span>
+<span class="line-added">263         width = 1;</span>
+<span class="line-added">264 </span>
+<span class="line-added">265         return false;</span>
+266     }
+267 
+<span class="line-modified">268     /**</span>
+<span class="line-added">269      * Return the current position in the character buffer.</span>
+<span class="line-added">270      *</span>
+<span class="line-added">271      * @return  current position in the character buffer.</span>
+272      */
+<span class="line-modified">273     protected int position() {</span>
+<span class="line-modified">274         return position;</span>
+
+
+
+275     }
+276 
+<span class="line-modified">277 </span>
+<span class="line-modified">278     /**</span>
+<span class="line-added">279      * Reset the reader to the specified position.</span>
+<span class="line-added">280      * Warning: Do not use when previous character was an ASCII or unicode backslash.</span>
+<span class="line-added">281      * @param pos</span>
+<span class="line-added">282      */</span>
+<span class="line-added">283     protected void reset(int pos) {</span>
+<span class="line-added">284         position = pos;</span>
+<span class="line-added">285         width = 0;</span>
+<span class="line-added">286         wasBackslash = false;</span>
+<span class="line-added">287         nextCodePoint();</span>
+288     }
+289 
+<span class="line-modified">290     /**</span>
+<span class="line-modified">291      * Return the current character in at the current position.</span>
+<span class="line-added">292      *</span>
+<span class="line-added">293      * @return current character in at the current position.</span>
+<span class="line-added">294      */</span>
+<span class="line-added">295     protected char get() {</span>
+<span class="line-added">296         return character;</span>
+297     }
+298 
+<span class="line-modified">299     /**</span>
+<span class="line-modified">300      * Return the current codepoint in at the current position.</span>
+<span class="line-modified">301      *</span>
+<span class="line-modified">302      * @return current codepoint in at the current position.</span>
+<span class="line-modified">303      */</span>
+<span class="line-added">304     protected int getCodepoint() {</span>
+<span class="line-added">305         return codepoint;</span>
+<span class="line-added">306     }</span>
+307 
+<span class="line-modified">308     /**</span>
+<span class="line-added">309      * Returns true if the current codepoint is a surrogate.</span>
+<span class="line-added">310      *</span>
+<span class="line-added">311      * @return true if the current codepoint is a surrogate.</span>
+<span class="line-added">312      */</span>
+<span class="line-added">313     protected boolean isSurrogate() {</span>
+<span class="line-added">314         return 0xFFFF &lt; codepoint;</span>
+315     }
+316 
+<span class="line-modified">317     /**</span>
+<span class="line-modified">318      * Returns true if the current character is ASCII.</span>
+<span class="line-added">319      *</span>
+<span class="line-added">320      * @return true if the current character is ASCII.</span>
+<span class="line-added">321      */</span>
+<span class="line-added">322     protected boolean isASCII() {</span>
+<span class="line-added">323         return character &lt;= 0x7F;</span>
+324     }
+325 
+<span class="line-modified">326     /**</span>
+<span class="line-modified">327      * Advances the current character to the next character.</span>
+<span class="line-added">328      *</span>
+<span class="line-added">329      * @return next character.</span>
+<span class="line-added">330      */</span>
+<span class="line-added">331     protected char next() {</span>
+<span class="line-added">332         nextCodePoint();</span>
+<span class="line-added">333 </span>
+<span class="line-added">334         return character;</span>
+335     }
+336 
+<span class="line-modified">337     /**</span>
+<span class="line-added">338      * Compare character. Returns true if a match.</span>
+<span class="line-added">339      *</span>
+<span class="line-added">340      * @param ch  character to match.</span>
+<span class="line-added">341      *</span>
+<span class="line-added">342      * @return true if a match.</span>
+343      */
+<span class="line-modified">344     protected boolean is(char ch) {</span>
+<span class="line-modified">345         return character == ch;</span>
+
+
+346     }
+347 
+<span class="line-modified">348     /**</span>
+<span class="line-added">349      * Match one of the arguments. Returns true if a match.</span>
+350      */
+<span class="line-modified">351     protected boolean isOneOf(char ch1, char ch2) {</span>
+<span class="line-modified">352         return is(ch1) || is(ch2);</span>
+<span class="line-modified">353     }</span>
+<span class="line-added">354     protected boolean isOneOf(char ch1, char ch2, char ch3) {</span>
+<span class="line-added">355         return is(ch1) || is(ch2) || is(ch3);</span>
+<span class="line-added">356     }</span>
+<span class="line-added">357     protected boolean isOneOf(char ch1, char ch2, char ch3, char ch4, char ch5, char ch6) {</span>
+<span class="line-added">358         return is(ch1) || is(ch2) || is(ch3) || is(ch4) || is(ch5) || is(ch6);</span>
+359     }
+360 
+<span class="line-modified">361     /**</span>
+<span class="line-modified">362      * Tests to see if current character is in the range of lo to hi characters (inclusive).</span>
+<span class="line-modified">363      *</span>
+<span class="line-modified">364      * @param lo  lowest character in range.</span>
+<span class="line-modified">365      * @param hi  highest character in range.</span>
+<span class="line-modified">366      *</span>
+<span class="line-modified">367      * @return true if the current character is in range.</span>
+<span class="line-modified">368      */</span>
+<span class="line-modified">369     protected boolean inRange(char lo, char hi) {</span>
+<span class="line-modified">370         return lo &lt;= character &amp;&amp; character &lt;= hi;</span>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+371     }
+372 
+<span class="line-modified">373     /**</span>
+<span class="line-added">374      * Compare character and advance if a match. Returns true if a match.</span>
+<span class="line-added">375      *</span>
+<span class="line-added">376      * @param ch  character to match.</span>
+<span class="line-added">377      *</span>
+<span class="line-added">378      * @return true if a match.</span>
+379      */
+<span class="line-modified">380     protected boolean accept(char ch) {</span>
+<span class="line-modified">381         if (is(ch)) {</span>
+<span class="line-modified">382             next();</span>
+<span class="line-modified">383 </span>
+384             return true;
+
+
+385         }
+<span class="line-added">386 </span>
+<span class="line-added">387         return false;</span>
+388     }
+389 
+<span class="line-modified">390     /**</span>
+<span class="line-modified">391      * Match one of the arguments and advance if a match. Returns true if a match.</span>
+
+
+392      */
+<span class="line-modified">393     protected boolean acceptOneOf(char ch1, char ch2) {</span>
+<span class="line-modified">394         if (isOneOf(ch1, ch2)) {</span>
+<span class="line-modified">395             next();</span>
+
+396 
+<span class="line-modified">397             return true;</span>
+<span class="line-added">398         }</span>
+399 
+<span class="line-modified">400         return false;</span>
+<span class="line-added">401     }</span>
+402 
+<span class="line-modified">403     protected boolean acceptOneOf(char ch1, char ch2, char ch3) {</span>
+<span class="line-modified">404         if (isOneOf(ch1, ch2, ch3)) {</span>
+<span class="line-added">405             next();</span>
+406 
+<span class="line-modified">407             return true;</span>
+
+
+408         }
+409 
+<span class="line-modified">410         return false;</span>
+411     }
+412 
+<span class="line-modified">413     /**</span>
+<span class="line-modified">414      * Skip over all occurances of character.</span>
+<span class="line-modified">415      *</span>
+<span class="line-modified">416      * @param ch character to accept.</span>
+<span class="line-modified">417      */</span>
+<span class="line-modified">418     protected void skip(char ch) {</span>
+<span class="line-modified">419         while (accept(ch)) {</span>
+<span class="line-modified">420             // next</span>
+
+
+
+
+
+
+421         }
+
+422     }
+423 
+<span class="line-modified">424     /**</span>
+<span class="line-modified">425      * Skip over ASCII white space characters.</span>
+<span class="line-added">426      */</span>
+<span class="line-added">427     protected void skipWhitespace() {</span>
+<span class="line-added">428         while (acceptOneOf(&#39; &#39;, &#39;\t&#39;, &#39;\f&#39;)) {</span>
+<span class="line-added">429             // next</span>
+<span class="line-added">430         }</span>
+431     }
+432 
+<span class="line-modified">433     /**</span>
+<span class="line-modified">434      * Skip to end of line.</span>
+<span class="line-added">435      */</span>
+<span class="line-added">436     protected void skipToEOLN() {</span>
+<span class="line-added">437         while (isAvailable()) {</span>
+<span class="line-added">438             if (isOneOf(&#39;\r&#39;, &#39;\n&#39;)) {</span>
+<span class="line-added">439                 break;</span>
+<span class="line-added">440             }</span>
+<span class="line-added">441 </span>
+<span class="line-added">442             next();</span>
+<span class="line-added">443         }</span>
+<span class="line-added">444 </span>
+445     }
+446 
+<span class="line-modified">447     /**</span>
+<span class="line-modified">448      * Compare string and advance if a match. Returns true if a match.</span>
+<span class="line-added">449      * Warning: Do not use when previous character was a backslash</span>
+<span class="line-added">450      * (confuses state of wasBackslash.)</span>
+<span class="line-added">451      *</span>
+<span class="line-added">452      * @param string string to match character for character.</span>
+<span class="line-added">453      *</span>
+<span class="line-added">454      * @return true if a match.</span>
+<span class="line-added">455      */</span>
+<span class="line-added">456     protected boolean accept(String string) {</span>
+<span class="line-added">457         // Quick test.</span>
+<span class="line-added">458         if (string.length() == 0 || !is(string.charAt(0))) {</span>
+<span class="line-added">459             return false;</span>
+<span class="line-added">460         }</span>
+<span class="line-added">461 </span>
+<span class="line-added">462         // Be prepared to retreat if not a match.</span>
+<span class="line-added">463         int savedPosition = position;</span>
+<span class="line-added">464 </span>
+<span class="line-added">465         nextCodePoint();</span>
+<span class="line-added">466 </span>
+<span class="line-added">467         // Check each character.</span>
+<span class="line-added">468         for (int i = 1; i &lt; string.length(); i++) {</span>
+<span class="line-added">469             if (!is(string.charAt(i))) {</span>
+<span class="line-added">470                 // Restart if not a match.</span>
+<span class="line-added">471                 reset(savedPosition);</span>
+<span class="line-added">472 </span>
+<span class="line-added">473                 return false;</span>
+<span class="line-added">474             }</span>
+<span class="line-added">475 </span>
+<span class="line-added">476             nextCodePoint();</span>
+<span class="line-added">477         }</span>
+<span class="line-added">478 </span>
+<span class="line-added">479         return true;</span>
+480     }
+481 
+482     /**
+<span class="line-modified">483      * Convert an ASCII digit from its base (8, 10, or 16) to its value. Does not</span>
+<span class="line-modified">484      * advance character.</span>
+<span class="line-added">485      *</span>
+<span class="line-added">486      * @param pos         starting position.</span>
+<span class="line-added">487      * @param digitRadix  base of number being converted.</span>
+<span class="line-added">488      *</span>
+<span class="line-added">489      * @return value of digit.</span>
+<span class="line-added">490      */</span>
+<span class="line-added">491     protected int digit(int pos, int digitRadix) {</span>
+<span class="line-added">492         int result;</span>
+<span class="line-added">493 </span>
+<span class="line-added">494         // Just an ASCII digit.</span>
+<span class="line-added">495         if (inRange(&#39;0&#39;, &#39;9&#39;)) {</span>
+<span class="line-added">496             // Fast common case.</span>
+<span class="line-added">497             result = character - &#39;0&#39;;</span>
+<span class="line-added">498 </span>
+<span class="line-added">499             return result &lt; digitRadix ? result : -1;</span>
+<span class="line-added">500         }</span>
+<span class="line-added">501 </span>
+<span class="line-added">502         // Handle other digits.</span>
+<span class="line-added">503         result = isSurrogate() ? Character.digit(codepoint, digitRadix) :</span>
+<span class="line-added">504                                  Character.digit(character, digitRadix);</span>
+<span class="line-added">505 </span>
+<span class="line-added">506         if (result &gt;= 0 &amp;&amp; !isASCII()) {</span>
+<span class="line-added">507             log.error(position(), Errors.IllegalNonasciiDigit);</span>
+<span class="line-added">508             character = &quot;0123456789abcdef&quot;.charAt(result);</span>
+<span class="line-added">509         }</span>
+<span class="line-added">510 </span>
+<span class="line-added">511         return result;</span>
+<span class="line-added">512     }</span>
+<span class="line-added">513 </span>
+<span class="line-added">514     /**</span>
+<span class="line-added">515      * Returns the input buffer. Unicode escape sequences are not translated.</span>
+<span class="line-added">516      *</span>
+<span class="line-added">517      * @return the input buffer.</span>
+518      */
+519     public char[] getRawCharacters() {
+<span class="line-modified">520         return length == buffer.length ? buffer : Arrays.copyOf(buffer, length);</span>
+
+
+521     }
+522 
+523     /**
+524      * Returns a copy of a character array subset of the input buffer.
+525      * The returned array begins at the {@code beginIndex} and
+526      * extends to the character at index {@code endIndex - 1}.
+527      * Thus the length of the substring is {@code endIndex-beginIndex}.
+528      * This behavior is like
+529      * {@code String.substring(beginIndex, endIndex)}.
+530      * Unicode escape sequences are not translated.
+531      *
+<span class="line-modified">532      * @param  beginIndex the beginning index, inclusive.</span>
+<span class="line-modified">533      * @param  endIndex the ending index, exclusive.</span>
+<span class="line-added">534      *</span>
+535      * @throws ArrayIndexOutOfBoundsException if either offset is outside of the
+536      *         array bounds
+537      */
+538     public char[] getRawCharacters(int beginIndex, int endIndex) {
+<span class="line-modified">539         return Arrays.copyOfRange(buffer, beginIndex, endIndex);</span>
+<span class="line-modified">540     }</span>
+<span class="line-modified">541 </span>
+<span class="line-modified">542     /**</span>
+<span class="line-added">543      * This is a specialized version of UnicodeReader that keeps track of the</span>
+<span class="line-added">544      * column position within a given character stream. Used for Javadoc</span>
+<span class="line-added">545      * processing to build a table for mapping positions in the comment string</span>
+<span class="line-added">546      * to positions in the source file.</span>
+<span class="line-added">547      */</span>
+<span class="line-added">548     static class PositionTrackingReader extends UnicodeReader {</span>
+<span class="line-added">549         /**</span>
+<span class="line-added">550          * Offset from the beginning of the original reader buffer.</span>
+<span class="line-added">551          */</span>
+<span class="line-added">552         private int offset;</span>
+<span class="line-added">553 </span>
+<span class="line-added">554         /**</span>
+<span class="line-added">555          * Current column in the comment.</span>
+<span class="line-added">556          */</span>
+<span class="line-added">557         private int column;</span>
+<span class="line-added">558 </span>
+<span class="line-added">559         /**</span>
+<span class="line-added">560          * Constructor.</span>
+<span class="line-added">561          *</span>
+<span class="line-added">562          * @param sf      Scan factory.</span>
+<span class="line-added">563          * @param array   Array containing contents of source.</span>
+<span class="line-added">564          * @param offset  Position offset in original source buffer.</span>
+<span class="line-added">565          */</span>
+<span class="line-added">566         protected PositionTrackingReader(ScannerFactory sf, char[] array, int offset) {</span>
+<span class="line-added">567             super(sf, array, array.length);</span>
+<span class="line-added">568             this.offset = offset;</span>
+<span class="line-added">569             this.column = 0;</span>
+<span class="line-added">570         }</span>
+<span class="line-added">571 </span>
+<span class="line-added">572         /**</span>
+<span class="line-added">573          * Advances the current character to the next character. Tracks column.</span>
+<span class="line-added">574          *</span>
+<span class="line-added">575          * @return next character.</span>
+<span class="line-added">576          */</span>
+<span class="line-added">577         @Override</span>
+<span class="line-added">578         protected char next() {</span>
+<span class="line-added">579             super.next();</span>
+<span class="line-added">580 </span>
+<span class="line-added">581             if (isOneOf(&#39;\n&#39;, &#39;\r&#39;, &#39;\f&#39;)) {</span>
+<span class="line-added">582                 column = 0;</span>
+<span class="line-added">583             } else if (is(&#39;\t&#39;)) {</span>
+<span class="line-added">584                 column = tabulate(column);</span>
+<span class="line-added">585             } else {</span>
+<span class="line-added">586                 column++;</span>
+<span class="line-added">587             }</span>
+<span class="line-added">588 </span>
+<span class="line-added">589             return get();</span>
+<span class="line-added">590         }</span>
+<span class="line-added">591 </span>
+<span class="line-added">592         /**</span>
+<span class="line-added">593          * Returns the current column.</span>
+<span class="line-added">594          *</span>
+<span class="line-added">595          * @return  the current column.</span>
+<span class="line-added">596          */</span>
+<span class="line-added">597         protected int column() {</span>
+<span class="line-added">598             return column;</span>
+<span class="line-added">599         }</span>
+<span class="line-added">600 </span>
+<span class="line-added">601         /**</span>
+<span class="line-added">602          * Returns position relative to the original source buffer.</span>
+<span class="line-added">603          *</span>
+<span class="line-added">604          * @return</span>
+<span class="line-added">605          */</span>
+<span class="line-added">606         protected int offsetPosition() {</span>
+<span class="line-added">607             return position() + offset;</span>
+<span class="line-added">608         }</span>
+609     }
+<span class="line-added">610 </span>
+611 }
+</pre>
+</td>
+</tr>
+</table>
+<center><a href="JavadocTokenizer.java.sdiff.html" target="_top">&lt; prev</a> <a href="../../../../../../../../../index.html" target="_top">index</a> <a href="../resources/compiler.properties.sdiff.html" target="_top">next &gt;</a></center>  </body>
+</html>

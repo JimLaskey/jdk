@@ -1,0 +1,1717 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Frames src/jdk.compiler/share/classes/com/sun/tools/javac/parser/JavaTokenizer.java</title>
+    <link rel="stylesheet" href="../../../../../../../../../style.css" />
+    <script type="text/javascript" src="../../../../../../../../../navigation.js"></script>
+  </head>
+<body onkeypress="keypress(event);">
+<a name="0"></a>
+<hr />
+<pre>   1 /*
+<a name="1" id="anc1"></a><span class="line-modified">   2  * Copyright (c) 1999, 2020, Oracle and/or its affiliates. All rights reserved.</span>
+   3  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
+   4  *
+   5  * This code is free software; you can redistribute it and/or modify it
+   6  * under the terms of the GNU General Public License version 2 only, as
+   7  * published by the Free Software Foundation.  Oracle designates this
+   8  * particular file as subject to the &quot;Classpath&quot; exception as provided
+   9  * by Oracle in the LICENSE file that accompanied this code.
+  10  *
+  11  * This code is distributed in the hope that it will be useful, but WITHOUT
+  12  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+  13  * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+  14  * version 2 for more details (a copy is included in the LICENSE file that
+  15  * accompanied this code).
+  16  *
+  17  * You should have received a copy of the GNU General Public License version
+  18  * 2 along with this work; if not, write to the Free Software Foundation,
+  19  * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
+  20  *
+  21  * Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
+  22  * or visit www.oracle.com if you need additional information or have any
+  23  * questions.
+  24  */
+  25 
+  26 package com.sun.tools.javac.parser;
+  27 
+  28 import com.sun.tools.javac.code.Lint;
+  29 import com.sun.tools.javac.code.Lint.LintCategory;
+  30 import com.sun.tools.javac.code.Preview;
+  31 import com.sun.tools.javac.code.Source;
+  32 import com.sun.tools.javac.code.Source.Feature;
+<a name="2" id="anc2"></a><span class="line-added">  33 import com.sun.tools.javac.file.JavacFileManager;</span>
+  34 import com.sun.tools.javac.parser.Tokens.Comment.CommentStyle;
+  35 import com.sun.tools.javac.resources.CompilerProperties.Errors;
+  36 import com.sun.tools.javac.resources.CompilerProperties.Warnings;
+  37 import com.sun.tools.javac.util.*;
+  38 import com.sun.tools.javac.util.JCDiagnostic.*;
+  39 
+<a name="3" id="anc3"></a>
+
+  40 import java.nio.CharBuffer;
+<a name="4" id="anc4"></a>
+  41 import java.util.Set;
+<a name="5" id="anc5"></a><span class="line-added">  42 import java.util.regex.Pattern;</span>
+  43 
+  44 import static com.sun.tools.javac.parser.Tokens.*;
+<a name="6" id="anc6"></a><span class="line-modified">  45 import static com.sun.tools.javac.util.LayoutCharacters.EOI;</span>
+  46 
+<a name="7" id="anc7"></a><span class="line-modified">  47 /**</span>
+<span class="line-modified">  48  * The lexical analyzer maps an input stream consisting of UTF-8 characters and unicode</span>
+<span class="line-added">  49  * escape sequences into a token sequence.</span>
+  50  *
+  51  *  &lt;p&gt;&lt;b&gt;This is NOT part of any supported API.
+  52  *  If you write code that depends on this, you do so at your own risk.
+  53  *  This code and its internal interfaces are subject to change or
+  54  *  deletion without notice.&lt;/b&gt;
+  55  */
+<a name="8" id="anc8"></a><span class="line-modified">  56 public class JavaTokenizer extends UnicodeReader {</span>
+<span class="line-modified">  57     /**</span>
+<span class="line-added">  58      * If true then prints token information after each nextToken().</span>
+<span class="line-added">  59      */</span>
+  60     private static final boolean scannerDebug = false;
+  61 
+<a name="9" id="anc9"></a><span class="line-modified">  62     /**</span>
+<span class="line-added">  63      * Sentinal for non-value.</span>
+<span class="line-added">  64      */</span>
+<span class="line-added">  65     private int NOT_FOUND = -1;</span>
+<span class="line-added">  66 </span>
+<span class="line-added">  67     /**</span>
+<span class="line-added">  68      * The source language setting. Copied from scanner factory.</span>
+  69      */
+  70     private Source source;
+  71 
+<a name="10" id="anc10"></a><span class="line-modified">  72     /**</span>
+<span class="line-added">  73      * The preview language setting. Copied from scanner factory.</span>
+<span class="line-added">  74      */</span>
+  75     private Preview preview;
+  76 
+<a name="11" id="anc11"></a><span class="line-modified">  77     /**</span>
+<span class="line-added">  78      * The log to be used for error reporting. Copied from scanner factory.</span>
+  79      */
+  80     private final Log log;
+  81 
+<a name="12" id="anc12"></a><span class="line-modified">  82     /**</span>
+<span class="line-added">  83      * The token factory. Copied from scanner factory.</span>
+<span class="line-added">  84      */</span>
+  85     private final Tokens tokens;
+  86 
+<a name="13" id="anc13"></a><span class="line-modified">  87     /**</span>
+<span class="line-added">  88      * The names factory. Copied from scanner factory.</span>
+<span class="line-added">  89      */</span>
+<span class="line-added">  90     private final Names names;</span>
+<span class="line-added">  91 </span>
+<span class="line-added">  92     /**</span>
+<span class="line-added">  93      * The token kind, set by nextToken().</span>
+  94      */
+  95     protected TokenKind tk;
+  96 
+<a name="14" id="anc14"></a><span class="line-modified">  97     /**</span>
+<span class="line-added">  98      * The token&#39;s radix, set by nextToken().</span>
+  99      */
+ 100     protected int radix;
+ 101 
+<a name="15" id="anc15"></a><span class="line-modified"> 102     /**</span>
+<span class="line-added"> 103      * The token&#39;s name, set by nextToken().</span>
+ 104      */
+ 105     protected Name name;
+ 106 
+<a name="16" id="anc16"></a><span class="line-modified"> 107     /**</span>
+<span class="line-added"> 108      * The position where a lexical error occurred;</span>
+ 109      */
+ 110     protected int errPos = Position.NOPOS;
+ 111 
+<a name="17" id="anc17"></a><span class="line-modified"> 112     /**</span>
+<span class="line-modified"> 113      * true if is a text block, set by nextToken().</span>
+
+
+
+ 114      */
+ 115     protected boolean isTextBlock;
+ 116 
+<a name="18" id="anc18"></a><span class="line-modified"> 117     /**</span>
+<span class="line-added"> 118      * true if contains escape sequences, set by nextToken().</span>
+ 119      */
+ 120     protected boolean hasEscapeSequences;
+ 121 
+<a name="19" id="anc19"></a><span class="line-added"> 122     /**</span>
+<span class="line-added"> 123      * Buffer for building literals, used by nextToken().</span>
+<span class="line-added"> 124      */</span>
+<span class="line-added"> 125     protected StringBuilder sb;</span>
+<span class="line-added"> 126 </span>
+<span class="line-added"> 127     /**</span>
+<span class="line-added"> 128      * Origin scanner factory.</span>
+<span class="line-added"> 129      */</span>
+ 130     protected ScannerFactory fac;
+ 131 
+<a name="20" id="anc20"></a><span class="line-modified"> 132     /**</span>
+<span class="line-modified"> 133      * The set of lint options currently in effect. It is initialized</span>
+<span class="line-modified"> 134      * from the context, and then is set/reset as needed by Attr as it</span>
+<span class="line-added"> 135      * visits all the various parts of the trees during attribution.</span>
+<span class="line-added"> 136      */</span>
+ 137     protected Lint lint;
+ 138 
+<a name="21" id="anc21"></a>
+
+
+
+
+
+
+
+
+
+ 139     /**
+<a name="22" id="anc22"></a><span class="line-modified"> 140      * Construct a Java token scanner from the input character buffer.</span>
+
+
+
+ 141      *
+<a name="23" id="anc23"></a><span class="line-modified"> 142      * @param fac  the factory which created this Scanner.</span>
+<span class="line-modified"> 143      * @param cb   the input character buffer.</span>
+
+ 144      */
+<a name="24" id="anc24"></a><span class="line-modified"> 145     protected JavaTokenizer(ScannerFactory fac, CharBuffer cb) {</span>
+<span class="line-modified"> 146         this(fac, JavacFileManager.toArray(cb), cb.limit());</span>
+ 147     }
+ 148 
+<a name="25" id="anc25"></a><span class="line-modified"> 149     /**</span>
+<span class="line-modified"> 150      * Construct a Java token scanner from the input character array.</span>
+<span class="line-modified"> 151      *</span>
+<span class="line-modified"> 152      * @param fac     the factory which created this Scanner</span>
+<span class="line-modified"> 153      * @param array   the input character array.</span>
+<span class="line-added"> 154      * @param length  The length of the meaningful content in the array.</span>
+<span class="line-added"> 155      */</span>
+<span class="line-added"> 156     protected JavaTokenizer(ScannerFactory fac, char[] array, int length) {</span>
+<span class="line-added"> 157         super(fac, array, length);</span>
+ 158         this.fac = fac;
+ 159         this.log = fac.log;
+<a name="26" id="anc26"></a><span class="line-added"> 160         this.names = fac.names;</span>
+ 161         this.tokens = fac.tokens;
+ 162         this.source = fac.source;
+ 163         this.preview = fac.preview;
+<a name="27" id="anc27"></a>
+ 164         this.lint = fac.lint;
+<a name="28" id="anc28"></a><span class="line-added"> 165         this.sb = new StringBuilder(256);</span>
+ 166     }
+ 167 
+<a name="29" id="anc29"></a><span class="line-added"> 168     /**</span>
+<span class="line-added"> 169      * Check the source level for a lexical feature.</span>
+<span class="line-added"> 170      *</span>
+<span class="line-added"> 171      * @param pos      position in input buffer.</span>
+<span class="line-added"> 172      * @param feature  feature to verify.</span>
+<span class="line-added"> 173      */</span>
+ 174     protected void checkSourceLevel(int pos, Feature feature) {
+ 175         if (preview.isPreview(feature) &amp;&amp; !preview.isEnabled()) {
+ 176             //preview feature without --preview flag, error
+ 177             lexError(DiagnosticFlag.SOURCE_LEVEL, pos, preview.disabledError(feature));
+ 178         } else if (!feature.allowedInSource(source)) {
+ 179             //incompatible source level, error
+ 180             lexError(DiagnosticFlag.SOURCE_LEVEL, pos, feature.error(source.name));
+ 181         } else if (preview.isPreview(feature)) {
+ 182             //use of preview feature, warn
+ 183             preview.warnPreview(pos, feature);
+ 184         }
+ 185     }
+ 186 
+<a name="30" id="anc30"></a><span class="line-modified"> 187     /**</span>
+<span class="line-added"> 188      * Report an error at the given position using the provided arguments.</span>
+<span class="line-added"> 189      *</span>
+<span class="line-added"> 190      * @param pos  position in input buffer.</span>
+<span class="line-added"> 191      * @param key  error key to report.</span>
+ 192      */
+ 193     protected void lexError(int pos, JCDiagnostic.Error key) {
+ 194         log.error(pos, key);
+ 195         tk = TokenKind.ERROR;
+ 196         errPos = pos;
+ 197     }
+ 198 
+<a name="31" id="anc31"></a><span class="line-added"> 199     /**</span>
+<span class="line-added"> 200      * Report an error at the given position using the provided arguments.</span>
+<span class="line-added"> 201      *</span>
+<span class="line-added"> 202      * @param flags  diagnostic flags.</span>
+<span class="line-added"> 203      * @param pos    position in input buffer.</span>
+<span class="line-added"> 204      * @param key    error key to report.</span>
+<span class="line-added"> 205      */</span>
+ 206     protected void lexError(DiagnosticFlag flags, int pos, JCDiagnostic.Error key) {
+ 207         log.error(flags, pos, key);
+ 208         tk = TokenKind.ERROR;
+ 209         errPos = pos;
+ 210     }
+ 211 
+<a name="32" id="anc32"></a><span class="line-added"> 212     /**</span>
+<span class="line-added"> 213      * Report an error at the given position using the provided arguments.</span>
+<span class="line-added"> 214      *</span>
+<span class="line-added"> 215      * @param lc     lint category.</span>
+<span class="line-added"> 216      * @param pos    position in input buffer.</span>
+<span class="line-added"> 217      * @param key    error key to report.</span>
+<span class="line-added"> 218      */</span>
+ 219     protected void lexWarning(LintCategory lc, int pos, JCDiagnostic.Warning key) {
+ 220         DiagnosticPosition dp = new SimpleDiagnosticPosition(pos) ;
+ 221         log.warning(lc, dp, key);
+ 222     }
+ 223 
+<a name="33" id="anc33"></a><span class="line-modified"> 224     /**</span>
+<span class="line-modified"> 225      * Add a character to the literal buffer.</span>
+<span class="line-modified"> 226      *</span>
+<span class="line-modified"> 227      * @param ch  character to add.</span>
+
+
+ 228      */
+<a name="34" id="anc34"></a><span class="line-modified"> 229     protected void put(char ch) {</span>
+<span class="line-modified"> 230         sb.append(ch);</span>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 231     }
+ 232 
+<a name="35" id="anc35"></a><span class="line-modified"> 233     /**</span>
+<span class="line-modified"> 234      * Add a codepoint to the literal buffer.</span>
+<span class="line-modified"> 235      *</span>
+<span class="line-added"> 236      * @param codePoint  codepoint to add.</span>
+ 237      */
+<a name="36" id="anc36"></a><span class="line-modified"> 238     protected void putCodePoint(int codePoint) {</span>
+<span class="line-modified"> 239         sb.appendCodePoint(codePoint);</span>
+<span class="line-modified"> 240     }</span>
+
+ 241 
+<a name="37" id="anc37"></a><span class="line-modified"> 242     /**</span>
+<span class="line-modified"> 243      * Add current character or codepoint to the literal buffer.</span>
+<span class="line-modified"> 244      */</span>
+<span class="line-added"> 245     protected void put() {</span>
+<span class="line-added"> 246         if (isSurrogate()) {</span>
+<span class="line-added"> 247             putCodePoint(getCodepoint());</span>
+<span class="line-added"> 248         } else {</span>
+<span class="line-added"> 249             put(get());</span>
+<span class="line-added"> 250         }</span>
+<span class="line-added"> 251     }</span>
+ 252 
+<a name="38" id="anc38"></a><span class="line-modified"> 253     /**</span>
+<span class="line-modified"> 254      * Add a string to the literal buffer.</span>
+<span class="line-modified"> 255      */</span>
+<span class="line-added"> 256     protected void put(String string) {</span>
+<span class="line-added"> 257         sb.append(string);</span>
+<span class="line-added"> 258     }</span>
+ 259 
+<a name="39" id="anc39"></a><span class="line-modified"> 260     /**</span>
+<span class="line-modified"> 261      * Add current character or codepoint to the literal buffer then return next character.</span>
+<span class="line-modified"> 262      */</span>
+<span class="line-modified"> 263     protected char putThenNext() {</span>
+<span class="line-modified"> 264         put();</span>
+
+
+
+
+
+ 265 
+<a name="40" id="anc40"></a><span class="line-modified"> 266         return next();</span>
+<span class="line-modified"> 267     }</span>
+
+
+
+
+
+ 268 
+<a name="41" id="anc41"></a><span class="line-modified"> 269     /**</span>
+<span class="line-modified"> 270      * If the specified character ch matches the current character then add current character</span>
+<span class="line-modified"> 271      * to the literal buffer and then advance.</span>
+<span class="line-modified"> 272      *</span>
+<span class="line-modified"> 273      * @param ch  character to match.</span>
+<span class="line-added"> 274      *</span>
+<span class="line-added"> 275      * @return true if ch matches current character.</span>
+<span class="line-added"> 276      */</span>
+<span class="line-added"> 277     protected boolean acceptThenPut(char ch) {</span>
+<span class="line-added"> 278         if (is(ch)) {</span>
+<span class="line-added"> 279             put(get());</span>
+<span class="line-added"> 280             next();</span>
+ 281 
+<a name="42" id="anc42"></a><span class="line-modified"> 282             return true;</span>
+
+
+
+ 283         }
+ 284 
+<a name="43" id="anc43"></a><span class="line-modified"> 285         return false;</span>
+<span class="line-modified"> 286     }</span>
+
+
+ 287 
+<a name="44" id="anc44"></a><span class="line-modified"> 288     /**</span>
+<span class="line-modified"> 289      * If either ch1 or ch2 matches the current character then add current character</span>
+<span class="line-modified"> 290      * to the literal buffer and then advance.</span>
+<span class="line-modified"> 291      *</span>
+<span class="line-modified"> 292      * @param ch1  first character to match.</span>
+<span class="line-modified"> 293      * @param ch2  second character to match.</span>
+<span class="line-modified"> 294      *</span>
+<span class="line-modified"> 295      * @return true if either ch1 or ch2 matches current character.</span>
+<span class="line-modified"> 296      */</span>
+<span class="line-modified"> 297     protected boolean acceptOneOfThenPut(char ch1, char ch2) {</span>
+<span class="line-modified"> 298         if (isOneOf(ch1, ch2)) {</span>
+<span class="line-modified"> 299             put(get());</span>
+<span class="line-modified"> 300             next();</span>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 301 
+<a name="45" id="anc45"></a><span class="line-modified"> 302             return true;</span>
+
+
+
+
+
+
+
+
+ 303         }
+ 304 
+<a name="46" id="anc46"></a><span class="line-modified"> 305         return false;</span>
+
+
+
+
+
+
+
+
+
+ 306     }
+ 307 
+<a name="47" id="anc47"></a><span class="line-modified"> 308     /**</span>
+<span class="line-added"> 309      * Test if the current character is a line terminator.</span>
+<span class="line-added"> 310      *</span>
+<span class="line-added"> 311      * @return true if current character is a line terminator.</span>
+ 312      */
+ 313     private boolean isEOLN() {
+<a name="48" id="anc48"></a><span class="line-modified"> 314         return isOneOf(&#39;\n&#39;, &#39;\r&#39;);</span>
+ 315     }
+ 316 
+<a name="49" id="anc49"></a><span class="line-modified"> 317     /**</span>
+<span class="line-added"> 318      * Skip and process a line terminator sequence.</span>
+ 319      */
+<a name="50" id="anc50"></a><span class="line-modified"> 320     private void skipLineTerminator() {</span>
+<span class="line-modified"> 321         int start = position();</span>
+<span class="line-added"> 322         accept(&#39;\r&#39;);</span>
+<span class="line-added"> 323         accept(&#39;\n&#39;);</span>
+<span class="line-added"> 324         processLineTerminator(start, position());</span>
+ 325     }
+ 326 
+<a name="51" id="anc51"></a><span class="line-modified"> 327     /**</span>
+<span class="line-added"> 328      * Processes the current character and places in the literal buffer. If the current</span>
+<span class="line-added"> 329      * character is a backslash then the next character is validated as a proper</span>
+<span class="line-added"> 330      * escape character. Conversion of escape sequences takes place at end of nextToken().</span>
+<span class="line-added"> 331      *</span>
+<span class="line-added"> 332      * @param pos position of the first character in literal.</span>
+ 333      */
+<a name="52" id="anc52"></a><span class="line-modified"> 334     private void scanLitChar(int pos) {</span>
+<span class="line-modified"> 335         if (acceptThenPut(&#39;\\&#39;)) {</span>
+<span class="line-modified"> 336             hasEscapeSequences = true;</span>
+
+
+
+
+ 337 
+<a name="53" id="anc53"></a><span class="line-modified"> 338             switch (get()) {</span>
+<span class="line-modified"> 339                 case &#39;0&#39;: case &#39;1&#39;: case &#39;2&#39;: case &#39;3&#39;:</span>
+<span class="line-modified"> 340                 case &#39;4&#39;: case &#39;5&#39;: case &#39;6&#39;: case &#39;7&#39;:</span>
+<span class="line-modified"> 341                     char leadch = get();</span>
+<span class="line-modified"> 342                     putThenNext();</span>
+<span class="line-modified"> 343 </span>
+<span class="line-added"> 344                     if (inRange(&#39;0&#39;, &#39;7&#39;)) {</span>
+<span class="line-added"> 345                         putThenNext();</span>
+<span class="line-added"> 346 </span>
+<span class="line-added"> 347                         if (leadch &lt;= &#39;3&#39; &amp;&amp; inRange(&#39;0&#39;, &#39;7&#39;)) {</span>
+<span class="line-added"> 348                             putThenNext();</span>
+<span class="line-added"> 349                         }</span>
+<span class="line-added"> 350                     }</span>
+<span class="line-added"> 351                     break;</span>
+<span class="line-added"> 352 </span>
+<span class="line-added"> 353                 case &#39;b&#39;:</span>
+<span class="line-added"> 354                 case &#39;t&#39;:</span>
+<span class="line-added"> 355                 case &#39;n&#39;:</span>
+<span class="line-added"> 356                 case &#39;f&#39;:</span>
+<span class="line-added"> 357                 case &#39;r&#39;:</span>
+<span class="line-added"> 358                 case &#39;\&#39;&#39;:</span>
+<span class="line-added"> 359                 case &#39;\&quot;&#39;:</span>
+<span class="line-added"> 360                 case &#39;\\&#39;:</span>
+<span class="line-added"> 361                     putThenNext();</span>
+<span class="line-added"> 362                     break;</span>
+<span class="line-added"> 363 </span>
+<span class="line-added"> 364                 case &#39;s&#39;:</span>
+<span class="line-added"> 365                     checkSourceLevel(position(), Feature.TEXT_BLOCKS);</span>
+<span class="line-added"> 366                     putThenNext();</span>
+<span class="line-added"> 367                     break;</span>
+<span class="line-added"> 368 </span>
+<span class="line-added"> 369                 case &#39;\n&#39;:</span>
+<span class="line-added"> 370                 case &#39;\r&#39;:</span>
+<span class="line-added"> 371                     if (isTextBlock) {</span>
+<span class="line-added"> 372                         skipLineTerminator();</span>
+<span class="line-added"> 373                         // Normalize line terminator.</span>
+<span class="line-added"> 374                         put(&#39;\n&#39;);</span>
+<span class="line-added"> 375                     } else {</span>
+<span class="line-added"> 376                         lexError(position(), Errors.IllegalEscChar);</span>
+<span class="line-added"> 377                     }</span>
+<span class="line-added"> 378                     break;</span>
+<span class="line-added"> 379 </span>
+<span class="line-added"> 380                 default:</span>
+<span class="line-added"> 381                     lexError(position(), Errors.IllegalEscChar);</span>
+<span class="line-added"> 382                     break;</span>
+<span class="line-added"> 383             }</span>
+<span class="line-added"> 384         } else {</span>
+<span class="line-added"> 385             putThenNext();</span>
+ 386         }
+<a name="54" id="anc54"></a>
+
+ 387     }
+ 388 
+<a name="55" id="anc55"></a><span class="line-modified"> 389     /**</span>
+<span class="line-added"> 390      * Scan a string literal or text block.</span>
+<span class="line-added"> 391      *</span>
+<span class="line-added"> 392      * @param pos  position of the first character in literal.</span>
+ 393      */
+ 394     private void scanString(int pos) {
+<a name="56" id="anc56"></a><span class="line-modified"> 395         // Assume the best.</span>
+<span class="line-modified"> 396         tk = Tokens.TokenKind.STRINGLITERAL;</span>
+
+ 397         // Track the end of first line for error recovery.
+<a name="57" id="anc57"></a><span class="line-modified"> 398         int firstEOLN = NOT_FOUND;</span>
+<span class="line-modified"> 399         // Check for text block delimiter.</span>
+<span class="line-modified"> 400         isTextBlock = accept(&quot;\&quot;\&quot;\&quot;&quot;);</span>
+<span class="line-modified"> 401 </span>
+<span class="line-modified"> 402         if (isTextBlock) {</span>
+
+
+
+
+
+ 403             // Check if preview feature is enabled for text blocks.
+ 404             checkSourceLevel(pos, Feature.TEXT_BLOCKS);
+<a name="58" id="anc58"></a><span class="line-modified"> 405 </span>
+ 406             // Verify the open delimiter sequence.
+<a name="59" id="anc59"></a><span class="line-modified"> 407             // Error if the open delimiter sequence is not &quot;&quot;&quot;&lt;white space&gt;*&lt;LineTerminator&gt;.</span>
+<span class="line-modified"> 408             skipWhitespace();</span>
+<span class="line-modified"> 409 </span>
+
+
+
+
+ 410             if (isEOLN()) {
+ 411                 skipLineTerminator();
+ 412             } else {
+<a name="60" id="anc60"></a><span class="line-modified"> 413                 lexError(position(), Errors.IllegalTextBlockOpen);</span>
+
+
+ 414                 return;
+ 415             }
+<a name="61" id="anc61"></a><span class="line-modified"> 416 </span>
+<span class="line-modified"> 417             // While characters are available.</span>
+<span class="line-modified"> 418             while (isAvailable()) {</span>
+<span class="line-modified"> 419                 if (accept(&quot;\&quot;\&quot;\&quot;&quot;)) {</span>
+
+
+
+
+
+
+
+ 420                     return;
+ 421                 }
+<a name="62" id="anc62"></a><span class="line-modified"> 422 </span>
+<span class="line-modified"> 423                 if (isEOLN()) {</span>
+<span class="line-modified"> 424                     skipLineTerminator();</span>
+<span class="line-modified"> 425                     // Add normalized line terminator to literal buffer.</span>
+<span class="line-modified"> 426                     put(&#39;\n&#39;);</span>
+<span class="line-modified"> 427 </span>
+<span class="line-modified"> 428                     // Record first line terminator for error recovery.</span>
+<span class="line-added"> 429                     if (firstEOLN == NOT_FOUND) {</span>
+<span class="line-added"> 430                         firstEOLN = position();</span>
+<span class="line-added"> 431                     }</span>
+<span class="line-added"> 432                 } else {</span>
+<span class="line-added"> 433                     // Add character to string buffer.</span>
+<span class="line-added"> 434                     scanLitChar(pos);</span>
+ 435                 }
+<a name="63" id="anc63"></a><span class="line-modified"> 436             }</span>
+<span class="line-modified"> 437         } else {</span>
+<span class="line-modified"> 438             // Skip first quote.</span>
+<span class="line-modified"> 439             next();</span>
+<span class="line-modified"> 440 </span>
+<span class="line-modified"> 441             // While characters are available.</span>
+<span class="line-added"> 442             while (isAvailable()) {</span>
+<span class="line-added"> 443                 if (accept(&#39;\&quot;&#39;)) {</span>
+<span class="line-added"> 444                     return;</span>
+<span class="line-added"> 445                 }</span>
+<span class="line-added"> 446 </span>
+<span class="line-added"> 447                 if (isEOLN()) {</span>
+<span class="line-added"> 448                     // Line terminator in string literal is an error.</span>
+<span class="line-added"> 449                     // Fall out to unclosed string literal error.</span>
+<span class="line-added"> 450                     break;</span>
+<span class="line-added"> 451                 } else {</span>
+<span class="line-added"> 452                     // Add character to string buffer.</span>
+<span class="line-added"> 453                     scanLitChar(pos);</span>
+ 454                 }
+<a name="64" id="anc64"></a>
+
+
+
+
+
+
+
+
+
+ 455             }
+ 456         }
+<a name="65" id="anc65"></a><span class="line-added"> 457 </span>
+ 458         // String ended without close delimiter sequence.
+<a name="66" id="anc66"></a><span class="line-modified"> 459         lexError(pos, isTextBlock ? Errors.UnclosedTextBlock : Errors.UnclosedStrLit);</span>
+<span class="line-modified"> 460 </span>
+<span class="line-modified"> 461         if (firstEOLN  != NOT_FOUND) {</span>
+<span class="line-modified"> 462             // Reset recovery position to point after text block open delimiter sequence.</span>
+<span class="line-added"> 463             reset(firstEOLN);</span>
+ 464         }
+ 465     }
+ 466 
+<a name="67" id="anc67"></a><span class="line-added"> 467     /**</span>
+<span class="line-added"> 468      * Scan sequence of digits.</span>
+<span class="line-added"> 469      *</span>
+<span class="line-added"> 470      * @param pos         position of the first character in literal.</span>
+<span class="line-added"> 471      * @param digitRadix  radix of numeric literal.</span>
+<span class="line-added"> 472      */</span>
+ 473     private void scanDigits(int pos, int digitRadix) {
+<a name="68" id="anc68"></a><span class="line-modified"> 474         int leadingUnderscorePos = is(&#39;_&#39;) ? position() : NOT_FOUND;</span>
+<span class="line-modified"> 475         int trailingUnderscorePos;</span>
+<span class="line-added"> 476 </span>
+ 477         do {
+<a name="69" id="anc69"></a><span class="line-modified"> 478             if (!is(&#39;_&#39;)) {</span>
+<span class="line-modified"> 479                 put();</span>
+<span class="line-added"> 480                 trailingUnderscorePos = NOT_FOUND;</span>
+<span class="line-added"> 481             } else {</span>
+<span class="line-added"> 482                 trailingUnderscorePos = position();</span>
+ 483             }
+<a name="70" id="anc70"></a><span class="line-modified"> 484 </span>
+<span class="line-modified"> 485             next();</span>
+<span class="line-modified"> 486         } while (digit(pos, digitRadix) &gt;= 0 || is(&#39;_&#39;));</span>
+<span class="line-modified"> 487 </span>
+<span class="line-modified"> 488         if (leadingUnderscorePos != NOT_FOUND) {</span>
+<span class="line-modified"> 489             lexError(leadingUnderscorePos, Errors.IllegalUnderscore);</span>
+<span class="line-added"> 490         } else if (trailingUnderscorePos != NOT_FOUND) {</span>
+<span class="line-added"> 491             lexError(trailingUnderscorePos, Errors.IllegalUnderscore);</span>
+<span class="line-added"> 492         }</span>
+ 493     }
+ 494 
+<a name="71" id="anc71"></a><span class="line-modified"> 495     /**</span>
+<span class="line-added"> 496      * Read fractional part of hexadecimal floating point number.</span>
+<span class="line-added"> 497      *</span>
+<span class="line-added"> 498      * @param pos  position of the first character in literal.</span>
+ 499      */
+ 500     private void scanHexExponentAndSuffix(int pos) {
+<a name="72" id="anc72"></a><span class="line-modified"> 501         if (acceptOneOfThenPut(&#39;p&#39;, &#39;P&#39;)) {</span>
+
+ 502             skipIllegalUnderscores();
+<a name="73" id="anc73"></a><span class="line-modified"> 503             acceptOneOfThenPut(&#39;+&#39;, &#39;-&#39;);</span>
+
+
+ 504             skipIllegalUnderscores();
+<a name="74" id="anc74"></a><span class="line-modified"> 505 </span>
+<span class="line-added"> 506             if (digit(pos, 10) &gt;= 0) {</span>
+ 507                 scanDigits(pos, 10);
+<a name="75" id="anc75"></a><span class="line-modified"> 508             } else {</span>
+
+
+ 509                 lexError(pos, Errors.MalformedFpLit);
+<a name="76" id="anc76"></a><span class="line-added"> 510             }</span>
+ 511         } else {
+ 512             lexError(pos, Errors.MalformedFpLit);
+ 513         }
+<a name="77" id="anc77"></a><span class="line-modified"> 514 </span>
+<span class="line-modified"> 515         if (acceptOneOfThenPut(&#39;f&#39;, &#39;F&#39;)) {</span>
+ 516             tk = TokenKind.FLOATLITERAL;
+ 517             radix = 16;
+ 518         } else {
+<a name="78" id="anc78"></a><span class="line-modified"> 519             acceptOneOfThenPut(&#39;d&#39;, &#39;D&#39;);</span>
+
+
+ 520             tk = TokenKind.DOUBLELITERAL;
+ 521             radix = 16;
+ 522         }
+ 523     }
+ 524 
+<a name="79" id="anc79"></a><span class="line-modified"> 525     /**</span>
+<span class="line-added"> 526      * Read fractional part of floating point number.</span>
+<span class="line-added"> 527      *</span>
+<span class="line-added"> 528      * @param pos  position of the first character in literal.</span>
+ 529      */
+ 530     private void scanFraction(int pos) {
+ 531         skipIllegalUnderscores();
+<a name="80" id="anc80"></a><span class="line-modified"> 532 </span>
+<span class="line-added"> 533         if (digit(pos, 10) &gt;= 0) {</span>
+ 534             scanDigits(pos, 10);
+ 535         }
+<a name="81" id="anc81"></a><span class="line-modified"> 536 </span>
+<span class="line-modified"> 537         int index = sb.length();</span>
+<span class="line-modified"> 538 </span>
+<span class="line-added"> 539         if (acceptOneOfThenPut(&#39;e&#39;, &#39;E&#39;)) {</span>
+ 540             skipIllegalUnderscores();
+<a name="82" id="anc82"></a><span class="line-modified"> 541             acceptOneOfThenPut(&#39;+&#39;, &#39;-&#39;);</span>
+
+
+ 542             skipIllegalUnderscores();
+<a name="83" id="anc83"></a><span class="line-modified"> 543 </span>
+<span class="line-added"> 544             if (digit(pos, 10) &gt;= 0) {</span>
+ 545                 scanDigits(pos, 10);
+ 546                 return;
+ 547             }
+<a name="84" id="anc84"></a><span class="line-added"> 548 </span>
+ 549             lexError(pos, Errors.MalformedFpLit);
+<a name="85" id="anc85"></a><span class="line-modified"> 550             sb.setLength(index);</span>
+ 551         }
+ 552     }
+ 553 
+<a name="86" id="anc86"></a><span class="line-modified"> 554     /**</span>
+<span class="line-added"> 555      * Read fractional part and &#39;d&#39; or &#39;f&#39; suffix of floating point number.</span>
+<span class="line-added"> 556      *</span>
+<span class="line-added"> 557      * @param pos  position of the first character in literal.</span>
+ 558      */
+ 559     private void scanFractionAndSuffix(int pos) {
+ 560         radix = 10;
+ 561         scanFraction(pos);
+<a name="87" id="anc87"></a><span class="line-modified"> 562 </span>
+<span class="line-modified"> 563         if (acceptOneOfThenPut(&#39;f&#39;, &#39;F&#39;)) {</span>
+<span class="line-modified"> 564              tk = TokenKind.FLOATLITERAL;</span>
+ 565         } else {
+<a name="88" id="anc88"></a><span class="line-modified"> 566             acceptOneOfThenPut(&#39;d&#39;, &#39;D&#39;);</span>
+
+
+ 567             tk = TokenKind.DOUBLELITERAL;
+ 568         }
+ 569     }
+ 570 
+<a name="89" id="anc89"></a><span class="line-modified"> 571     /**</span>
+<span class="line-added"> 572      * Read fractional part and &#39;d&#39; or &#39;f&#39; suffix of hexadecimal floating point number.</span>
+<span class="line-added"> 573      *</span>
+<span class="line-added"> 574      * @param pos  position of the first character in literal.</span>
+ 575      */
+ 576     private void scanHexFractionAndSuffix(int pos, boolean seendigit) {
+ 577         radix = 16;
+<a name="90" id="anc90"></a><span class="line-modified"> 578         Assert.check(is(&#39;.&#39;));</span>
+<span class="line-modified"> 579         putThenNext();</span>
+ 580         skipIllegalUnderscores();
+<a name="91" id="anc91"></a><span class="line-modified"> 581 </span>
+<span class="line-added"> 582         if (digit(pos, 16) &gt;= 0) {</span>
+ 583             seendigit = true;
+ 584             scanDigits(pos, 16);
+ 585         }
+<a name="92" id="anc92"></a><span class="line-added"> 586 </span>
+ 587         if (!seendigit)
+ 588             lexError(pos, Errors.InvalidHexNumber);
+ 589         else
+ 590             scanHexExponentAndSuffix(pos);
+ 591     }
+ 592 
+<a name="93" id="anc93"></a><span class="line-added"> 593     /**</span>
+<span class="line-added"> 594      * Skip over underscores and report as a error if found.</span>
+<span class="line-added"> 595      */</span>
+ 596     private void skipIllegalUnderscores() {
+<a name="94" id="anc94"></a><span class="line-modified"> 597         if (is(&#39;_&#39;)) {</span>
+<span class="line-modified"> 598             lexError(position(), Errors.IllegalUnderscore);</span>
+<span class="line-modified"> 599             skip(&#39;_&#39;);</span>
+
+ 600         }
+ 601     }
+ 602 
+<a name="95" id="anc95"></a><span class="line-modified"> 603     /**</span>
+<span class="line-modified"> 604      * Read a number. (Spec. 3.10)</span>
+<span class="line-added"> 605      *</span>
+<span class="line-added"> 606      * @param pos    position of the first character in literal.</span>
+<span class="line-added"> 607      * @param radix  the radix of the number; one of 2, 8, 10, 16.</span>
+ 608      */
+ 609     private void scanNumber(int pos, int radix) {
+ 610         // for octal, allow base-10 digit in case it&#39;s a float literal
+ 611         this.radix = radix;
+ 612         int digitRadix = (radix == 8 ? 10 : radix);
+<a name="96" id="anc96"></a><span class="line-modified"> 613         int firstDigit = digit(pos, Math.max(10, digitRadix));</span>
+ 614         boolean seendigit = firstDigit &gt;= 0;
+ 615         boolean seenValidDigit = firstDigit &gt;= 0 &amp;&amp; firstDigit &lt; digitRadix;
+<a name="97" id="anc97"></a><span class="line-added"> 616 </span>
+ 617         if (seendigit) {
+ 618             scanDigits(pos, digitRadix);
+ 619         }
+<a name="98" id="anc98"></a><span class="line-modified"> 620 </span>
+<span class="line-added"> 621         if (radix == 16 &amp;&amp; is(&#39;.&#39;)) {</span>
+ 622             scanHexFractionAndSuffix(pos, seendigit);
+<a name="99" id="anc99"></a><span class="line-modified"> 623         } else if (seendigit &amp;&amp; radix == 16 &amp;&amp; isOneOf(&#39;p&#39;, &#39;P&#39;)) {</span>
+ 624             scanHexExponentAndSuffix(pos);
+<a name="100" id="anc100"></a><span class="line-modified"> 625         } else if (digitRadix == 10 &amp;&amp; is(&#39;.&#39;)) {</span>
+<span class="line-modified"> 626             putThenNext();</span>
+ 627             scanFractionAndSuffix(pos);
+<a name="101" id="anc101"></a><span class="line-modified"> 628         } else if (digitRadix == 10 &amp;&amp; isOneOf(&#39;e&#39;, &#39;E&#39;, &#39;f&#39;, &#39;F&#39;, &#39;d&#39;, &#39;D&#39;)) {</span>
+
+
+
+ 629             scanFractionAndSuffix(pos);
+ 630         } else {
+ 631             if (!seenValidDigit) {
+ 632                 switch (radix) {
+ 633                 case 2:
+ 634                     lexError(pos, Errors.InvalidBinaryNumber);
+ 635                     break;
+ 636                 case 16:
+ 637                     lexError(pos, Errors.InvalidHexNumber);
+ 638                     break;
+ 639                 }
+ 640             }
+<a name="102" id="anc102"></a><span class="line-modified"> 641 </span>
+<span class="line-modified"> 642             if (acceptOneOf(&#39;l&#39;, &#39;L&#39;)) {</span>
+ 643                 tk = TokenKind.LONGLITERAL;
+ 644             } else {
+ 645                 tk = TokenKind.INTLITERAL;
+ 646             }
+ 647         }
+ 648     }
+ 649 
+<a name="103" id="anc103"></a><span class="line-modified"> 650     /**</span>
+<span class="line-added"> 651      * Determines if the sequence in the literal buffer is a token (keyword, operator.)</span>
+<span class="line-added"> 652      */</span>
+<span class="line-added"> 653     private void checkIdent() {</span>
+<span class="line-added"> 654         name = names.fromString(sb.toString());</span>
+<span class="line-added"> 655         tk = tokens.lookupKind(name);</span>
+<span class="line-added"> 656     }</span>
+<span class="line-added"> 657 </span>
+<span class="line-added"> 658     /**</span>
+<span class="line-added"> 659      * Read an identifier. (Spec. 3.8)</span>
+ 660      */
+ 661     private void scanIdent() {
+<a name="104" id="anc104"></a><span class="line-modified"> 662         putThenNext();</span>
+<span class="line-modified"> 663 </span>
+
+ 664         do {
+<a name="105" id="anc105"></a><span class="line-modified"> 665             switch (get()) {</span>
+ 666             case &#39;A&#39;: case &#39;B&#39;: case &#39;C&#39;: case &#39;D&#39;: case &#39;E&#39;:
+ 667             case &#39;F&#39;: case &#39;G&#39;: case &#39;H&#39;: case &#39;I&#39;: case &#39;J&#39;:
+ 668             case &#39;K&#39;: case &#39;L&#39;: case &#39;M&#39;: case &#39;N&#39;: case &#39;O&#39;:
+ 669             case &#39;P&#39;: case &#39;Q&#39;: case &#39;R&#39;: case &#39;S&#39;: case &#39;T&#39;:
+ 670             case &#39;U&#39;: case &#39;V&#39;: case &#39;W&#39;: case &#39;X&#39;: case &#39;Y&#39;:
+ 671             case &#39;Z&#39;:
+ 672             case &#39;a&#39;: case &#39;b&#39;: case &#39;c&#39;: case &#39;d&#39;: case &#39;e&#39;:
+ 673             case &#39;f&#39;: case &#39;g&#39;: case &#39;h&#39;: case &#39;i&#39;: case &#39;j&#39;:
+ 674             case &#39;k&#39;: case &#39;l&#39;: case &#39;m&#39;: case &#39;n&#39;: case &#39;o&#39;:
+ 675             case &#39;p&#39;: case &#39;q&#39;: case &#39;r&#39;: case &#39;s&#39;: case &#39;t&#39;:
+ 676             case &#39;u&#39;: case &#39;v&#39;: case &#39;w&#39;: case &#39;x&#39;: case &#39;y&#39;:
+ 677             case &#39;z&#39;:
+ 678             case &#39;$&#39;: case &#39;_&#39;:
+ 679             case &#39;0&#39;: case &#39;1&#39;: case &#39;2&#39;: case &#39;3&#39;: case &#39;4&#39;:
+ 680             case &#39;5&#39;: case &#39;6&#39;: case &#39;7&#39;: case &#39;8&#39;: case &#39;9&#39;:
+ 681                 break;
+<a name="106" id="anc106"></a><span class="line-added"> 682 </span>
+ 683             case &#39;\u0000&#39;: case &#39;\u0001&#39;: case &#39;\u0002&#39;: case &#39;\u0003&#39;:
+ 684             case &#39;\u0004&#39;: case &#39;\u0005&#39;: case &#39;\u0006&#39;: case &#39;\u0007&#39;:
+ 685             case &#39;\u0008&#39;: case &#39;\u000E&#39;: case &#39;\u000F&#39;: case &#39;\u0010&#39;:
+ 686             case &#39;\u0011&#39;: case &#39;\u0012&#39;: case &#39;\u0013&#39;: case &#39;\u0014&#39;:
+ 687             case &#39;\u0015&#39;: case &#39;\u0016&#39;: case &#39;\u0017&#39;:
+ 688             case &#39;\u0018&#39;: case &#39;\u0019&#39;: case &#39;\u001B&#39;:
+ 689             case &#39;\u007F&#39;:
+<a name="107" id="anc107"></a><span class="line-modified"> 690                 next();</span>
+ 691                 continue;
+<a name="108" id="anc108"></a><span class="line-added"> 692 </span>
+ 693             case &#39;\u001A&#39;: // EOI is also a legal identifier part
+<a name="109" id="anc109"></a><span class="line-modified"> 694                 if (isAvailable()) {</span>
+<span class="line-modified"> 695                     next();</span>
+<span class="line-modified"> 696                     continue;</span>
+
+ 697                 }
+<a name="110" id="anc110"></a><span class="line-modified"> 698 </span>
+<span class="line-modified"> 699                 checkIdent();</span>
+<span class="line-added"> 700                 return;</span>
+<span class="line-added"> 701 </span>
+ 702             default:
+<a name="111" id="anc111"></a><span class="line-modified"> 703                 boolean isJavaIdentifierPart;</span>
+<span class="line-added"> 704 </span>
+<span class="line-added"> 705                 if (isASCII()) {</span>
+ 706                     // all ASCII range chars already handled, above
+ 707                     isJavaIdentifierPart = false;
+ 708                 } else {
+<a name="112" id="anc112"></a><span class="line-modified"> 709                     if (Character.isIdentifierIgnorable(get())) {</span>
+<span class="line-modified"> 710                         next();</span>
+ 711                         continue;
+<a name="113" id="anc113"></a>
+
+
+
+
+
+
+
+
+ 712                     }
+<a name="114" id="anc114"></a><span class="line-added"> 713 </span>
+<span class="line-added"> 714                     isJavaIdentifierPart = isSurrogate()</span>
+<span class="line-added"> 715                             ? Character.isJavaIdentifierPart(getCodepoint())</span>
+<span class="line-added"> 716                             : Character.isJavaIdentifierPart(get());</span>
+ 717                 }
+<a name="115" id="anc115"></a><span class="line-added"> 718 </span>
+ 719                 if (!isJavaIdentifierPart) {
+<a name="116" id="anc116"></a><span class="line-modified"> 720                     checkIdent();</span>
+
+ 721                     return;
+ 722                 }
+ 723             }
+<a name="117" id="anc117"></a><span class="line-modified"> 724 </span>
+<span class="line-added"> 725             putThenNext();</span>
+ 726         } while (true);
+ 727     }
+ 728 
+<a name="118" id="anc118"></a><span class="line-modified"> 729     /**</span>
+<span class="line-added"> 730      * Return true if ch can be part of an operator.</span>
+<span class="line-added"> 731      *</span>
+<span class="line-added"> 732      * @param ch  character to check.</span>
+<span class="line-added"> 733      *</span>
+<span class="line-added"> 734      * @return true if ch can be part of an operator.</span>
+ 735      */
+ 736     private boolean isSpecial(char ch) {
+ 737         switch (ch) {
+ 738         case &#39;!&#39;: case &#39;%&#39;: case &#39;&amp;&#39;: case &#39;*&#39;: case &#39;?&#39;:
+ 739         case &#39;+&#39;: case &#39;-&#39;: case &#39;:&#39;: case &#39;&lt;&#39;: case &#39;=&#39;:
+ 740         case &#39;&gt;&#39;: case &#39;^&#39;: case &#39;|&#39;: case &#39;~&#39;:
+ 741         case &#39;@&#39;:
+ 742             return true;
+<a name="119" id="anc119"></a><span class="line-added"> 743 </span>
+ 744         default:
+ 745             return false;
+ 746         }
+ 747     }
+ 748 
+<a name="120" id="anc120"></a><span class="line-modified"> 749     /**</span>
+<span class="line-modified"> 750      * Read longest possible sequence of special characters and convert to token.</span>
+ 751      */
+ 752     private void scanOperator() {
+ 753         while (true) {
+<a name="121" id="anc121"></a><span class="line-modified"> 754             put();</span>
+<span class="line-modified"> 755             TokenKind newtk = tokens.lookupKind(sb.toString());</span>
+<span class="line-modified"> 756 </span>
+<span class="line-modified"> 757             if (newtk == TokenKind.IDENTIFIER) {</span>
+<span class="line-modified"> 758                 sb.setLength(sb.length() - 1);</span>
+<span class="line-added"> 759                 break;</span>
+<span class="line-added"> 760             }</span>
+<span class="line-added"> 761 </span>
+<span class="line-added"> 762             tk = newtk;</span>
+<span class="line-added"> 763             next();</span>
+<span class="line-added"> 764 </span>
+<span class="line-added"> 765             if (!isSpecial(get())) {</span>
+ 766                 break;
+ 767             }
+<a name="122" id="anc122"></a>
+
+
+ 768         }
+ 769     }
+ 770 
+<a name="123" id="anc123"></a><span class="line-modified"> 771     /**</span>
+<span class="line-added"> 772      * Read token (main entrypoint.)</span>
+ 773      */
+ 774     public Token readToken() {
+<a name="124" id="anc124"></a><span class="line-modified"> 775         sb.setLength(0);</span>
+
+ 776         name = null;
+ 777         radix = 0;
+<a name="125" id="anc125"></a><span class="line-added"> 778         isTextBlock = false;</span>
+<span class="line-added"> 779         hasEscapeSequences = false;</span>
+ 780 
+<a name="126" id="anc126"></a><span class="line-modified"> 781         int pos;</span>
+
+ 782         List&lt;Comment&gt; comments = null;
+ 783 
+ 784         try {
+ 785             loop: while (true) {
+<a name="127" id="anc127"></a><span class="line-modified"> 786                 pos = position();</span>
+<span class="line-modified"> 787 </span>
+<span class="line-modified"> 788                 switch (get()) {</span>
+<span class="line-added"> 789                 case &#39; &#39;:  // (Spec 3.6)</span>
+ 790                 case &#39;\t&#39;: // (Spec 3.6)
+<a name="128" id="anc128"></a><span class="line-modified"> 791                 case &#39;\f&#39;: // (Spec 3.6)</span>
+<span class="line-modified"> 792                     skipWhitespace();</span>
+<span class="line-modified"> 793                     processWhiteSpace(pos, position());</span>
+
+
+ 794                     break;
+<a name="129" id="anc129"></a><span class="line-modified"> 795 </span>
+<span class="line-modified"> 796                 case &#39;\n&#39;: // (Spec 3.4)</span>
+<span class="line-modified"> 797                     next();</span>
+<span class="line-added"> 798                     processLineTerminator(pos, position());</span>
+ 799                     break;
+<a name="130" id="anc130"></a><span class="line-modified"> 800 </span>
+<span class="line-modified"> 801                 case &#39;\r&#39;: // (Spec 3.4)</span>
+<span class="line-modified"> 802                     next();</span>
+<span class="line-modified"> 803                     accept(&#39;\n&#39;);</span>
+<span class="line-modified"> 804                     processLineTerminator(pos, position());</span>
+
+ 805                     break;
+<a name="131" id="anc131"></a><span class="line-added"> 806 </span>
+ 807                 case &#39;A&#39;: case &#39;B&#39;: case &#39;C&#39;: case &#39;D&#39;: case &#39;E&#39;:
+ 808                 case &#39;F&#39;: case &#39;G&#39;: case &#39;H&#39;: case &#39;I&#39;: case &#39;J&#39;:
+ 809                 case &#39;K&#39;: case &#39;L&#39;: case &#39;M&#39;: case &#39;N&#39;: case &#39;O&#39;:
+ 810                 case &#39;P&#39;: case &#39;Q&#39;: case &#39;R&#39;: case &#39;S&#39;: case &#39;T&#39;:
+ 811                 case &#39;U&#39;: case &#39;V&#39;: case &#39;W&#39;: case &#39;X&#39;: case &#39;Y&#39;:
+ 812                 case &#39;Z&#39;:
+ 813                 case &#39;a&#39;: case &#39;b&#39;: case &#39;c&#39;: case &#39;d&#39;: case &#39;e&#39;:
+ 814                 case &#39;f&#39;: case &#39;g&#39;: case &#39;h&#39;: case &#39;i&#39;: case &#39;j&#39;:
+ 815                 case &#39;k&#39;: case &#39;l&#39;: case &#39;m&#39;: case &#39;n&#39;: case &#39;o&#39;:
+ 816                 case &#39;p&#39;: case &#39;q&#39;: case &#39;r&#39;: case &#39;s&#39;: case &#39;t&#39;:
+ 817                 case &#39;u&#39;: case &#39;v&#39;: case &#39;w&#39;: case &#39;x&#39;: case &#39;y&#39;:
+ 818                 case &#39;z&#39;:
+<a name="132" id="anc132"></a><span class="line-modified"> 819                 case &#39;$&#39;: case &#39;_&#39;: // (Spec. 3.8)</span>
+ 820                     scanIdent();
+ 821                     break loop;
+<a name="133" id="anc133"></a><span class="line-modified"> 822 </span>
+<span class="line-modified"> 823                 case &#39;0&#39;: // (Spec. 3.10)</span>
+<span class="line-modified"> 824                     next();</span>
+<span class="line-modified"> 825 </span>
+<span class="line-added"> 826                     if (acceptOneOf(&#39;x&#39;, &#39;X&#39;)) {</span>
+ 827                         skipIllegalUnderscores();
+ 828                         scanNumber(pos, 16);
+<a name="134" id="anc134"></a><span class="line-modified"> 829                     } else if (acceptOneOf(&#39;b&#39;, &#39;B&#39;)) {</span>
+
+ 830                         skipIllegalUnderscores();
+ 831                         scanNumber(pos, 2);
+ 832                     } else {
+<a name="135" id="anc135"></a><span class="line-modified"> 833                         put(&#39;0&#39;);</span>
+<span class="line-modified"> 834 </span>
+<span class="line-modified"> 835                         if (is(&#39;_&#39;)) {</span>
+<span class="line-modified"> 836                             int savePos = position();</span>
+<span class="line-modified"> 837                             skip(&#39;_&#39;);</span>
+<span class="line-modified"> 838 </span>
+<span class="line-modified"> 839                             if (digit(pos, 10) &lt; 0) {</span>
+ 840                                 lexError(savePos, Errors.IllegalUnderscore);
+ 841                             }
+ 842                         }
+<a name="136" id="anc136"></a><span class="line-added"> 843 </span>
+ 844                         scanNumber(pos, 8);
+ 845                     }
+ 846                     break loop;
+<a name="137" id="anc137"></a><span class="line-added"> 847 </span>
+ 848                 case &#39;1&#39;: case &#39;2&#39;: case &#39;3&#39;: case &#39;4&#39;:
+<a name="138" id="anc138"></a><span class="line-modified"> 849                 case &#39;5&#39;: case &#39;6&#39;: case &#39;7&#39;: case &#39;8&#39;: case &#39;9&#39;:  // (Spec. 3.10)</span>
+ 850                     scanNumber(pos, 10);
+ 851                     break loop;
+<a name="139" id="anc139"></a><span class="line-modified"> 852 </span>
+<span class="line-modified"> 853                 case &#39;.&#39;: // (Spec. 3.12)</span>
+<span class="line-modified"> 854                     if (accept(&quot;...&quot;)) {</span>
+<span class="line-modified"> 855                         put(&quot;...&quot;);</span>
+<span class="line-modified"> 856                         tk = TokenKind.ELLIPSIS;</span>
+<span class="line-modified"> 857                     } else {</span>
+<span class="line-modified"> 858                         next();</span>
+<span class="line-modified"> 859                         int savePos = position();</span>
+<span class="line-modified"> 860 </span>
+<span class="line-modified"> 861                         if (accept(&#39;.&#39;)) {</span>
+
+
+
+ 862                             lexError(savePos, Errors.IllegalDot);
+<a name="140" id="anc140"></a><span class="line-added"> 863                         } else if (digit(pos, 10) &gt;= 0) {</span>
+<span class="line-added"> 864                             put(&#39;.&#39;);</span>
+<span class="line-added"> 865                             scanFractionAndSuffix(pos); // (Spec. 3.10)</span>
+<span class="line-added"> 866                         } else {</span>
+<span class="line-added"> 867                             tk = TokenKind.DOT;</span>
+ 868                         }
+<a name="141" id="anc141"></a>
+
+ 869                     }
+ 870                     break loop;
+<a name="142" id="anc142"></a><span class="line-modified"> 871 </span>
+<span class="line-modified"> 872                 case &#39;,&#39;: // (Spec. 3.12)</span>
+<span class="line-modified"> 873                     next();</span>
+<span class="line-modified"> 874                     tk = TokenKind.COMMA;</span>
+<span class="line-modified"> 875                     break loop;</span>
+<span class="line-modified"> 876 </span>
+<span class="line-modified"> 877                 case &#39;;&#39;: // (Spec. 3.12)</span>
+<span class="line-modified"> 878                     next();</span>
+<span class="line-modified"> 879                     tk = TokenKind.SEMI;</span>
+<span class="line-modified"> 880                     break loop;</span>
+<span class="line-modified"> 881 </span>
+<span class="line-modified"> 882                 case &#39;(&#39;: // (Spec. 3.12)</span>
+<span class="line-modified"> 883                     next();</span>
+<span class="line-modified"> 884                     tk = TokenKind.LPAREN;</span>
+<span class="line-modified"> 885                     break loop;</span>
+<span class="line-modified"> 886 </span>
+<span class="line-added"> 887                 case &#39;)&#39;: // (Spec. 3.12)</span>
+<span class="line-added"> 888                     next();</span>
+<span class="line-added"> 889                     tk = TokenKind.RPAREN;</span>
+<span class="line-added"> 890                     break loop;</span>
+<span class="line-added"> 891 </span>
+<span class="line-added"> 892                 case &#39;[&#39;: // (Spec. 3.12)</span>
+<span class="line-added"> 893                     next();</span>
+<span class="line-added"> 894                     tk = TokenKind.LBRACKET;</span>
+<span class="line-added"> 895                     break loop;</span>
+<span class="line-added"> 896 </span>
+<span class="line-added"> 897                 case &#39;]&#39;: // (Spec. 3.12)</span>
+<span class="line-added"> 898                     next();</span>
+<span class="line-added"> 899                     tk = TokenKind.RBRACKET;</span>
+<span class="line-added"> 900                     break loop;</span>
+<span class="line-added"> 901 </span>
+<span class="line-added"> 902                 case &#39;{&#39;: // (Spec. 3.12)</span>
+<span class="line-added"> 903                     next();</span>
+<span class="line-added"> 904                     tk = TokenKind.LBRACE;</span>
+<span class="line-added"> 905                     break loop;</span>
+<span class="line-added"> 906 </span>
+<span class="line-added"> 907                 case &#39;}&#39;: // (Spec. 3.12)</span>
+<span class="line-added"> 908                     next();</span>
+<span class="line-added"> 909                     tk = TokenKind.RBRACE;</span>
+<span class="line-added"> 910                     break loop;</span>
+<span class="line-added"> 911 </span>
+ 912                 case &#39;/&#39;:
+<a name="143" id="anc143"></a><span class="line-modified"> 913                     next();</span>
+<span class="line-modified"> 914 </span>
+<span class="line-modified"> 915                     if (accept(&#39;/&#39;)) { // (Spec. 3.7)</span>
+<span class="line-modified"> 916                         skipToEOLN();</span>
+<span class="line-modified"> 917 </span>
+<span class="line-modified"> 918                         if (isAvailable()) {</span>
+<span class="line-modified"> 919                             comments = appendComment(comments, processComment(pos, position(), CommentStyle.LINE));</span>
+ 920                         }
+ 921                         break;
+<a name="144" id="anc144"></a><span class="line-modified"> 922                     } else if (accept(&#39;*&#39;)) { // (Spec. 3.7)</span>
+ 923                         boolean isEmpty = false;
+<a name="145" id="anc145"></a>
+ 924                         CommentStyle style;
+<a name="146" id="anc146"></a><span class="line-modified"> 925 </span>
+<span class="line-added"> 926                         if (accept(&#39;*&#39;)) {</span>
+ 927                             style = CommentStyle.JAVADOC;
+<a name="147" id="anc147"></a><span class="line-modified"> 928 </span>
+<span class="line-modified"> 929                             if (is(&#39;/&#39;)) {</span>
+ 930                                 isEmpty = true;
+ 931                             }
+ 932                         } else {
+ 933                             style = CommentStyle.BLOCK;
+ 934                         }
+<a name="148" id="anc148"></a><span class="line-modified"> 935 </span>
+<span class="line-modified"> 936                         if (!isEmpty) {</span>
+<span class="line-modified"> 937                             while (isAvailable()) {</span>
+<span class="line-modified"> 938                                 if (accept(&#39;*&#39;)) {</span>
+<span class="line-modified"> 939                                     if (is(&#39;/&#39;)) {</span>
+<span class="line-modified"> 940                                         break;</span>
+<span class="line-added"> 941                                     }</span>
+<span class="line-added"> 942                                 } else {</span>
+<span class="line-added"> 943                                     next();</span>
+<span class="line-added"> 944                                 }</span>
+ 945                             }
+ 946                         }
+<a name="149" id="anc149"></a><span class="line-modified"> 947 </span>
+<span class="line-modified"> 948                         if (accept(&#39;/&#39;)) {</span>
+<span class="line-modified"> 949                             comments = appendComment(comments, processComment(pos, position(), style));</span>
+<span class="line-added"> 950 </span>
+ 951                             break;
+ 952                         } else {
+ 953                             lexError(pos, Errors.UnclosedComment);
+<a name="150" id="anc150"></a><span class="line-added"> 954 </span>
+ 955                             break loop;
+ 956                         }
+<a name="151" id="anc151"></a><span class="line-modified"> 957                     } else if (accept(&#39;=&#39;)) {</span>
+<span class="line-modified"> 958                         tk = TokenKind.SLASHEQ; // (Spec. 3.12)</span>
+
+ 959                     } else {
+<a name="152" id="anc152"></a><span class="line-modified"> 960                         tk = TokenKind.SLASH; // (Spec. 3.12)</span>
+ 961                     }
+ 962                     break loop;
+<a name="153" id="anc153"></a><span class="line-modified"> 963 </span>
+<span class="line-modified"> 964                 case &#39;\&#39;&#39;: // (Spec. 3.10)</span>
+<span class="line-modified"> 965                     next();</span>
+<span class="line-added"> 966 </span>
+<span class="line-added"> 967                     if (accept(&#39;\&#39;&#39;)) {</span>
+ 968                         lexError(pos, Errors.EmptyCharLit);
+<a name="154" id="anc154"></a>
+ 969                     } else {
+<a name="155" id="anc155"></a><span class="line-modified"> 970                         if (isEOLN()) {</span>
+ 971                             lexError(pos, Errors.IllegalLineEndInCharLit);
+<a name="156" id="anc156"></a><span class="line-modified"> 972                         }</span>
+<span class="line-modified"> 973 </span>
+<span class="line-modified"> 974                         scanLitChar(pos);</span>
+<span class="line-added"> 975 </span>
+<span class="line-added"> 976                         if (accept(&#39;\&#39;&#39;)) {</span>
+ 977                             tk = TokenKind.CHARLITERAL;
+ 978                         } else {
+ 979                             lexError(pos, Errors.UnclosedCharLit);
+ 980                         }
+ 981                     }
+ 982                     break loop;
+<a name="157" id="anc157"></a><span class="line-modified"> 983 </span>
+<span class="line-added"> 984                 case &#39;\&quot;&#39;: // (Spec. 3.10)</span>
+ 985                     scanString(pos);
+ 986                     break loop;
+<a name="158" id="anc158"></a><span class="line-added"> 987 </span>
+ 988                 default:
+<a name="159" id="anc159"></a><span class="line-modified"> 989                     if (isSpecial(get())) {</span>
+ 990                         scanOperator();
+ 991                     } else {
+ 992                         boolean isJavaIdentifierStart;
+<a name="160" id="anc160"></a><span class="line-modified"> 993 </span>
+<span class="line-modified"> 994                         if (isASCII()) {</span>
+ 995                             // all ASCII range chars already handled, above
+ 996                             isJavaIdentifierStart = false;
+ 997                         } else {
+<a name="161" id="anc161"></a><span class="line-modified"> 998                             isJavaIdentifierStart = isSurrogate()</span>
+<span class="line-modified"> 999                                     ? Character.isJavaIdentifierStart(getCodepoint())</span>
+<span class="line-modified">1000                                     : Character.isJavaIdentifierStart(get());</span>
+
+
+
+
+
+1001                         }
+<a name="162" id="anc162"></a><span class="line-added">1002 </span>
+1003                         if (isJavaIdentifierStart) {
+1004                             scanIdent();
+<a name="163" id="anc163"></a><span class="line-modified">1005                         } else if (digit(pos, 10) &gt;= 0) {</span>
+1006                             scanNumber(pos, 10);
+<a name="164" id="anc164"></a><span class="line-modified">1007                         } else if (is((char)EOI) || !isAvailable()) {</span>
+1008                             tk = TokenKind.EOF;
+<a name="165" id="anc165"></a><span class="line-modified">1009                             pos = position();</span>
+1010                         } else {
+1011                             String arg;
+1012 
+<a name="166" id="anc166"></a><span class="line-modified">1013                             if (isSurrogate()) {</span>
+<span class="line-modified">1014                                 int codePoint = getCodepoint();</span>
+<span class="line-modified">1015                                 char hi = Character.highSurrogate(codePoint);</span>
+<span class="line-modified">1016                                 char lo = Character.lowSurrogate(codePoint);</span>
+<span class="line-added">1017                                 arg = String.format(&quot;\\u%04x\\u%04x&quot;, (int) hi, (int) lo);</span>
+1018                             } else {
+<a name="167" id="anc167"></a><span class="line-modified">1019                                 char ch = get();</span>
+<span class="line-modified">1020                                 arg = (32 &lt; ch &amp;&amp; ch &lt; 127) ? String.format(&quot;%s&quot;, ch) :</span>
+<span class="line-modified">1021                                                               String.format(&quot;\\u%04x&quot;, (int) ch);</span>
+1022                             }
+<a name="168" id="anc168"></a><span class="line-added">1023 </span>
+1024                             lexError(pos, Errors.IllegalChar(arg));
+<a name="169" id="anc169"></a><span class="line-modified">1025                             next();</span>
+1026                         }
+1027                     }
+1028                     break loop;
+1029                 }
+1030             }
+<a name="170" id="anc170"></a><span class="line-modified">1031 </span>
+<span class="line-modified">1032             int endPos = position();</span>
+<span class="line-modified">1033 </span>
+<span class="line-modified">1034             if (tk.tag == Token.Tag.DEFAULT) {</span>
+<span class="line-modified">1035                 return new Token(tk, pos, endPos, comments);</span>
+<span class="line-modified">1036             } else  if (tk.tag == Token.Tag.NAMED) {</span>
+<span class="line-modified">1037                 return new NamedToken(tk, pos, endPos, name, comments);</span>
+<span class="line-modified">1038             } else {</span>
+<span class="line-modified">1039                 // Get characters from string buffer.</span>
+<span class="line-modified">1040                 String string = sb.toString();</span>
+<span class="line-modified">1041 </span>
+<span class="line-modified">1042                 // If a text block.</span>
+<span class="line-modified">1043                 if (isTextBlock) {</span>
+<span class="line-modified">1044                     // Verify that the incidental indentation is consistent.</span>
+<span class="line-modified">1045                     if (lint.isEnabled(LintCategory.TEXT_BLOCKS)) {</span>
+<span class="line-modified">1046                         Set&lt;TextBlockSupport.WhitespaceChecks&gt; checks =</span>
+<span class="line-modified">1047                                 TextBlockSupport.checkWhitespace(string);</span>
+<span class="line-modified">1048                         if (checks.contains(TextBlockSupport.WhitespaceChecks.INCONSISTENT)) {</span>
+<span class="line-modified">1049                             lexWarning(LintCategory.TEXT_BLOCKS, pos,</span>
+<span class="line-modified">1050                                     Warnings.InconsistentWhiteSpaceIndentation);</span>
+
+1051                         }
+<a name="171" id="anc171"></a><span class="line-modified">1052                         if (checks.contains(TextBlockSupport.WhitespaceChecks.TRAILING)) {</span>
+<span class="line-modified">1053                             lexWarning(LintCategory.TEXT_BLOCKS, pos,</span>
+<span class="line-modified">1054                                     Warnings.TrailingWhiteSpaceWillBeRemoved);</span>
+
+
+1055                         }
+1056                     }
+<a name="172" id="anc172"></a><span class="line-modified">1057                     // Remove incidental indentation.</span>
+<span class="line-modified">1058                     try {</span>
+<span class="line-modified">1059                         string = string.stripIndent();</span>
+<span class="line-modified">1060                     } catch (Exception ex) {</span>
+<span class="line-modified">1061                         // Error already reported, just use unstripped string.</span>
+<span class="line-modified">1062                     }</span>
+<span class="line-modified">1063                 }</span>
+<span class="line-added">1064 </span>
+<span class="line-added">1065                 // Translate escape sequences if present.</span>
+<span class="line-added">1066                 if (hasEscapeSequences) {</span>
+<span class="line-added">1067                     try {</span>
+<span class="line-added">1068                         string = string.translateEscapes();</span>
+<span class="line-added">1069                     } catch (Exception ex) {</span>
+<span class="line-added">1070                         // Error already reported, just use untranslated string.</span>
+1071                     }
+<a name="173" id="anc173"></a><span class="line-added">1072                 }</span>
+<span class="line-added">1073 </span>
+<span class="line-added">1074                 if (tk.tag == Token.Tag.STRING) {</span>
+1075                     // Build string token.
+1076                     return new StringToken(tk, pos, endPos, string, comments);
+<a name="174" id="anc174"></a><span class="line-added">1077                 } else {</span>
+<span class="line-added">1078                     // Build numeric token.</span>
+<span class="line-added">1079                     return new NumericToken(tk, pos, endPos, string, radix, comments);</span>
+1080                 }
+<a name="175" id="anc175"></a>
+
+1081             }
+<a name="176" id="anc176"></a><span class="line-modified">1082         } finally {</span>
+<span class="line-modified">1083             int endPos = position();</span>
+<span class="line-added">1084 </span>
+1085             if (scannerDebug) {
+1086                     System.out.println(&quot;nextToken(&quot; + pos
+1087                                        + &quot;,&quot; + endPos + &quot;)=|&quot; +
+<a name="177" id="anc177"></a><span class="line-modified">1088                                        new String(getRawCharacters(pos, endPos))</span>
+1089                                        + &quot;|&quot;);
+1090             }
+1091         }
+1092     }
+<a name="178" id="anc178"></a>
+
+
+
+
+
+1093 
+<a name="179" id="anc179"></a><span class="line-modified">1094     /**</span>
+<span class="line-added">1095      * Appends a comment to the list of comments preceding the current token.</span>
+<span class="line-added">1096      *</span>
+<span class="line-added">1097      * @param comments  existing list of comments.</span>
+<span class="line-added">1098      * @param comment   comment to append.</span>
+<span class="line-added">1099      *</span>
+<span class="line-added">1100      * @return new list with comment prepended to the existing list.</span>
+<span class="line-added">1101      */</span>
+<span class="line-added">1102     List&lt;Comment&gt; appendComment(List&lt;Comment&gt; comments, Comment comment) {</span>
+<span class="line-added">1103         return comments == null ?</span>
+<span class="line-added">1104                 List.of(comment) :</span>
+<span class="line-added">1105                 comments.prepend(comment);</span>
+<span class="line-added">1106     }</span>
+<span class="line-added">1107 </span>
+<span class="line-added">1108     /**</span>
+<span class="line-added">1109      * Return the position where a lexical error occurred.</span>
+<span class="line-added">1110      *</span>
+<span class="line-added">1111      * @return position in the input buffer of where the error occurred.</span>
+1112      */
+1113     public int errPos() {
+1114         return errPos;
+1115     }
+1116 
+<a name="180" id="anc180"></a><span class="line-modified">1117     /**</span>
+<span class="line-added">1118      * Set the position where a lexical error occurred.</span>
+<span class="line-added">1119      *</span>
+<span class="line-added">1120      * @param pos  position in the input buffer of where the error occurred.</span>
+1121      */
+1122     public void errPos(int pos) {
+1123         errPos = pos;
+1124     }
+1125 
+1126     /**
+1127      * Called when a complete comment has been scanned. pos and endPos
+1128      * will mark the comment boundary.
+<a name="181" id="anc181"></a><span class="line-added">1129      *</span>
+<span class="line-added">1130      * @param pos     position of the opening / in the input buffer.</span>
+<span class="line-added">1131      * @param endPos  position + 1 of the closing / in the input buffer.</span>
+<span class="line-added">1132      * @param style   style of comment.</span>
+<span class="line-added">1133      *</span>
+<span class="line-added">1134      * @return the constructed BasicComment.</span>
+1135      */
+1136     protected Tokens.Comment processComment(int pos, int endPos, CommentStyle style) {
+<a name="182" id="anc182"></a><span class="line-modified">1137         if (scannerDebug) {</span>
+1138             System.out.println(&quot;processComment(&quot; + pos
+<a name="183" id="anc183"></a><span class="line-modified">1139                                 + &quot;,&quot; + endPos + &quot;,&quot; + style + &quot;)=|&quot;</span>
+<span class="line-modified">1140                                 + new String(getRawCharacters(pos, endPos))</span>
+<span class="line-modified">1141                                 + &quot;|&quot;);</span>
+<span class="line-modified">1142         }</span>
+<span class="line-modified">1143 </span>
+<span class="line-added">1144         char[] buf = getRawCharacters(pos, endPos);</span>
+<span class="line-added">1145 </span>
+<span class="line-added">1146         return new BasicComment(style, fac, buf, pos);</span>
+1147     }
+1148 
+1149     /**
+1150      * Called when a complete whitespace run has been scanned. pos and endPos
+1151      * will mark the whitespace boundary.
+<a name="184" id="anc184"></a><span class="line-added">1152      *</span>
+<span class="line-added">1153      * (Spec 3.6)</span>
+<span class="line-added">1154      *</span>
+<span class="line-added">1155      * @param pos     position in input buffer of first whitespace character.</span>
+<span class="line-added">1156      * @param endPos  position + 1 in input buffer of last whitespace character.</span>
+1157      */
+1158     protected void processWhiteSpace(int pos, int endPos) {
+<a name="185" id="anc185"></a><span class="line-modified">1159         if (scannerDebug) {</span>
+1160             System.out.println(&quot;processWhitespace(&quot; + pos
+<a name="186" id="anc186"></a><span class="line-modified">1161                                 + &quot;,&quot; + endPos + &quot;)=|&quot; +</span>
+<span class="line-modified">1162                                 new String(getRawCharacters(pos, endPos))</span>
+<span class="line-modified">1163                                 + &quot;|&quot;);</span>
+<span class="line-added">1164         }</span>
+1165     }
+1166 
+1167     /**
+1168      * Called when a line terminator has been processed.
+<a name="187" id="anc187"></a><span class="line-added">1169      *</span>
+<span class="line-added">1170      * @param pos     position in input buffer of first character in sequence.</span>
+<span class="line-added">1171      * @param endPos  position + 1 in input buffer of last character in sequence.</span>
+1172      */
+1173     protected void processLineTerminator(int pos, int endPos) {
+<a name="188" id="anc188"></a><span class="line-modified">1174         if (scannerDebug) {</span>
+1175             System.out.println(&quot;processTerminator(&quot; + pos
+<a name="189" id="anc189"></a><span class="line-modified">1176                                 + &quot;,&quot; + endPos + &quot;)=|&quot; +</span>
+<span class="line-modified">1177                                 new String(getRawCharacters(pos, endPos))</span>
+<span class="line-modified">1178                                 + &quot;|&quot;);</span>
+<span class="line-added">1179         }</span>
+1180     }
+1181 
+<a name="190" id="anc190"></a><span class="line-modified">1182     /**</span>
+<span class="line-modified">1183      * Build a map for translating between line numbers and positions in the input.</span>
+1184      *
+<a name="191" id="anc191"></a><span class="line-modified">1185      * @return a LineMap</span>
+<span class="line-added">1186      */</span>
+1187     public Position.LineMap getLineMap() {
+<a name="192" id="anc192"></a><span class="line-modified">1188         return Position.makeLineMap(getRawCharacters(), length(), false);</span>
+1189     }
+1190 
+<a name="193" id="anc193"></a>
+1191     /**
+<a name="194" id="anc194"></a><span class="line-modified">1192      * Scan a documentation comment; determine if a deprecated tag is present.</span>
+<span class="line-modified">1193      * Called once the initial /, * have been skipped, positioned at the second *</span>
+<span class="line-modified">1194      * (which is treated as the beginning of the first line).</span>
+<span class="line-modified">1195      * Stops positioned at the closing &#39;/&#39;.</span>
+<span class="line-modified">1196      */</span>
+<span class="line-modified">1197     protected static class BasicComment extends PositionTrackingReader implements Comment {</span>
+<span class="line-modified">1198         /**</span>
+<span class="line-added">1199          * Style of comment</span>
+<span class="line-added">1200          *   LINE starting with //</span>
+<span class="line-added">1201          *   BLOCK starting with /*</span>
+<span class="line-added">1202          *   JAVADOC starting with /**</span>
+<span class="line-added">1203          */</span>
+1204         CommentStyle cs;
+<a name="195" id="anc195"></a>
+1205 
+<a name="196" id="anc196"></a><span class="line-added">1206         /**</span>
+<span class="line-added">1207          * true if comment contains @deprecated at beginning of a line.</span>
+<span class="line-added">1208          */</span>
+1209         protected boolean deprecatedFlag = false;
+<a name="197" id="anc197"></a><span class="line-added">1210 </span>
+<span class="line-added">1211         /**</span>
+<span class="line-added">1212          * true if comment has been fully scanned.</span>
+<span class="line-added">1213          */</span>
+1214         protected boolean scanned = false;
+1215 
+<a name="198" id="anc198"></a><span class="line-modified">1216         /**</span>
+<span class="line-modified">1217          * Constructor.</span>
+<span class="line-added">1218          *</span>
+<span class="line-added">1219          * @param cs      comment style</span>
+<span class="line-added">1220          * @param sf      Scan factory.</span>
+<span class="line-added">1221          * @param array   Array containing contents of source.</span>
+<span class="line-added">1222          * @param offset  Position offset in original source buffer.</span>
+<span class="line-added">1223          */</span>
+<span class="line-added">1224         protected BasicComment(CommentStyle cs, ScannerFactory sf, char[] array, int offset) {</span>
+<span class="line-added">1225             super(sf, array, offset);</span>
+1226             this.cs = cs;
+1227         }
+1228 
+<a name="199" id="anc199"></a><span class="line-added">1229         /**</span>
+<span class="line-added">1230          * Return comment body text minus comment adornments or null if not scanned.</span>
+<span class="line-added">1231          *</span>
+<span class="line-added">1232          * @return comment body text.</span>
+<span class="line-added">1233          */</span>
+1234         public String getText() {
+1235             return null;
+1236         }
+1237 
+<a name="200" id="anc200"></a><span class="line-added">1238         /**</span>
+<span class="line-added">1239          * Return buffer position in original buffer mapped from buffer position in comment.</span>
+<span class="line-added">1240          *</span>
+<span class="line-added">1241          * @param pos  buffer position in comment.</span>
+<span class="line-added">1242          *</span>
+<span class="line-added">1243          * @return buffer position in original buffer.</span>
+<span class="line-added">1244          */</span>
+1245         public int getSourcePos(int pos) {
+1246             return -1;
+1247         }
+1248 
+<a name="201" id="anc201"></a><span class="line-added">1249         /**</span>
+<span class="line-added">1250          * Return style of comment.</span>
+<span class="line-added">1251          *   LINE starting with //</span>
+<span class="line-added">1252          *   BLOCK starting with /*</span>
+<span class="line-added">1253          *   JAVADOC starting with /**</span>
+<span class="line-added">1254          *</span>
+<span class="line-added">1255          * @return</span>
+<span class="line-added">1256          */</span>
+1257         public CommentStyle getStyle() {
+1258             return cs;
+1259         }
+1260 
+<a name="202" id="anc202"></a><span class="line-added">1261         /**</span>
+<span class="line-added">1262          * true if comment contains @deprecated at beginning of a line.</span>
+<span class="line-added">1263          *</span>
+<span class="line-added">1264          * @return true if comment contains @deprecated.</span>
+<span class="line-added">1265          */</span>
+1266         public boolean isDeprecated() {
+1267             if (!scanned &amp;&amp; cs == CommentStyle.JAVADOC) {
+1268                 scanDocComment();
+1269             }
+<a name="203" id="anc203"></a><span class="line-added">1270 </span>
+1271             return deprecatedFlag;
+1272         }
+1273 
+<a name="204" id="anc204"></a><span class="line-modified">1274         /**</span>
+<span class="line-added">1275          * Scan JAVADOC comment for details.</span>
+<span class="line-added">1276          */</span>
+1277         protected void scanDocComment() {
+1278             try {
+1279                 boolean deprecatedPrefix = false;
+<a name="205" id="anc205"></a><span class="line-modified">1280                 accept(&quot;/**&quot;);</span>
+
+
+1281 
+1282                 forEachLine:
+<a name="206" id="anc206"></a><span class="line-modified">1283                 while (isAvailable()) {</span>
+
+1284                     // Skip optional WhiteSpace at beginning of line
+<a name="207" id="anc207"></a><span class="line-modified">1285                     skipWhitespace();</span>
+
+
+1286 
+1287                     // Skip optional consecutive Stars
+<a name="208" id="anc208"></a><span class="line-modified">1288                     while (accept(&#39;*&#39;)) {</span>
+<span class="line-modified">1289                         if (is(&#39;/&#39;)) {</span>
+
+1290                             return;
+1291                         }
+1292                     }
+1293 
+1294                     // Skip optional WhiteSpace after Stars
+<a name="209" id="anc209"></a><span class="line-modified">1295                     skipWhitespace();</span>
+
+
+1296 
+<a name="210" id="anc210"></a>
+1297                     // At beginning of line in the JavaDoc sense.
+<a name="211" id="anc211"></a><span class="line-modified">1298                     deprecatedPrefix = deprecatedFlag || accept(&quot;@deprecated&quot;);</span>
+
+
+
+
+
+
+
+
+
+
+
+1299 
+<a name="212" id="anc212"></a><span class="line-modified">1300                     if (deprecatedPrefix &amp;&amp; isAvailable()) {</span>
+<span class="line-modified">1301                         if (Character.isWhitespace(get())) {</span>
+1302                             deprecatedFlag = true;
+<a name="213" id="anc213"></a><span class="line-modified">1303                         } else if (accept(&#39;*&#39;)) {</span>
+<span class="line-modified">1304                             if (is(&#39;/&#39;)) {</span>
+
+1305                                 deprecatedFlag = true;
+1306                                 return;
+1307                             }
+1308                         }
+1309                     }
+1310 
+1311                     // Skip rest of line
+<a name="214" id="anc214"></a><span class="line-modified">1312                     while (isAvailable()) {</span>
+<span class="line-modified">1313                         switch (get()) {</span>
+1314                             case &#39;*&#39;:
+<a name="215" id="anc215"></a><span class="line-modified">1315                                 next();</span>
+<span class="line-modified">1316 </span>
+<span class="line-added">1317                                 if (is(&#39;/&#39;)) {</span>
+1318                                     return;
+1319                                 }
+<a name="216" id="anc216"></a><span class="line-added">1320 </span>
+1321                                 break;
+<a name="217" id="anc217"></a><span class="line-modified">1322                             case &#39;\r&#39;: // (Spec 3.4)</span>
+<span class="line-modified">1323                             case &#39;\n&#39;: // (Spec 3.4)</span>
+<span class="line-modified">1324                                 accept(&#39;\r&#39;);</span>
+<span class="line-modified">1325                                 accept(&#39;\n&#39;);</span>
+
+
+
+
+1326                                 continue forEachLine;
+<a name="218" id="anc218"></a><span class="line-added">1327 </span>
+1328                             default:
+<a name="219" id="anc219"></a><span class="line-modified">1329                                 next();</span>
+<span class="line-added">1330                                 break;</span>
+1331                         }
+1332                     } // rest of line
+1333                 } // forEachLine
+1334                 return;
+1335             } finally {
+1336                 scanned = true;
+1337             }
+1338         }
+1339     }
+1340 }
+<a name="220" id="anc220"></a><b style="font-size: large; color: red">--- EOF ---</b>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</pre>
+<input id="eof" value="220" type="hidden" />
+</body>
+</html>

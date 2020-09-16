@@ -1,0 +1,3931 @@
+diff a/src/jdk.compiler/share/classes/com/sun/tools/javac/parser/JavaTokenizer.java b/src/jdk.compiler/share/classes/com/sun/tools/javac/parser/JavaTokenizer.java
+--- a/src/jdk.compiler/share/classes/com/sun/tools/javac/parser/JavaTokenizer.java
++++ b/src/jdk.compiler/share/classes/com/sun/tools/javac/parser/JavaTokenizer.java
+@@ -1,7 +1,7 @@
+ /*
+- * Copyright (c) 1999, 2019, Oracle and/or its affiliates. All rights reserved.
++ * Copyright (c) 1999, 2020, Oracle and/or its affiliates. All rights reserved.
+  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
+  *
+  * This code is free software; you can redistribute it and/or modify it
+  * under the terms of the GNU General Public License version 2 only, as
+  * published by the Free Software Foundation.  Oracle designates this
+@@ -28,124 +28,151 @@
+ import com.sun.tools.javac.code.Lint;
+ import com.sun.tools.javac.code.Lint.LintCategory;
+ import com.sun.tools.javac.code.Preview;
+ import com.sun.tools.javac.code.Source;
+ import com.sun.tools.javac.code.Source.Feature;
++import com.sun.tools.javac.file.JavacFileManager;
+ import com.sun.tools.javac.parser.Tokens.Comment.CommentStyle;
+ import com.sun.tools.javac.resources.CompilerProperties.Errors;
+ import com.sun.tools.javac.resources.CompilerProperties.Warnings;
+ import com.sun.tools.javac.util.*;
+ import com.sun.tools.javac.util.JCDiagnostic.*;
+ 
+-import java.lang.reflect.InvocationTargetException;
+-import java.lang.reflect.Method;
+ import java.nio.CharBuffer;
+-import java.util.HashSet;
+ import java.util.Set;
++import java.util.regex.Pattern;
+ 
+ import static com.sun.tools.javac.parser.Tokens.*;
+-import static com.sun.tools.javac.util.LayoutCharacters.*;
++import static com.sun.tools.javac.util.LayoutCharacters.EOI;
+ 
+-/** The lexical analyzer maps an input stream consisting of
+- *  ASCII characters and Unicode escapes into a token sequence.
++/**
++ * The lexical analyzer maps an input stream consisting of UTF-8 characters and unicode
++ * escape sequences into a token sequence.
+  *
+  *  <p><b>This is NOT part of any supported API.
+  *  If you write code that depends on this, you do so at your own risk.
+  *  This code and its internal interfaces are subject to change or
+  *  deletion without notice.</b>
+  */
+-public class JavaTokenizer {
+-
++public class JavaTokenizer extends UnicodeReader {
++    /**
++     * If true then prints token information after each nextToken().
++     */
+     private static final boolean scannerDebug = false;
+ 
+-    /** The source language setting.
++    /**
++     * Sentinal for non-value.
++     */
++    private int NOT_FOUND = -1;
++
++    /**
++     * The source language setting. Copied from scanner factory.
+      */
+     private Source source;
+ 
+-    /** The preview language setting. */
++    /**
++     * The preview language setting. Copied from scanner factory.
++     */
+     private Preview preview;
+ 
+-    /** The log to be used for error reporting.
++    /**
++     * The log to be used for error reporting. Copied from scanner factory.
+      */
+     private final Log log;
+ 
+-    /** The token factory. */
++    /**
++     * The token factory. Copied from scanner factory.
++     */
+     private final Tokens tokens;
+ 
+-    /** The token kind, set by nextToken().
++    /**
++     * The names factory. Copied from scanner factory.
++     */
++    private final Names names;
++
++    /**
++     * The token kind, set by nextToken().
+      */
+     protected TokenKind tk;
+ 
+-    /** The token's radix, set by nextToken().
++    /**
++     * The token's radix, set by nextToken().
+      */
+     protected int radix;
+ 
+-    /** The token's name, set by nextToken().
++    /**
++     * The token's name, set by nextToken().
+      */
+     protected Name name;
+ 
+-    /** The position where a lexical error occurred;
++    /**
++     * The position where a lexical error occurred;
+      */
+     protected int errPos = Position.NOPOS;
+ 
+-    /** The Unicode reader (low-level stream reader).
+-     */
+-    protected UnicodeReader reader;
+-
+-    /** If is a text block
++    /**
++     * true if is a text block, set by nextToken().
+      */
+     protected boolean isTextBlock;
+ 
+-    /** If contains escape sequences
++    /**
++     * true if contains escape sequences, set by nextToken().
+      */
+     protected boolean hasEscapeSequences;
+ 
++    /**
++     * Buffer for building literals, used by nextToken().
++     */
++    protected StringBuilder sb;
++
++    /**
++     * Origin scanner factory.
++     */
+     protected ScannerFactory fac;
+ 
+-    // The set of lint options currently in effect. It is initialized
+-    // from the context, and then is set/reset as needed by Attr as it
+-    // visits all the various parts of the trees during attribution.
++    /**
++     * The set of lint options currently in effect. It is initialized
++     * from the context, and then is set/reset as needed by Attr as it
++     * visits all the various parts of the trees during attribution.
++     */
+     protected Lint lint;
+ 
+-    private static final boolean hexFloatsWork = hexFloatsWork();
+-    private static boolean hexFloatsWork() {
+-        try {
+-            Float.valueOf("0x1.0p1");
+-            return true;
+-        } catch (NumberFormatException ex) {
+-            return false;
+-        }
+-    }
+-
+     /**
+-     * Create a scanner from the input array.  This method might
+-     * modify the array.  To avoid copying the input array, ensure
+-     * that {@code inputLength < input.length} or
+-     * {@code input[input.length -1]} is a white space character.
++     * Construct a Java token scanner from the input character buffer.
+      *
+-     * @param fac the factory which created this Scanner
+-     * @param buf the input, might be modified
+-     * Must be positive and less than or equal to input.length.
++     * @param fac  the factory which created this Scanner.
++     * @param cb   the input character buffer.
+      */
+-    protected JavaTokenizer(ScannerFactory fac, CharBuffer buf) {
+-        this(fac, new UnicodeReader(fac, buf));
++    protected JavaTokenizer(ScannerFactory fac, CharBuffer cb) {
++        this(fac, JavacFileManager.toArray(cb), cb.limit());
+     }
+ 
+-    protected JavaTokenizer(ScannerFactory fac, char[] buf, int inputLength) {
+-        this(fac, new UnicodeReader(fac, buf, inputLength));
+-    }
+-
+-    protected JavaTokenizer(ScannerFactory fac, UnicodeReader reader) {
++    /**
++     * Construct a Java token scanner from the input character array.
++     *
++     * @param fac     the factory which created this Scanner
++     * @param array   the input character array.
++     * @param length  The length of the meaningful content in the array.
++     */
++    protected JavaTokenizer(ScannerFactory fac, char[] array, int length) {
++        super(fac, array, length);
+         this.fac = fac;
+         this.log = fac.log;
++        this.names = fac.names;
+         this.tokens = fac.tokens;
+         this.source = fac.source;
+         this.preview = fac.preview;
+-        this.reader = reader;
+         this.lint = fac.lint;
++        this.sb = new StringBuilder(256);
+     }
+ 
++    /**
++     * Check the source level for a lexical feature.
++     *
++     * @param pos      position in input buffer.
++     * @param feature  feature to verify.
++     */
+     protected void checkSourceLevel(int pos, Feature feature) {
+         if (preview.isPreview(feature) && !preview.isEnabled()) {
+             //preview feature without --preview flag, error
+             lexError(DiagnosticFlag.SOURCE_LEVEL, pos, preview.disabledError(feature));
+         } else if (!feature.allowedInSource(source)) {
+@@ -155,486 +182,452 @@
+             //use of preview feature, warn
+             preview.warnPreview(pos, feature);
+         }
+     }
+ 
+-    /** Report an error at the given position using the provided arguments.
++    /**
++     * Report an error at the given position using the provided arguments.
++     *
++     * @param pos  position in input buffer.
++     * @param key  error key to report.
+      */
+     protected void lexError(int pos, JCDiagnostic.Error key) {
+         log.error(pos, key);
+         tk = TokenKind.ERROR;
+         errPos = pos;
+     }
+ 
++    /**
++     * Report an error at the given position using the provided arguments.
++     *
++     * @param flags  diagnostic flags.
++     * @param pos    position in input buffer.
++     * @param key    error key to report.
++     */
+     protected void lexError(DiagnosticFlag flags, int pos, JCDiagnostic.Error key) {
+         log.error(flags, pos, key);
+         tk = TokenKind.ERROR;
+         errPos = pos;
+     }
+ 
++    /**
++     * Report an error at the given position using the provided arguments.
++     *
++     * @param lc     lint category.
++     * @param pos    position in input buffer.
++     * @param key    error key to report.
++     */
+     protected void lexWarning(LintCategory lc, int pos, JCDiagnostic.Warning key) {
+         DiagnosticPosition dp = new SimpleDiagnosticPosition(pos) ;
+         log.warning(lc, dp, key);
+     }
+ 
+-    /** Read next character in character or string literal and copy into sbuf.
+-     *      pos - start of literal offset
+-     *      translateEscapesNow - true if String::translateEscapes is not available
+-     *                            in the java.base libs. Occurs during bootstrapping.
+-     *      multiline - true if scanning a text block. Allows newlines to be embedded
+-     *                  in the result.
++    /**
++     * Add a character to the literal buffer.
++     *
++     * @param ch  character to add.
+      */
+-    private void scanLitChar(int pos, boolean translateEscapesNow, boolean multiline) {
+-         if (reader.ch == '\\') {
+-            if (reader.peekChar() == '\\' && !reader.isUnicode()) {
+-                reader.skipChar();
+-                if (!translateEscapesNow) {
+-                    reader.putChar(false);
+-                }
+-                reader.putChar(true);
+-            } else {
+-                reader.nextChar(translateEscapesNow);
+-                switch (reader.ch) {
+-                case '0': case '1': case '2': case '3':
+-                case '4': case '5': case '6': case '7':
+-                    char leadch = reader.ch;
+-                    int oct = reader.digit(pos, 8);
+-                    reader.nextChar(translateEscapesNow);
+-                    if ('0' <= reader.ch && reader.ch <= '7') {
+-                        oct = oct * 8 + reader.digit(pos, 8);
+-                        reader.nextChar(translateEscapesNow);
+-                        if (leadch <= '3' && '0' <= reader.ch && reader.ch <= '7') {
+-                            oct = oct * 8 + reader.digit(pos, 8);
+-                            reader.nextChar(translateEscapesNow);
+-                        }
+-                    }
+-                    if (translateEscapesNow) {
+-                        reader.putChar((char)oct);
+-                    }
+-                    break;
+-                case 'b':
+-                    reader.putChar(translateEscapesNow ? '\b' : 'b', true); break;
+-                case 't':
+-                    reader.putChar(translateEscapesNow ? '\t' : 't', true); break;
+-                case 'n':
+-                    reader.putChar(translateEscapesNow ? '\n' : 'n', true); break;
+-                case 'f':
+-                    reader.putChar(translateEscapesNow ? '\f' : 'f', true); break;
+-                case 'r':
+-                    reader.putChar(translateEscapesNow ? '\r' : 'r', true); break;
+-                case '\'':
+-                case '\"':
+-                case '\\':
+-                    reader.putChar(true); break;
+-                case 's':
+-                    checkSourceLevel(reader.bp, Feature.TEXT_BLOCKS);
+-                    reader.putChar(translateEscapesNow ? ' ' : 's', true); break;
+-                case '\n':
+-                case '\r':
+-                    if (!multiline) {
+-                        lexError(reader.bp, Errors.IllegalEscChar);
+-                    } else {
+-                        checkSourceLevel(reader.bp, Feature.TEXT_BLOCKS);
+-                        int start = reader.bp;
+-                        if (reader.ch == '\r' && reader.peekChar() == '\n') {
+-                           reader.nextChar(translateEscapesNow);
+-                        }
+-                        reader.nextChar(translateEscapesNow);
+-                        processLineTerminator(start, reader.bp);
+-                    }
+-                    break;
+-                default:
+-                    lexError(reader.bp, Errors.IllegalEscChar);
+-                }
+-            }
+-        } else if (reader.bp != reader.buflen) {
+-            reader.putChar(true);
+-        }
++    protected void put(char ch) {
++        sb.append(ch);
+     }
+ 
+-    /** Interim access to String methods used to support text blocks.
+-     *  Required to handle bootstrapping with pre-text block jdks.
+-     *  Should be replaced with direct calls in the 'next' jdk.
++    /**
++     * Add a codepoint to the literal buffer.
++     *
++     * @param codePoint  codepoint to add.
+      */
+-    static class TextBlockSupport {
+-        /** Reflection method to remove incidental indentation.
+-         */
+-        private static final Method stripIndent;
++    protected void putCodePoint(int codePoint) {
++        sb.appendCodePoint(codePoint);
++    }
+ 
+-        /** Reflection method to translate escape sequences.
+-         */
+-        private static final Method translateEscapes;
++    /**
++     * Add current character or codepoint to the literal buffer.
++     */
++    protected void put() {
++        if (isSurrogate()) {
++            putCodePoint(getCodepoint());
++        } else {
++            put(get());
++        }
++    }
+ 
+-        /** true if stripIndent and translateEscapes are available in the bootstrap jdk.
+-         */
+-        private static final boolean hasSupport;
++    /**
++     * Add a string to the literal buffer.
++     */
++    protected void put(String string) {
++        sb.append(string);
++    }
+ 
+-        /** Get a string method via refection or null if not available.
+-         */
+-        private static Method getStringMethodOrNull(String name) {
+-            try {
+-                return String.class.getMethod(name);
+-            } catch (Exception ex) {
+-                // Method not available, return null.
+-            }
+-            return null;
+-        }
++    /**
++     * Add current character or codepoint to the literal buffer then return next character.
++     */
++    protected char putThenNext() {
++        put();
+ 
+-        static {
+-            // Get text block string methods.
+-            stripIndent = getStringMethodOrNull("stripIndent");
+-            translateEscapes = getStringMethodOrNull("translateEscapes");
+-            // true if stripIndent and translateEscapes are available in the bootstrap jdk.
+-            hasSupport = stripIndent != null && translateEscapes != null;
+-        }
++        return next();
++    }
+ 
+-        /** Return true if stripIndent and translateEscapes are available in the bootstrap jdk.
+-         */
+-        static boolean hasSupport() {
+-            return hasSupport;
+-        }
++    /**
++     * If the specified character ch matches the current character then add current character
++     * to the literal buffer and then advance.
++     *
++     * @param ch  character to match.
++     *
++     * @return true if ch matches current character.
++     */
++    protected boolean acceptThenPut(char ch) {
++        if (is(ch)) {
++            put(get());
++            next();
+ 
+-        /** Return the leading whitespace count (indentation) of the line.
+-         */
+-        private static int indent(String line) {
+-            return line.length() - line.stripLeading().length();
++            return true;
+         }
+ 
+-        enum WhitespaceChecks {
+-            INCONSISTENT,
+-            TRAILING
+-        };
++        return false;
++    }
+ 
+-        /** Check that the use of white space in content is not problematic.
+-         */
+-        static Set<WhitespaceChecks> checkWhitespace(String string) {
+-            // Start with empty result set.
+-            Set<WhitespaceChecks> checks = new HashSet<>();
+-            // No need to check empty strings.
+-            if (string.isEmpty()) {
+-                return checks;
+-            }
+-            // Maximum common indentation.
+-            int outdent = 0;
+-            // No need to check indentation if opting out (last line is empty.)
+-            char lastChar = string.charAt(string.length() - 1);
+-            boolean optOut = lastChar == '\n' || lastChar == '\r';
+-            // Split string based at line terminators.
+-            String[] lines = string.split("\\R");
+-            int length = lines.length;
+-            // Extract last line.
+-            String lastLine = length == 0 ? "" : lines[length - 1];
+-             if (!optOut) {
+-                // Prime with the last line indentation (may be blank.)
+-                outdent = indent(lastLine);
+-                for (String line : lines) {
+-                    // Blanks lines have no influence (last line accounted for.)
+-                    if (!line.isBlank()) {
+-                        outdent = Integer.min(outdent, indent(line));
+-                        if (outdent == 0) {
+-                            break;
+-                        }
+-                    }
+-                }
+-            }
+-            // Last line is representative.
+-            String start = lastLine.substring(0, outdent);
+-            for (String line : lines) {
+-                // Fail if a line does not have the same indentation.
+-                if (!line.isBlank() && !line.startsWith(start)) {
+-                    // Mix of different white space
+-                    checks.add(WhitespaceChecks.INCONSISTENT);
+-                }
+-                // Line has content even after indent is removed.
+-                if (outdent < line.length()) {
+-                    // Is the last character a white space.
+-                    lastChar = line.charAt(line.length() - 1);
+-                    if (Character.isWhitespace(lastChar)) {
+-                        // Has trailing white space.
+-                        checks.add(WhitespaceChecks.TRAILING);
+-                    }
+-                }
+-            }
+-            return checks;
+-        }
++    /**
++     * If either ch1 or ch2 matches the current character then add current character
++     * to the literal buffer and then advance.
++     *
++     * @param ch1  first character to match.
++     * @param ch2  second character to match.
++     *
++     * @return true if either ch1 or ch2 matches current character.
++     */
++    protected boolean acceptOneOfThenPut(char ch1, char ch2) {
++        if (isOneOf(ch1, ch2)) {
++            put(get());
++            next();
+ 
+-        /** Invoke String::stripIndent through reflection.
+-         */
+-        static String stripIndent(String string) {
+-            try {
+-                string = (String)stripIndent.invoke(string);
+-            } catch (InvocationTargetException | IllegalAccessException ex) {
+-                throw new RuntimeException(ex);
+-            }
+-            return string;
++            return true;
+         }
+ 
+-        /** Invoke String::translateEscapes through reflection.
+-         */
+-        static String translateEscapes(String string) {
+-            try {
+-                string = (String)translateEscapes.invoke(string);
+-            } catch (InvocationTargetException | IllegalAccessException ex) {
+-                throw new RuntimeException(ex);
+-            }
+-            return string;
+-        }
++        return false;
+     }
+ 
+-    /** Test for EOLN.
++    /**
++     * Test if the current character is a line terminator.
++     *
++     * @return true if current character is a line terminator.
+      */
+     private boolean isEOLN() {
+-        return reader.ch == LF || reader.ch == CR;
++        return isOneOf('\n', '\r');
+     }
+ 
+-    /** Test for CRLF.
++    /**
++     * Skip and process a line terminator sequence.
+      */
+-    private boolean isCRLF() {
+-        return reader.ch == CR && reader.peekChar() == LF;
++    private void skipLineTerminator() {
++        int start = position();
++        accept('\r');
++        accept('\n');
++        processLineTerminator(start, position());
+     }
+ 
+-    /** Count and skip repeated occurrences of the specified character.
++    /**
++     * Processes the current character and places in the literal buffer. If the current
++     * character is a backslash then the next character is validated as a proper
++     * escape character. Conversion of escape sequences takes place at end of nextToken().
++     *
++     * @param pos position of the first character in literal.
+      */
+-    private int countChar(char ch, int max) {
+-        int count = 0;
+-        for ( ; count < max && reader.bp < reader.buflen && reader.ch == ch; count++) {
+-            reader.scanChar();
+-        }
+-        return count;
+-    }
++    private void scanLitChar(int pos) {
++        if (acceptThenPut('\\')) {
++            hasEscapeSequences = true;
+ 
+-    /** Skip and process a line terminator.
+-     */
+-    private void skipLineTerminator() {
+-        int start = reader.bp;
+-        if (isCRLF()) {
+-            reader.scanChar();
++            switch (get()) {
++                case '0': case '1': case '2': case '3':
++                case '4': case '5': case '6': case '7':
++                    char leadch = get();
++                    putThenNext();
++
++                    if (inRange('0', '7')) {
++                        putThenNext();
++
++                        if (leadch <= '3' && inRange('0', '7')) {
++                            putThenNext();
++                        }
++                    }
++                    break;
++
++                case 'b':
++                case 't':
++                case 'n':
++                case 'f':
++                case 'r':
++                case '\'':
++                case '\"':
++                case '\\':
++                    putThenNext();
++                    break;
++
++                case 's':
++                    checkSourceLevel(position(), Feature.TEXT_BLOCKS);
++                    putThenNext();
++                    break;
++
++                case '\n':
++                case '\r':
++                    if (isTextBlock) {
++                        skipLineTerminator();
++                        // Normalize line terminator.
++                        put('\n');
++                    } else {
++                        lexError(position(), Errors.IllegalEscChar);
++                    }
++                    break;
++
++                default:
++                    lexError(position(), Errors.IllegalEscChar);
++                    break;
++            }
++        } else {
++            putThenNext();
+         }
+-        reader.scanChar();
+-        processLineTerminator(start, reader.bp);
+     }
+ 
+-    /** Scan a string literal or text block.
++    /**
++     * Scan a string literal or text block.
++     *
++     * @param pos  position of the first character in literal.
+      */
+     private void scanString(int pos) {
+-        // Clear flags.
+-        isTextBlock = false;
+-        hasEscapeSequences = false;
++        // Assume the best.
++        tk = Tokens.TokenKind.STRINGLITERAL;
+         // Track the end of first line for error recovery.
+-        int firstEOLN = -1;
+-        // Attempt to scan for up to 3 double quotes.
+-        int openCount = countChar('\"', 3);
+-        switch (openCount) {
+-        case 1: // Starting a string literal.
+-            break;
+-        case 2: // Starting an empty string literal.
+-            tk = Tokens.TokenKind.STRINGLITERAL;
+-            return;
+-        case 3: // Starting a text block.
++        int firstEOLN = NOT_FOUND;
++        // Check for text block delimiter.
++        isTextBlock = accept("\"\"\"");
++
++        if (isTextBlock) {
+             // Check if preview feature is enabled for text blocks.
+             checkSourceLevel(pos, Feature.TEXT_BLOCKS);
+-            isTextBlock = true;
++
+             // Verify the open delimiter sequence.
+-            while (reader.bp < reader.buflen) {
+-                char ch = reader.ch;
+-                if (ch != ' ' && ch != '\t' && ch != FF) {
+-                    break;
+-                }
+-                reader.scanChar();
+-            }
++            // Error if the open delimiter sequence is not """<white space>*<LineTerminator>.
++            skipWhitespace();
++
+             if (isEOLN()) {
+                 skipLineTerminator();
+             } else {
+-                // Error if the open delimiter sequence is not
+-                //     """<white space>*<LineTerminator>.
+-                lexError(reader.bp, Errors.IllegalTextBlockOpen);
++                lexError(position(), Errors.IllegalTextBlockOpen);
+                 return;
+             }
+-            break;
+-        }
+-        // While characters are available.
+-        while (reader.bp < reader.buflen) {
+-            // If possible close delimiter sequence.
+-            if (reader.ch == '\"') {
+-                // Check to see if enough double quotes are present.
+-                int closeCount = countChar('\"', openCount);
+-                if (openCount == closeCount) {
+-                    // Good result.
+-                    tk = Tokens.TokenKind.STRINGLITERAL;
++
++            // While characters are available.
++            while (isAvailable()) {
++                if (accept("\"\"\"")) {
+                     return;
+                 }
+-                // False alarm, add double quotes to string buffer.
+-                reader.repeat('\"', closeCount);
+-            } else if (isEOLN()) {
+-                // Line terminator in string literal is an error.
+-                // Fall out to unclosed string literal error.
+-                if (openCount == 1) {
+-                    break;
++
++                if (isEOLN()) {
++                    skipLineTerminator();
++                    // Add normalized line terminator to literal buffer.
++                    put('\n');
++
++                    // Record first line terminator for error recovery.
++                    if (firstEOLN == NOT_FOUND) {
++                        firstEOLN = position();
++                    }
++                } else {
++                    // Add character to string buffer.
++                    scanLitChar(pos);
+                 }
+-                skipLineTerminator();
+-                // Add line terminator to string buffer.
+-                reader.putChar('\n', false);
+-                // Record first line terminator for error recovery.
+-                if (firstEOLN == -1) {
+-                    firstEOLN = reader.bp;
++            }
++        } else {
++            // Skip first quote.
++            next();
++
++            // While characters are available.
++            while (isAvailable()) {
++                if (accept('\"')) {
++                    return;
++                }
++
++                if (isEOLN()) {
++                    // Line terminator in string literal is an error.
++                    // Fall out to unclosed string literal error.
++                    break;
++                } else {
++                    // Add character to string buffer.
++                    scanLitChar(pos);
+                 }
+-            } else if (reader.ch == '\\') {
+-                // Handle escape sequences.
+-                hasEscapeSequences = true;
+-                // Translate escapes immediately if TextBlockSupport is not available
+-                // during bootstrapping.
+-                boolean translateEscapesNow = !TextBlockSupport.hasSupport();
+-                scanLitChar(pos, translateEscapesNow, openCount != 1);
+-            } else {
+-                // Add character to string buffer.
+-                reader.putChar(true);
+             }
+         }
++
+         // String ended without close delimiter sequence.
+-        lexError(pos, openCount == 1 ? Errors.UnclosedStrLit : Errors.UnclosedTextBlock);
+-        if (firstEOLN  != -1) {
+-            // Reset recovery position to point after open delimiter sequence.
+-            reader.reset(firstEOLN);
++        lexError(pos, isTextBlock ? Errors.UnclosedTextBlock : Errors.UnclosedStrLit);
++
++        if (firstEOLN  != NOT_FOUND) {
++            // Reset recovery position to point after text block open delimiter sequence.
++            reset(firstEOLN);
+         }
+     }
+ 
++    /**
++     * Scan sequence of digits.
++     *
++     * @param pos         position of the first character in literal.
++     * @param digitRadix  radix of numeric literal.
++     */
+     private void scanDigits(int pos, int digitRadix) {
+-        char saveCh;
+-        int savePos;
++        int leadingUnderscorePos = is('_') ? position() : NOT_FOUND;
++        int trailingUnderscorePos;
++
+         do {
+-            if (reader.ch != '_') {
+-                reader.putChar(false);
++            if (!is('_')) {
++                put();
++                trailingUnderscorePos = NOT_FOUND;
++            } else {
++                trailingUnderscorePos = position();
+             }
+-            saveCh = reader.ch;
+-            savePos = reader.bp;
+-            reader.scanChar();
+-        } while (reader.digit(pos, digitRadix) >= 0 || reader.ch == '_');
+-        if (saveCh == '_')
+-            lexError(savePos, Errors.IllegalUnderscore);
++
++            next();
++        } while (digit(pos, digitRadix) >= 0 || is('_'));
++
++        if (leadingUnderscorePos != NOT_FOUND) {
++            lexError(leadingUnderscorePos, Errors.IllegalUnderscore);
++        } else if (trailingUnderscorePos != NOT_FOUND) {
++            lexError(trailingUnderscorePos, Errors.IllegalUnderscore);
++        }
+     }
+ 
+-    /** Read fractional part of hexadecimal floating point number.
++    /**
++     * Read fractional part of hexadecimal floating point number.
++     *
++     * @param pos  position of the first character in literal.
+      */
+     private void scanHexExponentAndSuffix(int pos) {
+-        if (reader.ch == 'p' || reader.ch == 'P') {
+-            reader.putChar(true);
++        if (acceptOneOfThenPut('p', 'P')) {
+             skipIllegalUnderscores();
+-            if (reader.ch == '+' || reader.ch == '-') {
+-                reader.putChar(true);
+-            }
++            acceptOneOfThenPut('+', '-');
+             skipIllegalUnderscores();
+-            if (reader.digit(pos, 10) >= 0) {
++
++            if (digit(pos, 10) >= 0) {
+                 scanDigits(pos, 10);
+-                if (!hexFloatsWork)
+-                    lexError(pos, Errors.UnsupportedCrossFpLit);
+-            } else
++            } else {
+                 lexError(pos, Errors.MalformedFpLit);
++            }
+         } else {
+             lexError(pos, Errors.MalformedFpLit);
+         }
+-        if (reader.ch == 'f' || reader.ch == 'F') {
+-            reader.putChar(true);
++
++        if (acceptOneOfThenPut('f', 'F')) {
+             tk = TokenKind.FLOATLITERAL;
+             radix = 16;
+         } else {
+-            if (reader.ch == 'd' || reader.ch == 'D') {
+-                reader.putChar(true);
+-            }
++            acceptOneOfThenPut('d', 'D');
+             tk = TokenKind.DOUBLELITERAL;
+             radix = 16;
+         }
+     }
+ 
+-    /** Read fractional part of floating point number.
++    /**
++     * Read fractional part of floating point number.
++     *
++     * @param pos  position of the first character in literal.
+      */
+     private void scanFraction(int pos) {
+         skipIllegalUnderscores();
+-        if (reader.digit(pos, 10) >= 0) {
++
++        if (digit(pos, 10) >= 0) {
+             scanDigits(pos, 10);
+         }
+-        int sp1 = reader.sp;
+-        if (reader.ch == 'e' || reader.ch == 'E') {
+-            reader.putChar(true);
++
++        int index = sb.length();
++
++        if (acceptOneOfThenPut('e', 'E')) {
+             skipIllegalUnderscores();
+-            if (reader.ch == '+' || reader.ch == '-') {
+-                reader.putChar(true);
+-            }
++            acceptOneOfThenPut('+', '-');
+             skipIllegalUnderscores();
+-            if (reader.digit(pos, 10) >= 0) {
++
++            if (digit(pos, 10) >= 0) {
+                 scanDigits(pos, 10);
+                 return;
+             }
++
+             lexError(pos, Errors.MalformedFpLit);
+-            reader.sp = sp1;
++            sb.setLength(index);
+         }
+     }
+ 
+-    /** Read fractional part and 'd' or 'f' suffix of floating point number.
++    /**
++     * Read fractional part and 'd' or 'f' suffix of floating point number.
++     *
++     * @param pos  position of the first character in literal.
+      */
+     private void scanFractionAndSuffix(int pos) {
+         radix = 10;
+         scanFraction(pos);
+-        if (reader.ch == 'f' || reader.ch == 'F') {
+-            reader.putChar(true);
+-            tk = TokenKind.FLOATLITERAL;
++
++        if (acceptOneOfThenPut('f', 'F')) {
++             tk = TokenKind.FLOATLITERAL;
+         } else {
+-            if (reader.ch == 'd' || reader.ch == 'D') {
+-                reader.putChar(true);
+-            }
++            acceptOneOfThenPut('d', 'D');
+             tk = TokenKind.DOUBLELITERAL;
+         }
+     }
+ 
+-    /** Read fractional part and 'd' or 'f' suffix of floating point number.
++    /**
++     * Read fractional part and 'd' or 'f' suffix of hexadecimal floating point number.
++     *
++     * @param pos  position of the first character in literal.
+      */
+     private void scanHexFractionAndSuffix(int pos, boolean seendigit) {
+         radix = 16;
+-        Assert.check(reader.ch == '.');
+-        reader.putChar(true);
++        Assert.check(is('.'));
++        putThenNext();
+         skipIllegalUnderscores();
+-        if (reader.digit(pos, 16) >= 0) {
++
++        if (digit(pos, 16) >= 0) {
+             seendigit = true;
+             scanDigits(pos, 16);
+         }
++
+         if (!seendigit)
+             lexError(pos, Errors.InvalidHexNumber);
+         else
+             scanHexExponentAndSuffix(pos);
+     }
+ 
++    /**
++     * Skip over underscores and report as a error if found.
++     */
+     private void skipIllegalUnderscores() {
+-        if (reader.ch == '_') {
+-            lexError(reader.bp, Errors.IllegalUnderscore);
+-            while (reader.ch == '_')
+-                reader.scanChar();
++        if (is('_')) {
++            lexError(position(), Errors.IllegalUnderscore);
++            skip('_');
+         }
+     }
+ 
+-    /** Read a number.
+-     *  @param radix  The radix of the number; one of 2, 8, 10, 16.
++    /**
++     * Read a number. (Spec. 3.10)
++     *
++     * @param pos    position of the first character in literal.
++     * @param radix  the radix of the number; one of 2, 8, 10, 16.
+      */
+     private void scanNumber(int pos, int radix) {
+         // for octal, allow base-10 digit in case it's a float literal
+         this.radix = radix;
+         int digitRadix = (radix == 8 ? 10 : radix);
+-        int firstDigit = reader.digit(pos, Math.max(10, digitRadix));
++        int firstDigit = digit(pos, Math.max(10, digitRadix));
+         boolean seendigit = firstDigit >= 0;
+         boolean seenValidDigit = firstDigit >= 0 && firstDigit < digitRadix;
++
+         if (seendigit) {
+             scanDigits(pos, digitRadix);
+         }
+-        if (radix == 16 && reader.ch == '.') {
++
++        if (radix == 16 && is('.')) {
+             scanHexFractionAndSuffix(pos, seendigit);
+-        } else if (seendigit && radix == 16 && (reader.ch == 'p' || reader.ch == 'P')) {
++        } else if (seendigit && radix == 16 && isOneOf('p', 'P')) {
+             scanHexExponentAndSuffix(pos);
+-        } else if (digitRadix == 10 && reader.ch == '.') {
+-            reader.putChar(true);
++        } else if (digitRadix == 10 && is('.')) {
++            putThenNext();
+             scanFractionAndSuffix(pos);
+-        } else if (digitRadix == 10 &&
+-                   (reader.ch == 'e' || reader.ch == 'E' ||
+-                    reader.ch == 'f' || reader.ch == 'F' ||
+-                    reader.ch == 'd' || reader.ch == 'D')) {
++        } else if (digitRadix == 10 && isOneOf('e', 'E', 'f', 'F', 'd', 'D')) {
+             scanFractionAndSuffix(pos);
+         } else {
+             if (!seenValidDigit) {
+                 switch (radix) {
+                 case 2:
+@@ -643,27 +636,35 @@
+                 case 16:
+                     lexError(pos, Errors.InvalidHexNumber);
+                     break;
+                 }
+             }
+-            if (reader.ch == 'l' || reader.ch == 'L') {
+-                reader.scanChar();
++
++            if (acceptOneOf('l', 'L')) {
+                 tk = TokenKind.LONGLITERAL;
+             } else {
+                 tk = TokenKind.INTLITERAL;
+             }
+         }
+     }
+ 
+-    /** Read an identifier.
++    /**
++     * Determines if the sequence in the literal buffer is a token (keyword, operator.)
++     */
++    private void checkIdent() {
++        name = names.fromString(sb.toString());
++        tk = tokens.lookupKind(name);
++    }
++
++    /**
++     * Read an identifier. (Spec. 3.8)
+      */
+     private void scanIdent() {
+-        boolean isJavaIdentifierPart;
+-        char high;
+-        reader.putChar(true);
++        putThenNext();
++
+         do {
+-            switch (reader.ch) {
++            switch (get()) {
+             case 'A': case 'B': case 'C': case 'D': case 'E':
+             case 'F': case 'G': case 'H': case 'I': case 'J':
+             case 'K': case 'L': case 'M': case 'N': case 'O':
+             case 'P': case 'Q': case 'R': case 'S': case 'T':
+             case 'U': case 'V': case 'W': case 'X': case 'Y':
+@@ -676,123 +677,135 @@
+             case 'z':
+             case '$': case '_':
+             case '0': case '1': case '2': case '3': case '4':
+             case '5': case '6': case '7': case '8': case '9':
+                 break;
++
+             case '\u0000': case '\u0001': case '\u0002': case '\u0003':
+             case '\u0004': case '\u0005': case '\u0006': case '\u0007':
+             case '\u0008': case '\u000E': case '\u000F': case '\u0010':
+             case '\u0011': case '\u0012': case '\u0013': case '\u0014':
+             case '\u0015': case '\u0016': case '\u0017':
+             case '\u0018': case '\u0019': case '\u001B':
+             case '\u007F':
+-                reader.scanChar();
++                next();
+                 continue;
++
+             case '\u001A': // EOI is also a legal identifier part
+-                if (reader.bp >= reader.buflen) {
+-                    name = reader.name();
+-                    tk = tokens.lookupKind(name);
+-                    return;
++                if (isAvailable()) {
++                    next();
++                    continue;
+                 }
+-                reader.scanChar();
+-                continue;
++
++                checkIdent();
++                return;
++
+             default:
+-                if (reader.ch < '\u0080') {
++                boolean isJavaIdentifierPart;
++
++                if (isASCII()) {
+                     // all ASCII range chars already handled, above
+                     isJavaIdentifierPart = false;
+                 } else {
+-                    if (Character.isIdentifierIgnorable(reader.ch)) {
+-                        reader.scanChar();
++                    if (Character.isIdentifierIgnorable(get())) {
++                        next();
+                         continue;
+-                    } else {
+-                        int codePoint = reader.peekSurrogates();
+-                        if (codePoint >= 0) {
+-                            if (isJavaIdentifierPart = Character.isJavaIdentifierPart(codePoint)) {
+-                                reader.putChar(true);
+-                            }
+-                        } else {
+-                            isJavaIdentifierPart = Character.isJavaIdentifierPart(reader.ch);
+-                        }
+                     }
++
++                    isJavaIdentifierPart = isSurrogate()
++                            ? Character.isJavaIdentifierPart(getCodepoint())
++                            : Character.isJavaIdentifierPart(get());
+                 }
++
+                 if (!isJavaIdentifierPart) {
+-                    name = reader.name();
+-                    tk = tokens.lookupKind(name);
++                    checkIdent();
+                     return;
+                 }
+             }
+-            reader.putChar(true);
++
++            putThenNext();
+         } while (true);
+     }
+ 
+-    /** Return true if reader.ch can be part of an operator.
++    /**
++     * Return true if ch can be part of an operator.
++     *
++     * @param ch  character to check.
++     *
++     * @return true if ch can be part of an operator.
+      */
+     private boolean isSpecial(char ch) {
+         switch (ch) {
+         case '!': case '%': case '&': case '*': case '?':
+         case '+': case '-': case ':': case '<': case '=':
+         case '>': case '^': case '|': case '~':
+         case '@':
+             return true;
++
+         default:
+             return false;
+         }
+     }
+ 
+-    /** Read longest possible sequence of special characters and convert
+-     *  to token.
++    /**
++     * Read longest possible sequence of special characters and convert to token.
+      */
+     private void scanOperator() {
+         while (true) {
+-            reader.putChar(false);
+-            Name newname = reader.name();
+-            TokenKind tk1 = tokens.lookupKind(newname);
+-            if (tk1 == TokenKind.IDENTIFIER) {
+-                reader.sp--;
++            put();
++            TokenKind newtk = tokens.lookupKind(sb.toString());
++
++            if (newtk == TokenKind.IDENTIFIER) {
++                sb.setLength(sb.length() - 1);
++                break;
++            }
++
++            tk = newtk;
++            next();
++
++            if (!isSpecial(get())) {
+                 break;
+             }
+-            tk = tk1;
+-            reader.scanChar();
+-            if (!isSpecial(reader.ch)) break;
+         }
+     }
+ 
+-    /** Read token.
++    /**
++     * Read token (main entrypoint.)
+      */
+     public Token readToken() {
+-
+-        reader.sp = 0;
++        sb.setLength(0);
+         name = null;
+         radix = 0;
++        isTextBlock = false;
++        hasEscapeSequences = false;
+ 
+-        int pos = 0;
+-        int endPos = 0;
++        int pos;
+         List<Comment> comments = null;
+ 
+         try {
+             loop: while (true) {
+-                pos = reader.bp;
+-                switch (reader.ch) {
+-                case ' ': // (Spec 3.6)
++                pos = position();
++
++                switch (get()) {
++                case ' ':  // (Spec 3.6)
+                 case '\t': // (Spec 3.6)
+-                case FF: // (Spec 3.6)
+-                    do {
+-                        reader.scanChar();
+-                    } while (reader.ch == ' ' || reader.ch == '\t' || reader.ch == FF);
+-                    processWhiteSpace(pos, reader.bp);
++                case '\f': // (Spec 3.6)
++                    skipWhitespace();
++                    processWhiteSpace(pos, position());
+                     break;
+-                case LF: // (Spec 3.4)
+-                    reader.scanChar();
+-                    processLineTerminator(pos, reader.bp);
++
++                case '\n': // (Spec 3.4)
++                    next();
++                    processLineTerminator(pos, position());
+                     break;
+-                case CR: // (Spec 3.4)
+-                    reader.scanChar();
+-                    if (reader.ch == LF) {
+-                        reader.scanChar();
+-                    }
+-                    processLineTerminator(pos, reader.bp);
++
++                case '\r': // (Spec 3.4)
++                    next();
++                    accept('\n');
++                    processLineTerminator(pos, position());
+                     break;
++
+                 case 'A': case 'B': case 'C': case 'D': case 'E':
+                 case 'F': case 'G': case 'H': case 'I': case 'J':
+                 case 'K': case 'L': case 'M': case 'N': case 'O':
+                 case 'P': case 'Q': case 'R': case 'S': case 'T':
+                 case 'U': case 'V': case 'W': case 'X': case 'Y':
+@@ -801,419 +814,522 @@
+                 case 'f': case 'g': case 'h': case 'i': case 'j':
+                 case 'k': case 'l': case 'm': case 'n': case 'o':
+                 case 'p': case 'q': case 'r': case 's': case 't':
+                 case 'u': case 'v': case 'w': case 'x': case 'y':
+                 case 'z':
+-                case '$': case '_':
++                case '$': case '_': // (Spec. 3.8)
+                     scanIdent();
+                     break loop;
+-                case '0':
+-                    reader.scanChar();
+-                    if (reader.ch == 'x' || reader.ch == 'X') {
+-                        reader.scanChar();
++
++                case '0': // (Spec. 3.10)
++                    next();
++
++                    if (acceptOneOf('x', 'X')) {
+                         skipIllegalUnderscores();
+                         scanNumber(pos, 16);
+-                    } else if (reader.ch == 'b' || reader.ch == 'B') {
+-                        reader.scanChar();
++                    } else if (acceptOneOf('b', 'B')) {
+                         skipIllegalUnderscores();
+                         scanNumber(pos, 2);
+                     } else {
+-                        reader.putChar('0');
+-                        if (reader.ch == '_') {
+-                            int savePos = reader.bp;
+-                            do {
+-                                reader.scanChar();
+-                            } while (reader.ch == '_');
+-                            if (reader.digit(pos, 10) < 0) {
++                        put('0');
++
++                        if (is('_')) {
++                            int savePos = position();
++                            skip('_');
++
++                            if (digit(pos, 10) < 0) {
+                                 lexError(savePos, Errors.IllegalUnderscore);
+                             }
+                         }
++
+                         scanNumber(pos, 8);
+                     }
+                     break loop;
++
+                 case '1': case '2': case '3': case '4':
+-                case '5': case '6': case '7': case '8': case '9':
++                case '5': case '6': case '7': case '8': case '9':  // (Spec. 3.10)
+                     scanNumber(pos, 10);
+                     break loop;
+-                case '.':
+-                    reader.scanChar();
+-                    if (reader.digit(pos, 10) >= 0) {
+-                        reader.putChar('.');
+-                        scanFractionAndSuffix(pos);
+-                    } else if (reader.ch == '.') {
+-                        int savePos = reader.bp;
+-                        reader.putChar('.'); reader.putChar('.', true);
+-                        if (reader.ch == '.') {
+-                            reader.scanChar();
+-                            reader.putChar('.');
+-                            tk = TokenKind.ELLIPSIS;
+-                        } else {
++
++                case '.': // (Spec. 3.12)
++                    if (accept("...")) {
++                        put("...");
++                        tk = TokenKind.ELLIPSIS;
++                    } else {
++                        next();
++                        int savePos = position();
++
++                        if (accept('.')) {
+                             lexError(savePos, Errors.IllegalDot);
++                        } else if (digit(pos, 10) >= 0) {
++                            put('.');
++                            scanFractionAndSuffix(pos); // (Spec. 3.10)
++                        } else {
++                            tk = TokenKind.DOT;
+                         }
+-                    } else {
+-                        tk = TokenKind.DOT;
+                     }
+                     break loop;
+-                case ',':
+-                    reader.scanChar(); tk = TokenKind.COMMA; break loop;
+-                case ';':
+-                    reader.scanChar(); tk = TokenKind.SEMI; break loop;
+-                case '(':
+-                    reader.scanChar(); tk = TokenKind.LPAREN; break loop;
+-                case ')':
+-                    reader.scanChar(); tk = TokenKind.RPAREN; break loop;
+-                case '[':
+-                    reader.scanChar(); tk = TokenKind.LBRACKET; break loop;
+-                case ']':
+-                    reader.scanChar(); tk = TokenKind.RBRACKET; break loop;
+-                case '{':
+-                    reader.scanChar(); tk = TokenKind.LBRACE; break loop;
+-                case '}':
+-                    reader.scanChar(); tk = TokenKind.RBRACE; break loop;
++
++                case ',': // (Spec. 3.12)
++                    next();
++                    tk = TokenKind.COMMA;
++                    break loop;
++
++                case ';': // (Spec. 3.12)
++                    next();
++                    tk = TokenKind.SEMI;
++                    break loop;
++
++                case '(': // (Spec. 3.12)
++                    next();
++                    tk = TokenKind.LPAREN;
++                    break loop;
++
++                case ')': // (Spec. 3.12)
++                    next();
++                    tk = TokenKind.RPAREN;
++                    break loop;
++
++                case '[': // (Spec. 3.12)
++                    next();
++                    tk = TokenKind.LBRACKET;
++                    break loop;
++
++                case ']': // (Spec. 3.12)
++                    next();
++                    tk = TokenKind.RBRACKET;
++                    break loop;
++
++                case '{': // (Spec. 3.12)
++                    next();
++                    tk = TokenKind.LBRACE;
++                    break loop;
++
++                case '}': // (Spec. 3.12)
++                    next();
++                    tk = TokenKind.RBRACE;
++                    break loop;
++
+                 case '/':
+-                    reader.scanChar();
+-                    if (reader.ch == '/') {
+-                        do {
+-                            reader.scanCommentChar();
+-                        } while (reader.ch != CR && reader.ch != LF && reader.bp < reader.buflen);
+-                        if (reader.bp < reader.buflen) {
+-                            comments = addComment(comments, processComment(pos, reader.bp, CommentStyle.LINE));
++                    next();
++
++                    if (accept('/')) { // (Spec. 3.7)
++                        skipToEOLN();
++
++                        if (isAvailable()) {
++                            comments = appendComment(comments, processComment(pos, position(), CommentStyle.LINE));
+                         }
+                         break;
+-                    } else if (reader.ch == '*') {
++                    } else if (accept('*')) { // (Spec. 3.7)
+                         boolean isEmpty = false;
+-                        reader.scanChar();
+                         CommentStyle style;
+-                        if (reader.ch == '*') {
++
++                        if (accept('*')) {
+                             style = CommentStyle.JAVADOC;
+-                            reader.scanCommentChar();
+-                            if (reader.ch == '/') {
++
++                            if (is('/')) {
+                                 isEmpty = true;
+                             }
+                         } else {
+                             style = CommentStyle.BLOCK;
+                         }
+-                        while (!isEmpty && reader.bp < reader.buflen) {
+-                            if (reader.ch == '*') {
+-                                reader.scanChar();
+-                                if (reader.ch == '/') break;
+-                            } else {
+-                                reader.scanCommentChar();
++
++                        if (!isEmpty) {
++                            while (isAvailable()) {
++                                if (accept('*')) {
++                                    if (is('/')) {
++                                        break;
++                                    }
++                                } else {
++                                    next();
++                                }
+                             }
+                         }
+-                        if (reader.ch == '/') {
+-                            reader.scanChar();
+-                            comments = addComment(comments, processComment(pos, reader.bp, style));
++
++                        if (accept('/')) {
++                            comments = appendComment(comments, processComment(pos, position(), style));
++
+                             break;
+                         } else {
+                             lexError(pos, Errors.UnclosedComment);
++
+                             break loop;
+                         }
+-                    } else if (reader.ch == '=') {
+-                        tk = TokenKind.SLASHEQ;
+-                        reader.scanChar();
++                    } else if (accept('=')) {
++                        tk = TokenKind.SLASHEQ; // (Spec. 3.12)
+                     } else {
+-                        tk = TokenKind.SLASH;
++                        tk = TokenKind.SLASH; // (Spec. 3.12)
+                     }
+                     break loop;
+-                case '\'':
+-                    reader.scanChar();
+-                    if (reader.ch == '\'') {
++
++                case '\'': // (Spec. 3.10)
++                    next();
++
++                    if (accept('\'')) {
+                         lexError(pos, Errors.EmptyCharLit);
+-                        reader.scanChar();
+                     } else {
+-                        if (isEOLN())
++                        if (isEOLN()) {
+                             lexError(pos, Errors.IllegalLineEndInCharLit);
+-                        scanLitChar(pos, true, false);
+-                        if (reader.ch == '\'') {
+-                            reader.scanChar();
++                        }
++
++                        scanLitChar(pos);
++
++                        if (accept('\'')) {
+                             tk = TokenKind.CHARLITERAL;
+                         } else {
+                             lexError(pos, Errors.UnclosedCharLit);
+                         }
+                     }
+                     break loop;
+-                case '\"':
++
++                case '\"': // (Spec. 3.10)
+                     scanString(pos);
+                     break loop;
++
+                 default:
+-                    if (isSpecial(reader.ch)) {
++                    if (isSpecial(get())) {
+                         scanOperator();
+                     } else {
+                         boolean isJavaIdentifierStart;
+-                        int codePoint = -1;
+-                        if (reader.ch < '\u0080') {
++
++                        if (isASCII()) {
+                             // all ASCII range chars already handled, above
+                             isJavaIdentifierStart = false;
+                         } else {
+-                            codePoint = reader.peekSurrogates();
+-                            if (codePoint >= 0) {
+-                                if (isJavaIdentifierStart = Character.isJavaIdentifierStart(codePoint)) {
+-                                    reader.putChar(true);
+-                                }
+-                            } else {
+-                                isJavaIdentifierStart = Character.isJavaIdentifierStart(reader.ch);
+-                            }
++                            isJavaIdentifierStart = isSurrogate()
++                                    ? Character.isJavaIdentifierStart(getCodepoint())
++                                    : Character.isJavaIdentifierStart(get());
+                         }
++
+                         if (isJavaIdentifierStart) {
+                             scanIdent();
+-                        } else if (reader.digit(pos, 10) >= 0) {
++                        } else if (digit(pos, 10) >= 0) {
+                             scanNumber(pos, 10);
+-                        } else if (reader.bp == reader.buflen || reader.ch == EOI && reader.bp + 1 == reader.buflen) { // JLS 3.5
++                        } else if (is((char)EOI) || !isAvailable()) {
+                             tk = TokenKind.EOF;
+-                            pos = reader.realLength;
++                            pos = position();
+                         } else {
+                             String arg;
+ 
+-                            if (codePoint >= 0) {
+-                                char high = reader.ch;
+-                                reader.scanChar();
+-                                arg = String.format("\\u%04x\\u%04x", (int) high, (int)reader.ch);
++                            if (isSurrogate()) {
++                                int codePoint = getCodepoint();
++                                char hi = Character.highSurrogate(codePoint);
++                                char lo = Character.lowSurrogate(codePoint);
++                                arg = String.format("\\u%04x\\u%04x", (int) hi, (int) lo);
+                             } else {
+-                                arg = (32 < reader.ch && reader.ch < 127) ?
+-                                                String.format("%s", reader.ch) :
+-                                                String.format("\\u%04x", (int)reader.ch);
++                                char ch = get();
++                                arg = (32 < ch && ch < 127) ? String.format("%s", ch) :
++                                                              String.format("\\u%04x", (int) ch);
+                             }
++
+                             lexError(pos, Errors.IllegalChar(arg));
+-                            reader.scanChar();
++                            next();
+                         }
+                     }
+                     break loop;
+                 }
+             }
+-            endPos = reader.bp;
+-            switch (tk.tag) {
+-                case DEFAULT: return new Token(tk, pos, endPos, comments);
+-                case NAMED: return new NamedToken(tk, pos, endPos, name, comments);
+-                case STRING: {
+-                    // Get characters from string buffer.
+-                    String string = reader.chars();
+-                    // If a text block.
+-                    if (isTextBlock && TextBlockSupport.hasSupport()) {
+-                        // Verify that the incidental indentation is consistent.
+-                        if (lint.isEnabled(LintCategory.TEXT_BLOCKS)) {
+-                            Set<TextBlockSupport.WhitespaceChecks> checks =
+-                                    TextBlockSupport.checkWhitespace(string);
+-                            if (checks.contains(TextBlockSupport.WhitespaceChecks.INCONSISTENT)) {
+-                                lexWarning(LintCategory.TEXT_BLOCKS, pos,
+-                                        Warnings.InconsistentWhiteSpaceIndentation);
+-                            }
+-                            if (checks.contains(TextBlockSupport.WhitespaceChecks.TRAILING)) {
+-                                lexWarning(LintCategory.TEXT_BLOCKS, pos,
+-                                        Warnings.TrailingWhiteSpaceWillBeRemoved);
+-                            }
++
++            int endPos = position();
++
++            if (tk.tag == Token.Tag.DEFAULT) {
++                return new Token(tk, pos, endPos, comments);
++            } else  if (tk.tag == Token.Tag.NAMED) {
++                return new NamedToken(tk, pos, endPos, name, comments);
++            } else {
++                // Get characters from string buffer.
++                String string = sb.toString();
++
++                // If a text block.
++                if (isTextBlock) {
++                    // Verify that the incidental indentation is consistent.
++                    if (lint.isEnabled(LintCategory.TEXT_BLOCKS)) {
++                        Set<TextBlockSupport.WhitespaceChecks> checks =
++                                TextBlockSupport.checkWhitespace(string);
++                        if (checks.contains(TextBlockSupport.WhitespaceChecks.INCONSISTENT)) {
++                            lexWarning(LintCategory.TEXT_BLOCKS, pos,
++                                    Warnings.InconsistentWhiteSpaceIndentation);
+                         }
+-                        // Remove incidental indentation.
+-                        try {
+-                            string = TextBlockSupport.stripIndent(string);
+-                        } catch (Exception ex) {
+-                            // Error already reported, just use unstripped string.
++                        if (checks.contains(TextBlockSupport.WhitespaceChecks.TRAILING)) {
++                            lexWarning(LintCategory.TEXT_BLOCKS, pos,
++                                    Warnings.TrailingWhiteSpaceWillBeRemoved);
+                         }
+                     }
+-                    // Translate escape sequences if present.
+-                    if (hasEscapeSequences && TextBlockSupport.hasSupport()) {
+-                        try {
+-                            string = TextBlockSupport.translateEscapes(string);
+-                        } catch (Exception ex) {
+-                            // Error already reported, just use untranslated string.
+-                        }
++                    // Remove incidental indentation.
++                    try {
++                        string = string.stripIndent();
++                    } catch (Exception ex) {
++                        // Error already reported, just use unstripped string.
++                    }
++                }
++
++                // Translate escape sequences if present.
++                if (hasEscapeSequences) {
++                    try {
++                        string = string.translateEscapes();
++                    } catch (Exception ex) {
++                        // Error already reported, just use untranslated string.
+                     }
++                }
++
++                if (tk.tag == Token.Tag.STRING) {
+                     // Build string token.
+                     return new StringToken(tk, pos, endPos, string, comments);
++                } else {
++                    // Build numeric token.
++                    return new NumericToken(tk, pos, endPos, string, radix, comments);
+                 }
+-                case NUMERIC: return new NumericToken(tk, pos, endPos, reader.chars(), radix, comments);
+-                default: throw new AssertionError();
+             }
+-        }
+-        finally {
++        } finally {
++            int endPos = position();
++
+             if (scannerDebug) {
+                     System.out.println("nextToken(" + pos
+                                        + "," + endPos + ")=|" +
+-                                       new String(reader.getRawCharacters(pos, endPos))
++                                       new String(getRawCharacters(pos, endPos))
+                                        + "|");
+             }
+         }
+     }
+-    //where
+-        List<Comment> addComment(List<Comment> comments, Comment comment) {
+-            return comments == null ?
+-                    List.of(comment) :
+-                    comments.prepend(comment);
+-        }
+ 
+-    /** Return the position where a lexical error occurred;
++    /**
++     * Appends a comment to the list of comments preceding the current token.
++     *
++     * @param comments  existing list of comments.
++     * @param comment   comment to append.
++     *
++     * @return new list with comment prepended to the existing list.
++     */
++    List<Comment> appendComment(List<Comment> comments, Comment comment) {
++        return comments == null ?
++                List.of(comment) :
++                comments.prepend(comment);
++    }
++
++    /**
++     * Return the position where a lexical error occurred.
++     *
++     * @return position in the input buffer of where the error occurred.
+      */
+     public int errPos() {
+         return errPos;
+     }
+ 
+-    /** Set the position where a lexical error occurred;
++    /**
++     * Set the position where a lexical error occurred.
++     *
++     * @param pos  position in the input buffer of where the error occurred.
+      */
+     public void errPos(int pos) {
+         errPos = pos;
+     }
+ 
+     /**
+      * Called when a complete comment has been scanned. pos and endPos
+      * will mark the comment boundary.
++     *
++     * @param pos     position of the opening / in the input buffer.
++     * @param endPos  position + 1 of the closing / in the input buffer.
++     * @param style   style of comment.
++     *
++     * @return the constructed BasicComment.
+      */
+     protected Tokens.Comment processComment(int pos, int endPos, CommentStyle style) {
+-        if (scannerDebug)
++        if (scannerDebug) {
+             System.out.println("processComment(" + pos
+-                               + "," + endPos + "," + style + ")=|"
+-                               + new String(reader.getRawCharacters(pos, endPos))
+-                               + "|");
+-        char[] buf = reader.getRawCharacters(pos, endPos);
+-        return new BasicComment<>(new UnicodeReader(fac, buf, buf.length), style);
++                                + "," + endPos + "," + style + ")=|"
++                                + new String(getRawCharacters(pos, endPos))
++                                + "|");
++        }
++
++        char[] buf = getRawCharacters(pos, endPos);
++
++        return new BasicComment(style, fac, buf, pos);
+     }
+ 
+     /**
+      * Called when a complete whitespace run has been scanned. pos and endPos
+      * will mark the whitespace boundary.
++     *
++     * (Spec 3.6)
++     *
++     * @param pos     position in input buffer of first whitespace character.
++     * @param endPos  position + 1 in input buffer of last whitespace character.
+      */
+     protected void processWhiteSpace(int pos, int endPos) {
+-        if (scannerDebug)
++        if (scannerDebug) {
+             System.out.println("processWhitespace(" + pos
+-                               + "," + endPos + ")=|" +
+-                               new String(reader.getRawCharacters(pos, endPos))
+-                               + "|");
++                                + "," + endPos + ")=|" +
++                                new String(getRawCharacters(pos, endPos))
++                                + "|");
++        }
+     }
+ 
+     /**
+      * Called when a line terminator has been processed.
++     *
++     * @param pos     position in input buffer of first character in sequence.
++     * @param endPos  position + 1 in input buffer of last character in sequence.
+      */
+     protected void processLineTerminator(int pos, int endPos) {
+-        if (scannerDebug)
++        if (scannerDebug) {
+             System.out.println("processTerminator(" + pos
+-                               + "," + endPos + ")=|" +
+-                               new String(reader.getRawCharacters(pos, endPos))
+-                               + "|");
++                                + "," + endPos + ")=|" +
++                                new String(getRawCharacters(pos, endPos))
++                                + "|");
++        }
+     }
+ 
+-    /** Build a map for translating between line numbers and
+-     * positions in the input.
++    /**
++     * Build a map for translating between line numbers and positions in the input.
+      *
+-     * @return a LineMap */
++     * @return a LineMap
++     */
+     public Position.LineMap getLineMap() {
+-        return Position.makeLineMap(reader.getRawCharacters(), reader.buflen, false);
++        return Position.makeLineMap(getRawCharacters(), length(), false);
+     }
+ 
+-
+     /**
+-    * Scan a documentation comment; determine if a deprecated tag is present.
+-    * Called once the initial /, * have been skipped, positioned at the second *
+-    * (which is treated as the beginning of the first line).
+-    * Stops positioned at the closing '/'.
+-    */
+-    protected static class BasicComment<U extends UnicodeReader> implements Comment {
+-
++     * Scan a documentation comment; determine if a deprecated tag is present.
++     * Called once the initial /, * have been skipped, positioned at the second *
++     * (which is treated as the beginning of the first line).
++     * Stops positioned at the closing '/'.
++     */
++    protected static class BasicComment extends PositionTrackingReader implements Comment {
++        /**
++         * Style of comment
++         *   LINE starting with //
++         *   BLOCK starting with /*
++         *   JAVADOC starting with /**
++         */
+         CommentStyle cs;
+-        U comment_reader;
+ 
++        /**
++         * true if comment contains @deprecated at beginning of a line.
++         */
+         protected boolean deprecatedFlag = false;
++
++        /**
++         * true if comment has been fully scanned.
++         */
+         protected boolean scanned = false;
+ 
+-        protected BasicComment(U comment_reader, CommentStyle cs) {
+-            this.comment_reader = comment_reader;
++        /**
++         * Constructor.
++         *
++         * @param cs      comment style
++         * @param sf      Scan factory.
++         * @param array   Array containing contents of source.
++         * @param offset  Position offset in original source buffer.
++         */
++        protected BasicComment(CommentStyle cs, ScannerFactory sf, char[] array, int offset) {
++            super(sf, array, offset);
+             this.cs = cs;
+         }
+ 
++        /**
++         * Return comment body text minus comment adornments or null if not scanned.
++         *
++         * @return comment body text.
++         */
+         public String getText() {
+             return null;
+         }
+ 
++        /**
++         * Return buffer position in original buffer mapped from buffer position in comment.
++         *
++         * @param pos  buffer position in comment.
++         *
++         * @return buffer position in original buffer.
++         */
+         public int getSourcePos(int pos) {
+             return -1;
+         }
+ 
++        /**
++         * Return style of comment.
++         *   LINE starting with //
++         *   BLOCK starting with /*
++         *   JAVADOC starting with /**
++         *
++         * @return
++         */
+         public CommentStyle getStyle() {
+             return cs;
+         }
+ 
++        /**
++         * true if comment contains @deprecated at beginning of a line.
++         *
++         * @return true if comment contains @deprecated.
++         */
+         public boolean isDeprecated() {
+             if (!scanned && cs == CommentStyle.JAVADOC) {
+                 scanDocComment();
+             }
++
+             return deprecatedFlag;
+         }
+ 
+-        @SuppressWarnings("fallthrough")
++        /**
++         * Scan JAVADOC comment for details.
++         */
+         protected void scanDocComment() {
+             try {
+                 boolean deprecatedPrefix = false;
+-
+-                comment_reader.bp += 3; // '/**'
+-                comment_reader.ch = comment_reader.buf[comment_reader.bp];
++                accept("/**");
+ 
+                 forEachLine:
+-                while (comment_reader.bp < comment_reader.buflen) {
+-
++                while (isAvailable()) {
+                     // Skip optional WhiteSpace at beginning of line
+-                    while (comment_reader.bp < comment_reader.buflen && (comment_reader.ch == ' ' || comment_reader.ch == '\t' || comment_reader.ch == FF)) {
+-                        comment_reader.scanCommentChar();
+-                    }
++                    skipWhitespace();
+ 
+                     // Skip optional consecutive Stars
+-                    while (comment_reader.bp < comment_reader.buflen && comment_reader.ch == '*') {
+-                        comment_reader.scanCommentChar();
+-                        if (comment_reader.ch == '/') {
++                    while (accept('*')) {
++                        if (is('/')) {
+                             return;
+                         }
+                     }
+ 
+                     // Skip optional WhiteSpace after Stars
+-                    while (comment_reader.bp < comment_reader.buflen && (comment_reader.ch == ' ' || comment_reader.ch == '\t' || comment_reader.ch == FF)) {
+-                        comment_reader.scanCommentChar();
+-                    }
++                    skipWhitespace();
+ 
+-                    deprecatedPrefix = false;
+                     // At beginning of line in the JavaDoc sense.
+-                    if (!deprecatedFlag) {
+-                        String deprecated = "@deprecated";
+-                        int i = 0;
+-                        while (comment_reader.bp < comment_reader.buflen && comment_reader.ch == deprecated.charAt(i)) {
+-                            comment_reader.scanCommentChar();
+-                            i++;
+-                            if (i == deprecated.length()) {
+-                                deprecatedPrefix = true;
+-                                break;
+-                            }
+-                        }
+-                    }
++                    deprecatedPrefix = deprecatedFlag || accept("@deprecated");
+ 
+-                    if (deprecatedPrefix && comment_reader.bp < comment_reader.buflen) {
+-                        if (Character.isWhitespace(comment_reader.ch)) {
++                    if (deprecatedPrefix && isAvailable()) {
++                        if (Character.isWhitespace(get())) {
+                             deprecatedFlag = true;
+-                        } else if (comment_reader.ch == '*') {
+-                            comment_reader.scanCommentChar();
+-                            if (comment_reader.ch == '/') {
++                        } else if (accept('*')) {
++                            if (is('/')) {
+                                 deprecatedFlag = true;
+                                 return;
+                             }
+                         }
+                     }
+ 
+                     // Skip rest of line
+-                    while (comment_reader.bp < comment_reader.buflen) {
+-                        switch (comment_reader.ch) {
++                    while (isAvailable()) {
++                        switch (get()) {
+                             case '*':
+-                                comment_reader.scanCommentChar();
+-                                if (comment_reader.ch == '/') {
++                                next();
++
++                                if (is('/')) {
+                                     return;
+                                 }
++
+                                 break;
+-                            case CR: // (Spec 3.4)
+-                                comment_reader.scanCommentChar();
+-                                if (comment_reader.ch != LF) {
+-                                    continue forEachLine;
+-                                }
+-                            /* fall through to LF case */
+-                            case LF: // (Spec 3.4)
+-                                comment_reader.scanCommentChar();
++                            case '\r': // (Spec 3.4)
++                            case '\n': // (Spec 3.4)
++                                accept('\r');
++                                accept('\n');
+                                 continue forEachLine;
++
+                             default:
+-                                comment_reader.scanCommentChar();
++                                next();
++                                break;
+                         }
+                     } // rest of line
+                 } // forEachLine
+                 return;
+             } finally {
+diff a/src/jdk.compiler/share/classes/com/sun/tools/javac/parser/JavadocTokenizer.java b/src/jdk.compiler/share/classes/com/sun/tools/javac/parser/JavadocTokenizer.java
+--- a/src/jdk.compiler/share/classes/com/sun/tools/javac/parser/JavadocTokenizer.java
++++ b/src/jdk.compiler/share/classes/com/sun/tools/javac/parser/JavadocTokenizer.java
+@@ -1,7 +1,7 @@
+ /*
+- * Copyright (c) 2004, 2018, Oracle and/or its affiliates. All rights reserved.
++ * Copyright (c) 2004, 2020, Oracle and/or its affiliates. All rights reserved.
+  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
+  *
+  * This code is free software; you can redistribute it and/or modify it
+  * under the terms of the GNU General Public License version 2 only, as
+  * published by the Free Software Foundation.  Oracle designates this
+@@ -27,209 +27,127 @@
+ 
+ import com.sun.tools.javac.parser.Tokens.Comment;
+ import com.sun.tools.javac.parser.Tokens.Comment.CommentStyle;
+ import com.sun.tools.javac.util.*;
+ 
+-import java.nio.*;
++import java.nio.CharBuffer;
++import java.util.Arrays;
+ import java.util.regex.Pattern;
+ 
+-import static com.sun.tools.javac.util.LayoutCharacters.*;
+-
+-/** An extension to the base lexical analyzer that captures
+- *  and processes the contents of doc comments.  It does so by
+- *  translating Unicode escape sequences and by stripping the
+- *  leading whitespace and starts from each line of the comment.
++/**
++ * An extension to the base lexical analyzer (JavaTokenizer) that
++ * captures and processes the contents of doc comments. It does
++ * so by stripping the leading whitespace and comment starts from
++ * each line of the Javadoc comment.
+  *
+  *  <p><b>This is NOT part of any supported API.
+  *  If you write code that depends on this, you do so at your own risk.
+  *  This code and its internal interfaces are subject to change or
+  *  deletion without notice.</b>
+  */
+ public class JavadocTokenizer extends JavaTokenizer {
++    /**
++     * The factory that created this Scanner.
++     */
++    final ScannerFactory fac;
+ 
+-    /** Create a scanner from the input buffer.  buffer must implement
+-     *  array() and compact(), and remaining() must be less than limit().
++    /**
++     * Create a tokenizer from the input character buffer. The input buffer
++     * content would typically be a Javadoc comment extracted by
++     * JavaTokenizer.
++     *
++     * @param fac  the factory which created this Scanner.
++     * @param cb   the input character buffer.
+      */
+-    protected JavadocTokenizer(ScannerFactory fac, CharBuffer buffer) {
+-        super(fac, buffer);
++    protected JavadocTokenizer(ScannerFactory fac, CharBuffer cb) {
++        super(fac, cb);
++        this.fac = fac;
+     }
+ 
+-    /** Create a scanner from the input array.  The array must have at
+-     *  least a single character of extra space.
++    /**
++     * Create a tokenizer from the input array. The input buffer
++     * content would typically be a Javadoc comment extracted by
++     * JavaTokenizer.
++     *
++     * @param fac     factory which created this Scanner
++     * @param array   input character array.
++     * @param length  length of the meaningful content in the array.
+      */
+-    protected JavadocTokenizer(ScannerFactory fac, char[] input, int inputLength) {
+-        super(fac, input, inputLength);
++    protected JavadocTokenizer(ScannerFactory fac, char[] array, int length) {
++        super(fac, array, length);
++        this.fac = fac;
+     }
+ 
+     @Override
+     protected Comment processComment(int pos, int endPos, CommentStyle style) {
+-        char[] buf = reader.getRawCharacters(pos, endPos);
+-        return new JavadocComment(new DocReader(fac, buf, buf.length, pos), style);
++        char[] buf = getRawCharacters(pos, endPos);
++        return new JavadocComment(style, fac, buf, pos);
+     }
+ 
+     /**
+-     * This is a specialized version of UnicodeReader that keeps track of the
+-     * column position within a given character stream (used for Javadoc processing),
+-     * and which builds a table for mapping positions in the comment string to
+-     * positions in the source file.
++     * An extension of BasicComment used to extract the relevant portion
++     * of a Javadoc comment.
+      */
+-    static class DocReader extends UnicodeReader {
+-
+-         int col;
+-         int startPos;
+-
+-         /**
+-          * A buffer for building a table for mapping positions in {@link #sbuf}
+-          * to positions in the source buffer.
+-          *
+-          * The array is organized as a series of pairs of integers: the first
+-          * number in each pair specifies a position in the comment text,
+-          * the second number in each pair specifies the corresponding position
+-          * in the source buffer. The pairs are sorted in ascending order.
+-          *
+-          * Since the mapping function is generally continuous, with successive
+-          * positions in the string corresponding to successive positions in the
+-          * source buffer, the table only needs to record discontinuities in
+-          * the mapping. The values of intermediate positions can be inferred.
+-          *
+-          * Discontinuities may occur in a number of places: when a newline
+-          * is followed by whitespace and asterisks (which are ignored),
+-          * when a tab is expanded into spaces, and when unicode escapes
+-          * are used in the source buffer.
+-          *
+-          * Thus, to find the source position of any position, p, in the comment
+-          * string, find the index, i, of the pair whose string offset
+-          * ({@code pbuf[i] }) is closest to but not greater than p. Then,
+-          * {@code sourcePos(p) = pbuf[i+1] + (p - pbuf[i]) }.
+-          */
+-         int[] pbuf = new int[128];
+-
+-         /**
+-          * The index of the next empty slot in the pbuf buffer.
+-          */
+-         int pp = 0;
+-
+-         /** The buffer index of the last double backslash sequence
+-          */
+-         private int doubleBackslashBp = -1;
+-
+-         DocReader(ScannerFactory fac, char[] input, int inputLength, int startPos) {
+-             super(fac, input, inputLength);
+-             this.startPos = startPos;
+-         }
+-
+-         @Override
+-         protected void convertUnicode() {
+-             if (ch == '\\' && unicodeConversionBp != bp) {
+-                 bp++; ch = buf[bp]; col++;
+-                 if (ch == 'u') {
+-                     do {
+-                         bp++; ch = buf[bp]; col++;
+-                     } while (ch == 'u');
+-                     int limit = bp + 3;
+-                     if (limit < buflen) {
+-                         int d = digit(bp, 16);
+-                         int code = d;
+-                         while (bp < limit && d >= 0) {
+-                             bp++; ch = buf[bp]; col++;
+-                             d = digit(bp, 16);
+-                             code = (code << 4) + d;
+-                         }
+-                         if (d >= 0) {
+-                             ch = (char)code;
+-                             unicodeConversionBp = bp;
+-                             return;
+-                         }
+-                     }
+-                     // "illegal.Unicode.esc", reported by base scanner
+-                 } else {
+-                     bp--;
+-                     ch = '\\';
+-                     col--;
+-                 }
+-             }
+-         }
+-
+-         @Override
+-         protected void scanCommentChar() {
+-             scanChar();
+-             if (ch == '\\') {
+-                 if (peekChar() == '\\' && !isUnicode()) {
+-                     bp++; col++;
+-                     doubleBackslashBp = bp;
+-                 } else {
+-                     convertUnicode();
+-                 }
+-             }
+-         }
+-
+-         @Override
+-         protected void scanChar() {
+-             bp++;
+-             ch = buf[bp];
+-             switch (ch) {
+-             case '\r': // return
+-                 col = 0;
+-                 break;
+-             case '\n': // newline
+-                 if (bp == 0 || buf[bp-1] != '\r') {
+-                     col = 0;
+-                 }
+-                 break;
+-             case '\t': // tab
+-                 col = (col / TabInc * TabInc) + TabInc;
+-                 break;
+-             case '\\': // possible Unicode
+-                 col++;
+-                 convertUnicode();
+-                 break;
+-             default:
+-                 col++;
+-                 break;
+-             }
+-         }
+-
+-         @Override
+-         public void putChar(char ch, boolean scan) {
+-             // At this point, bp is the position of the current character in buf,
+-             // and sp is the position in sbuf where this character will be put.
+-             // Record a new entry in pbuf if pbuf is empty or if sp and its
+-             // corresponding source position are not equidistant from the
+-             // corresponding values in the latest entry in the pbuf array.
+-             // (i.e. there is a discontinuity in the map function.)
+-             if ((pp == 0)
+-                     || (sp - pbuf[pp - 2] != (startPos + bp) - pbuf[pp - 1])) {
+-                 if (pp + 1 >= pbuf.length) {
+-                     int[] new_pbuf = new int[pbuf.length * 2];
+-                     System.arraycopy(pbuf, 0, new_pbuf, 0, pbuf.length);
+-                     pbuf = new_pbuf;
+-                 }
+-                 pbuf[pp] = sp;
+-                 pbuf[pp + 1] = startPos + bp;
+-                 pp += 2;
+-             }
+-             super.putChar(ch, scan);
+-         }
++    protected static class JavadocComment extends BasicComment {
++        /**
++         * Pattern used to detect a well formed @deprecated tag in a JaavDoc
++         * comment.
++         */
++        private static final Pattern DEPRECATED_PATTERN =
++            Pattern.compile("(?sm).*^\\s*@deprecated( |$).*");
+ 
+-         /** Whether the ch represents a sequence of two backslashes. */
+-         boolean isDoubleBackslash() {
+-             return doubleBackslashBp == bp;
+-         }
++        /**
++         * The relevant portion of the comment that is of interest to Javadoc.
++         * Produced by invoking scanDocComment.
++         */
++        private String docComment = null;
+ 
++        /**
++         * StringBuilder used to extract the relevant portion of the Javadoc comment.
++         */
++        private StringBuilder sb;
+ 
+-     }
++        /**
++         * Map used to map the extracted Javadoc comment's character positions back to
++         * the original source.
++         */
++        OffsetMap offsetMap = new OffsetMap();
++
++        JavadocComment(CommentStyle cs, ScannerFactory sf, char[] array, int offset) {
++            super( cs, sf, array, offset);
++            this.sb = new StringBuilder();
++        }
+ 
+-     protected static class JavadocComment extends JavaTokenizer.BasicComment<DocReader> {
++        /**
++         * Add a character to the extraction buffer.
++         *
++         * @param ch  character to add.
++         */
++        protected void put(char ch) {
++            offsetMap.add(sb.length(), offsetPosition());
++            sb.append(ch);
++        }
+ 
+         /**
+-        * Translated and stripped contents of doc comment
+-        */
+-        private String docComment = null;
+-        private int[] docPosns = null;
++         * Add a code point to the extraction buffer.
++         *
++         * @param codePoint  code point to add.
++         */
++        protected void putCodePoint(int codePoint) {
++            offsetMap.add(sb.length(), offsetPosition());
++            sb.appendCodePoint(codePoint);
++        }
+ 
+-        JavadocComment(DocReader reader, CommentStyle cs) {
+-            super(reader, cs);
++        /**
++         * Add current character or code point to the extraction buffer.
++         */
++        protected void put() {
++            if (isSurrogate()) {
++                putCodePoint(getCodepoint());
++            } else {
++                put(get());
++            }
+         }
+ 
+         @Override
+         public String getText() {
+             if (!scanned && cs == CommentStyle.JAVADOC) {
+@@ -238,234 +156,293 @@
+             return docComment;
+         }
+ 
+         @Override
+         public int getSourcePos(int pos) {
+-            // Binary search to find the entry for which the string index is
+-            // less than pos. Since docPosns is a list of pairs of integers
+-            // we must make sure the index is always even.
+-            // If we find an exact match for pos, the other item in the pair
+-            // gives the source pos; otherwise, compute the source position
+-            // relative to the best match found in the array.
+-            if (pos == Position.NOPOS)
++            if (pos == Position.NOPOS) {
+                 return Position.NOPOS;
+-            if (pos < 0 || pos > docComment.length())
++            }
++
++            if (pos < 0 || pos > docComment.length()) {
+                 throw new StringIndexOutOfBoundsException(String.valueOf(pos));
+-            if (docPosns == null)
+-                return Position.NOPOS;
+-            int start = 0;
+-            int end = docPosns.length;
+-            while (start < end - 2) {
+-                // find an even index midway between start and end
+-                int index = ((start  + end) / 4) * 2;
+-                if (docPosns[index] < pos)
+-                    start = index;
+-                else if (docPosns[index] == pos)
+-                    return docPosns[index + 1];
+-                else
+-                    end = index;
+             }
+-            return docPosns[start + 1] + (pos - docPosns[start]);
++
++            return offsetMap.getSourcePos(pos);
+         }
+ 
+         @Override
+-        @SuppressWarnings("fallthrough")
+         protected void scanDocComment() {
+              try {
+                  boolean firstLine = true;
+ 
+-                 // Skip over first slash
+-                 comment_reader.scanCommentChar();
+-                 // Skip over first star
+-                 comment_reader.scanCommentChar();
++                 // Skip over /*
++                 accept("/*");
+ 
+-                 // consume any number of stars
+-                 while (comment_reader.bp < comment_reader.buflen && comment_reader.ch == '*') {
+-                     comment_reader.scanCommentChar();
+-                 }
+-                 // is the comment in the form /**/, /***/, /****/, etc. ?
+-                 if (comment_reader.bp < comment_reader.buflen && comment_reader.ch == '/') {
++                 // Consume any number of stars
++                 skip('*');
++
++                 // Is the comment in the form /**/, /***/, /****/, etc. ?
++                 if (is('/')) {
+                      docComment = "";
+                      return;
+                  }
+ 
+-                 // skip a newline on the first line of the comment.
+-                 if (comment_reader.bp < comment_reader.buflen) {
+-                     if (comment_reader.ch == LF) {
+-                         comment_reader.scanCommentChar();
+-                         firstLine = false;
+-                     } else if (comment_reader.ch == CR) {
+-                         comment_reader.scanCommentChar();
+-                         if (comment_reader.ch == LF) {
+-                             comment_reader.scanCommentChar();
+-                             firstLine = false;
+-                         }
+-                     }
++                 // Skip line terminator on the first line of the comment.
++                 if (isOneOf('\n', '\r')) {
++                     accept('\r');
++                     accept('\n');
++                     firstLine = false;
+                  }
+ 
+              outerLoop:
+-
+                  // The outerLoop processes the doc comment, looping once
+                  // for each line.  For each line, it first strips off
+                  // whitespace, then it consumes any stars, then it
+-                 // puts the rest of the line into our buffer.
+-                 while (comment_reader.bp < comment_reader.buflen) {
+-                     int begin_bp = comment_reader.bp;
+-                     char begin_ch = comment_reader.ch;
+-                     // The wsLoop consumes whitespace from the beginning
+-                     // of each line.
+-                 wsLoop:
+-
+-                     while (comment_reader.bp < comment_reader.buflen) {
+-                         switch(comment_reader.ch) {
+-                         case ' ':
+-                             comment_reader.scanCommentChar();
+-                             break;
+-                         case '\t':
+-                             comment_reader.col = ((comment_reader.col - 1) / TabInc * TabInc) + TabInc;
+-                             comment_reader.scanCommentChar();
+-                             break;
+-                         case FF:
+-                             comment_reader.col = 0;
+-                             comment_reader.scanCommentChar();
+-                             break;
+-         // Treat newline at beginning of line (blank line, no star)
+-         // as comment text.  Old Javadoc compatibility requires this.
+-         /*---------------------------------*
+-                         case CR: // (Spec 3.4)
+-                             doc_reader.scanCommentChar();
+-                             if (ch == LF) {
+-                                 col = 0;
+-                                 doc_reader.scanCommentChar();
+-                             }
+-                             break;
+-                         case LF: // (Spec 3.4)
+-                             doc_reader.scanCommentChar();
+-                             break;
+-         *---------------------------------*/
+-                         default:
+-                             // we've seen something that isn't whitespace;
+-                             // jump out.
+-                             break wsLoop;
+-                         }
+-                     }
+-
++                 // puts the rest of the line into the extraction buffer.
++                 while (isAvailable()) {
++                     int begin_pos = position();
++                     // Consume  whitespace from the beginning of each line.
++                     skipWhitespace();
+                      // Are there stars here?  If so, consume them all
+                      // and check for the end of comment.
+-                     if (comment_reader.ch == '*') {
++                     if (is('*')) {
+                          // skip all of the stars
+-                         do {
+-                             comment_reader.scanCommentChar();
+-                         } while (comment_reader.ch == '*');
++                         skip('*');
+ 
+                          // check for the closing slash.
+-                         if (comment_reader.ch == '/') {
+-                             // We're done with the doc comment
+-                             // scanChar() and breakout.
++                         if (accept('/')) {
++                             // We're done with the Javadoc comment
+                              break outerLoop;
+                          }
+-                     } else if (! firstLine) {
++                     } else if (!firstLine) {
+                          // The current line does not begin with a '*' so we will
+                          // treat it as comment
+-                         comment_reader.bp = begin_bp;
+-                         comment_reader.ch = begin_ch;
++                         reset(begin_pos);
+                      }
+-                     // The textLoop processes the rest of the characters
+-                     // on the line, adding them to our buffer.
++
+                  textLoop:
+-                     while (comment_reader.bp < comment_reader.buflen) {
+-                         switch (comment_reader.ch) {
+-                         case '*':
+-                             // Is this just a star?  Or is this the
+-                             // end of a comment?
+-                             comment_reader.scanCommentChar();
+-                             if (comment_reader.ch == '/') {
+-                                 // This is the end of the comment,
+-                                 // set ch and return our buffer.
+-                                 break outerLoop;
+-                             }
+-                             // This is just an ordinary star.  Add it to
+-                             // the buffer.
+-                             comment_reader.putChar('*', false);
+-                             break;
+-                         case '\\':
+-                             comment_reader.putChar('\\', false);
+-                             // If a double backslash was found, write two
+-                             if (comment_reader.isDoubleBackslash()) {
+-                                 comment_reader.putChar('\\', false);
+-                             }
+-                             comment_reader.scanCommentChar();
+-                             break;
+-                         case ' ':
+-                         case '\t':
+-                             comment_reader.putChar(comment_reader.ch, false);
+-                             comment_reader.scanCommentChar();
+-                             break;
+-                         case FF:
+-                             comment_reader.scanCommentChar();
+-                             break textLoop; // treat as end of line
+-                         case CR: // (Spec 3.4)
+-                             comment_reader.scanCommentChar();
+-                             if (comment_reader.ch != LF) {
+-                                 // Canonicalize CR-only line terminator to LF
+-                                 comment_reader.putChar((char)LF, false);
+-                                 break textLoop;
+-                             }
+-                             /* fall through to LF case */
+-                         case LF: // (Spec 3.4)
++                     // The textLoop processes the rest of the characters
++                     // on the line, adding them to the extraction buffer.
++                     while (isAvailable()) {
++                         if (accept("*/")) {
++                             // This is the end of the comment, return
++                             // the contents of the extraction buffer.
++                             break outerLoop;
++                         } else if (isOneOf('\n', '\r')) {
+                              // We've seen a newline.  Add it to our
+                              // buffer and break out of this loop,
+                              // starting fresh on a new line.
+-                             comment_reader.putChar(comment_reader.ch, false);
+-                             comment_reader.scanCommentChar();
++                             put('\n');
++                             accept('\r');
++                             accept('\n');
+                              break textLoop;
+-                         default:
++                         } else if (is('\f')){
++                             next();
++                             break textLoop; // treat as end of line
++
++                         } else {
+                              // Add the character to our buffer.
+-                             comment_reader.putChar(comment_reader.ch, false);
+-                             comment_reader.scanCommentChar();
++                             put();
++                             next();
+                          }
+                      } // end textLoop
+                      firstLine = false;
+                  } // end outerLoop
+ 
+-                 if (comment_reader.sp > 0) {
+-                     int i = comment_reader.sp - 1;
+-                 trailLoop:
+-                     while (i > -1) {
+-                         switch (comment_reader.sbuf[i]) {
+-                         case '*':
+-                             i--;
+-                             break;
+-                         default:
+-                             break trailLoop;
+-                         }
++                 // If extraction buffer is not empty.
++                 if (sb.length() > 0) {
++                     // Remove trailing asterisks.
++                     int i = sb.length() - 1;
++                     while (i > -1 && sb.charAt(i) == '*') {
++                         i--;
+                      }
+-                     comment_reader.sp = i + 1;
++                     sb.setLength(i + 1) ;
+ 
+                      // Store the text of the doc comment
+-                    docComment = comment_reader.chars();
+-                    docPosns = new int[comment_reader.pp];
+-                    System.arraycopy(comment_reader.pbuf, 0, docPosns, 0, docPosns.length);
+-                } else {
++                    docComment = sb.toString();
++                 } else {
+                     docComment = "";
+                 }
+             } finally {
+                 scanned = true;
+-                comment_reader = null;
+-                if (docComment != null &&
+-                        DEPRECATED_PATTERN.matcher(docComment).matches()) {
++
++                // Check if comment contains @deprecated comment.
++                if (docComment != null && DEPRECATED_PATTERN.matcher(docComment).matches()) {
+                     deprecatedFlag = true;
+                 }
+             }
+         }
+-        //where:
+-            private static final Pattern DEPRECATED_PATTERN =
+-                    Pattern.compile("(?sm).*^\\s*@deprecated( |$).*");
+-
+     }
+ 
++    /**
++     * Build a map for translating between line numbers and positions in the input.
++     * Overridden to expand tabs.
++     *
++     * @return a LineMap
++     */
+     @Override
+     public Position.LineMap getLineMap() {
+-        char[] buf = reader.getRawCharacters();
++        char[] buf = getRawCharacters();
+         return Position.makeLineMap(buf, buf.length, true);
+     }
++
++    /**
++     * Build an int table to mapping positions in extracted Javadoc comment
++     * to positions in the JavaTokenizer source buffer.
++     *
++     * The array is organized as a series of pairs of integers: the first
++     * number in each pair specifies a position in the comment text,
++     * the second number in each pair specifies the corresponding position
++     * in the source buffer. The pairs are sorted in ascending order.
++     *
++     * Since the mapping function is generally continuous, with successive
++     * positions in the string corresponding to successive positions in the
++     * source buffer, the table only needs to record discontinuities in
++     * the mapping. The values of intermediate positions can be inferred.
++     *
++     * Discontinuities may occur in a number of places: when a newline
++     * is followed by whitespace and asterisks (which are ignored),
++     * when a tab is expanded into spaces, and when unicode escapes
++     * are used in the source buffer.
++     *
++     * Thus, to find the source position of any position, p, in the comment
++     * string, find the index, i, of the pair whose string offset
++     * ({@code map[i + SB_OFFSET] }) is closest to but not greater than p. Then,
++     * {@code sourcePos(p) = map[i + POS_OFFSET] + (p - map[i + SB_OFFSET]) }.
++     */
++    static class OffsetMap {
++        /**
++         * map entry offset for comment offset member of pair.
++         */
++        private static final int SB_OFFSET = 0;
++
++        /**
++         * map entry offset of input offset member of pair.
++         */
++        private static final int POS_OFFSET = 1;
++
++        /**
++         * Number of elements in each entry.
++         */
++        private static final int NOFFSETS = 2;
++
++        /**
++         * Array storing entries in map.
++         */
++        private int[] map;
++
++        /**
++         * Logical size of map (number of valid entries.)
++         */
++        private int size;
++
++        /**
++         * Constructor.
++         */
++        OffsetMap() {
++            this.map = new int[128];
++            this.size = 0;
++        }
++
++        /**
++         * Returns true if it is worthwhile adding the entry pair to the map. That is
++         * if there is a change in relative offset.
++         *
++         * @param sbOffset  comment offset member of pair.
++         * @param posOffet  input offset member of pair.
++         *
++         * @return true if it is worthwhile adding the entry pair.
++         */
++        boolean shouldAdd(int sbOffset, int posOffet) {
++            return sbOffset - lastSBOffset() != posOffet - lastPosOffset();
++        }
++
++        /**
++         * Adds entry pair if worthwhile.
++         *
++         * @param sbOffset  comment offset member of pair.
++         * @param posOffet  input offset member of pair.
++         */
++        void add(int sbOffset, int posOffet) {
++            if (size == 0 || shouldAdd(sbOffset, posOffet)) {
++                ensure(NOFFSETS);
++                map[size + SB_OFFSET] = sbOffset;
++                map[size + POS_OFFSET] = posOffet;
++                size += NOFFSETS;
++            }
++        }
++
++        /**
++         * Returns the previous comment offset.
++         *
++         * @return the previous comment offset.
++         */
++        private int lastSBOffset() {
++            return size == 0 ? 0 : map[size - NOFFSETS + SB_OFFSET];
++        }
++
++        /**
++         * Returns the previous input offset.
++         *
++         * @return the previous input offset.
++         */
++        private int lastPosOffset() {
++            return size == 0 ? 0 : map[size - NOFFSETS + POS_OFFSET];
++        }
++
++        /**
++         * Ensures there is enough space for a new entry.
++         *
++         * @param need  number of array slots needed.
++         */
++        private void ensure(int need) {
++            need += size;
++            int grow = map.length;
++
++            while (need > grow) {
++                grow <<= 1;
++            }
++
++            // Handle overflow.
++            if (grow < map.length) {
++                throw new IndexOutOfBoundsException();
++            } else if (grow != map.length) {
++                map = Arrays.copyOf(map, grow);
++            }
++        }
++
++        /**
++         * Binary search to find the entry for which the string index is less
++         * than pos. Since the map is a list of pairs of integers we must make
++         * sure the index is always NOFFSETS scaled. If we find an exact match
++         * for pos, the other item in the pair gives the source pos; otherwise,
++         * compute the source position relative to the best match found in the
++         * array.
++         */
++        int getSourcePos(int pos) {
++            if (size == 0) {
++                return Position.NOPOS;
++            }
++
++            int start = 0;
++            int end = size / NOFFSETS;
++
++            while (start < end - NOFFSETS) {
++                // find an index midway between start and end
++                int index = (start + end) / 2;
++                int indexScaled = index * NOFFSETS;
++
++                if (map[indexScaled + SB_OFFSET] < pos) {
++                    start = index;
++                } else if (map[indexScaled + SB_OFFSET] == pos) {
++                    return map[indexScaled + POS_OFFSET];
++                } else {
++                    end = index;
++                }
++            }
++
++            int startScaled = start * NOFFSETS;
++
++            return map[startScaled + POS_OFFSET] + (pos - map[startScaled + SB_OFFSET]);
++        }
++    }
+ }
+diff a/src/jdk.compiler/share/classes/com/sun/tools/javac/parser/TextBlockSupport.java b/src/jdk.compiler/share/classes/com/sun/tools/javac/parser/TextBlockSupport.java
+--- /dev/null
++++ b/src/jdk.compiler/share/classes/com/sun/tools/javac/parser/TextBlockSupport.java
+@@ -0,0 +1,101 @@
++/*
++ * Copyright (c) 2020, Oracle and/or its affiliates. All rights reserved.
++ * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
++ *
++ * This code is free software; you can redistribute it and/or modify it
++ * under the terms of the GNU General Public License version 2 only, as
++ * published by the Free Software Foundation.  Oracle designates this
++ * particular file as subject to the "Classpath" exception as provided
++ * by Oracle in the LICENSE file that accompanied this code.
++ *
++ * This code is distributed in the hope that it will be useful, but WITHOUT
++ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
++ * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
++ * version 2 for more details (a copy is included in the LICENSE file that
++ * accompanied this code).
++ *
++ * You should have received a copy of the GNU General Public License version
++ * 2 along with this work; if not, write to the Free Software Foundation,
++ * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
++ *
++ * Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
++ * or visit www.oracle.com if you need additional information or have any
++ * questions.
++ */
++
++package com.sun.tools.javac.parser;
++
++import java.util.HashSet;
++import java.util.Set;
++
++/**
++ * Methods used to support text blocks lint.
++ *
++ *  <p><b>This is NOT part of any supported API.
++ *  If you write code that depends on this, you do so at your own risk.
++ *  This code and its internal interfaces are subject to change or
++ *  deletion without notice.</b>
++ */
++class TextBlockSupport {
++     enum WhitespaceChecks {
++        INCONSISTENT,
++        TRAILING
++    };
++
++    /** Check that the use of white space in content is not problematic.
++     */
++    static Set<WhitespaceChecks> checkWhitespace(String string) {
++        // Start with empty result set.
++        Set<WhitespaceChecks> checks = new HashSet<>();
++        // No need to check empty strings.
++        if (string.isEmpty()) {
++            return checks;
++        }
++        // Maximum common indentation.
++        int outdent = 0;
++        // No need to check indentation if opting out (last line is empty.)
++        char lastChar = string.charAt(string.length() - 1);
++        boolean optOut = lastChar == '\n' || lastChar == '\r';
++        // Split string based at line terminators.
++        String[] lines = string.split("\\R");
++        int length = lines.length;
++        // Extract last line.
++        String lastLine = length == 0 ? "" : lines[length - 1];
++         if (!optOut) {
++            // Prime with the last line indentation (may be blank.)
++            outdent = indexOfNonWhitespace(lastLine);
++            for (String line : lines) {
++                // Blanks lines have no influence (last line accounted for.)
++                if (!line.isBlank()) {
++                    outdent = Integer.min(outdent, indexOfNonWhitespace(line));
++                    if (outdent == 0) {
++                        break;
++                    }
++                }
++            }
++        }
++        // Last line is representative.
++        String start = lastLine.substring(0, outdent);
++        for (String line : lines) {
++            // Fail if a line does not have the same indentation.
++            if (!line.isBlank() && !line.startsWith(start)) {
++                // Mix of different white space
++                checks.add(WhitespaceChecks.INCONSISTENT);
++            }
++            // Line has content even after indent is removed.
++            if (outdent < line.length()) {
++                // Is the last character a white space.
++                lastChar = line.charAt(line.length() - 1);
++                if (Character.isWhitespace(lastChar)) {
++                    // Has trailing white space.
++                    checks.add(WhitespaceChecks.TRAILING);
++                }
++            }
++        }
++        return checks;
++    }
++
++   private static int indexOfNonWhitespace(String string) {
++        return string.length() - string.stripLeading().length();
++    }
++}
+diff a/src/jdk.compiler/share/classes/com/sun/tools/javac/parser/UnicodeReader.java b/src/jdk.compiler/share/classes/com/sun/tools/javac/parser/UnicodeReader.java
+--- a/src/jdk.compiler/share/classes/com/sun/tools/javac/parser/UnicodeReader.java
++++ b/src/jdk.compiler/share/classes/com/sun/tools/javac/parser/UnicodeReader.java
+@@ -1,7 +1,7 @@
+ /*
+- * Copyright (c) 2011, 2018, Oracle and/or its affiliates. All rights reserved.
++ * Copyright (c) 2011, 2020, Oracle and/or its affiliates. All rights reserved.
+  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
+  *
+  * This code is free software; you can redistribute it and/or modify it
+  * under the terms of the GNU General Public License version 2 only, as
+  * published by the Free Software Foundation.  Oracle designates this
+@@ -23,271 +23,503 @@
+  * questions.
+  */
+ 
+ package com.sun.tools.javac.parser;
+ 
+-import java.nio.CharBuffer;
+ import java.util.Arrays;
+ 
+-import com.sun.tools.javac.file.JavacFileManager;
+ import com.sun.tools.javac.resources.CompilerProperties.Errors;
+-import com.sun.tools.javac.util.ArrayUtils;
+ import com.sun.tools.javac.util.Log;
+-import com.sun.tools.javac.util.Name;
+-import com.sun.tools.javac.util.Names;
+ 
+-import static com.sun.tools.javac.util.LayoutCharacters.*;
++import static com.sun.tools.javac.util.LayoutCharacters.EOI;
++import static com.sun.tools.javac.util.LayoutCharacters.tabulate;
+ 
+-/** The char reader used by the javac lexer/tokenizer. Returns the sequence of
+- * characters contained in the input stream, handling unicode escape accordingly.
+- * Additionally, it provides features for saving chars into a buffer and to retrieve
+- * them at a later stage.
++/**
++ * The unicode character reader used by the javac/javadoc lexer/tokenizer, returns characters
++ * one by one as contained in the input stream, handling unicode escape sequences accordingly.
+  *
+  *  <p><b>This is NOT part of any supported API.
+  *  If you write code that depends on this, you do so at your own risk.
+  *  This code and its internal interfaces are subject to change or
+- *  deletion without notice.</b>
++ *  deletion without notice.</b></p>
+  */
+ public class UnicodeReader {
++    /**
++     * Buffer containing characters from source file. May contain extraneous characters
++     * beyond this.length.
++     */
++    private final char[] buffer;
+ 
+-    /** The input buffer, index of next character to be read,
+-     *  index of one past last character in buffer.
++    /**
++     * Length of meaningful content in buffer.
+      */
+-    protected char[] buf;
+-    protected int bp;
+-    protected final int buflen;
++    private final int length;
+ 
+-    /** The current character.
++    /**
++     * Character buffer index of character currently being observed.
+      */
+-    protected char ch;
++    private int position;
+ 
+-    /** The buffer index of the last converted unicode character
++    /**
++     * Number of characters combined to provide character currently being observed. Typically
++     * one, but may be more when combinations of surrogate pairs and unicode escape sequences
++     * are read.
+      */
+-    protected int unicodeConversionBp = -1;
++    private int width;
+ 
+-    protected Log log;
+-    protected Names names;
++    /**
++     * Character currently being observed. If a surrogate pair is read then will be the high
++     * member of the pair.
++     */
++    private char character;
+ 
+-    /** A character buffer for saved chars.
++    /**
++     * Codepoint of character currently being observed. Typically equivalent to the character
++     * but will have a value greater that 0xFFFF when a surrogate pair.
++     */
++    private int codepoint;
++
++    /**
++     * true if the last character was a backslash. This is used to handle the special case
++     * when a backslash precedes an unicode escape. In that case, the second backslash
++     * is treated as a backslash and not part of an unicode escape.
+      */
+-    protected char[] sbuf = new char[128];
+-    protected int realLength;
+-    protected int sp;
++    private boolean wasBackslash;
+ 
+     /**
+-     * Create a scanner from the input array.  This method might
+-     * modify the array.  To avoid copying the input array, ensure
+-     * that {@code inputLength < input.length} or
+-     * {@code input[input.length -1]} is a white space character.
++     * Log for error reporting.
++     */
++    private final Log log;
++
++    /**
++     * Constructor.
+      *
+-     * @param sf the factory which created this Scanner
+-     * @param buffer the input, might be modified
+-     * Must be positive and less than or equal to input.length.
++     * @param sf      scan factory.
++     * @param array   array containing contents of source.
++     * @param length  length of meaningful content in buffer.
+      */
+-    protected UnicodeReader(ScannerFactory sf, CharBuffer buffer) {
+-        this(sf, JavacFileManager.toArray(buffer), buffer.limit());
++    protected UnicodeReader(ScannerFactory sf, char[] array, int length) {
++        this.buffer = array;
++        this.length = length;
++        this.position = 0;
++        this.width = 0;
++        this.character = '\0';
++        this.codepoint = 0;
++        this.wasBackslash = false;
++        this.log = sf.log;
++
++        nextCodePoint();
+     }
+ 
+-    protected UnicodeReader(ScannerFactory sf, char[] input, int inputLength) {
+-        log = sf.log;
+-        names = sf.names;
+-        realLength = inputLength;
+-        if (inputLength == input.length) {
+-            if (input.length > 0 && Character.isWhitespace(input[input.length - 1])) {
+-                inputLength--;
+-            } else {
+-                input = Arrays.copyOf(input, inputLength + 1);
+-            }
++    /**
++     * Returns the length of the buffer. This is length of meaningful content in buffer and
++     * not the length of the buffer array.
++     *
++     * @return length of the buffer.
++     */
++    protected int length() {
++        return length;
++    }
++
++    /**
++     * Return true if current position is within the meaningful part of the buffer.
++     *
++     * @return true if current position is within the meaningful part of the buffer.
++     */
++    protected boolean isAvailable() {
++        return position < length;
++    }
++
++    /**
++     * Fetches the next 16-bit character from the buffer and places it in this.character.
++     */
++    private void nextCodeUnit() {
++        // Index of next character in buffer.
++        int index = position + width;
++
++        // If past end of buffer.
++        if (length <= index) {
++            // End of file is marked with EOI.
++            character = EOI;
++        } else {
++            // Next character in buffer.
++            character = buffer[index];
++            // Increment length of codepoint.
++            width++;
+         }
+-        buf = input;
+-        buflen = inputLength;
+-        buf[buflen] = EOI;
+-        bp = -1;
+-        scanChar();
+     }
+ 
+-    /** Read next character.
++    /**
++     * Fetches the next 16-bit character from the buffer. If an unicode escape
++     * is detected then converts the unicode escape to a character.
+      */
+-    protected void scanChar() {
+-        if (bp < buflen) {
+-            ch = buf[++bp];
+-            if (ch == '\\') {
+-                convertUnicode();
+-            }
++    private void nextUnicodeInputCharacter() {
++        // Position to next codepoint.
++        position += width;
++        // Codepoint has no characters yet.
++        width = 0;
++
++        // Fetch next character.
++        nextCodeUnit();
++
++        // If second backslash is detected.
++        if (wasBackslash) {
++            // Treat like a normal character (not part of unicode escape.)
++            wasBackslash = false;
++        } else if (character == '\\') {
++            // May be an unicode escape.
++            wasBackslash = !unicodeEscape();
+         }
++
++        // Codepoint and character match if not surrogate.
++        codepoint = (int)character;
+     }
+ 
+-    /** Read next character in comment, skipping over double '\' characters.
++    /**
++     * Fetches the nextcode point from the buffer. If an unicode escape is recognized
++     * then converts unicode escape to a character. If two characters are a surrogate pair
++     * then converts to a codepoint.
+      */
+-    protected void scanCommentChar() {
+-        scanChar();
+-        if (ch == '\\') {
+-            if (peekChar() == '\\' && !isUnicode()) {
+-                skipChar();
+-            } else {
+-                convertUnicode();
++    private void nextCodePoint() {
++        // Next unicode character.
++        nextUnicodeInputCharacter();
++
++        // Return early if ASCII or not a surrogate pair.
++        if (isASCII() || !Character.isHighSurrogate(character)) {
++            return;
++        }
++
++        // Capture high surrogate and position.
++        char hi = character;
++        int savePosition = position;
++        int saveWidth = width;
++
++        // Get potential low surrogate.
++        nextUnicodeInputCharacter();
++        char lo = character;
++
++        if (Character.isLowSurrogate(lo)) {
++            // Start codepoint at start of high surrogate.
++            position = savePosition;
++            width += saveWidth;
++            // Compute codepoint.
++            codepoint = Character.toCodePoint(hi, lo);
++        } else {
++            // Restore to treat high surrogate as just a character.
++            position = savePosition;
++            width = saveWidth;
++            character = hi;
++            codepoint = (int)hi;
++            // Could potential report an error here (old code did not.)
++        }
++    }
++
++    /**
++     * Converts an unicode escape into a character.
++     *
++     * @return true if was an unicode escape.
++     */
++    private boolean unicodeEscape() {
++        // Start of unicode escape (past backslash.)
++        int start = position + width;
++        int index;
++
++        // Skip multiple 'u'.
++        for (index = start; index < length; index++) {
++            if (buffer[index] != 'u') {
++                break;
++            }
++        }
++
++        // Needs to be at least backslash-u.
++        if (index != start) {
++            // If enough characters available.
++            if (index + 4 < length) {
++                // Convert four hex digits to codepoint. If any digit is invalid then the
++                // result is negative.
++                int code = (Character.digit(buffer[index++], 16) << 12) |
++                           (Character.digit(buffer[index++], 16) << 8) |
++                           (Character.digit(buffer[index++], 16) << 4) |
++                            Character.digit(buffer[index++], 16);
++
++                // If all digits are good.
++                if (code >= 0) {
++                    width = index - position;
++                    character = (char)code;
++
++                    return true;
++                }
+             }
++
++            // Did not work out.
++            log.error(position, Errors.IllegalUnicodeEsc);
++            width = index - position;
++
++            // Return true so that the invalid unicode escape is skipped.
++            return true;
+         }
++
++        // Must be just a backslash.
++        character = '\\';
++        width = 1;
++
++        return false;
+     }
+ 
+-    /** Append a character to sbuf.
++    /**
++     * Return the current position in the character buffer.
++     *
++     * @return  current position in the character buffer.
+      */
+-    protected void putChar(char ch, boolean scan) {
+-        sbuf = ArrayUtils.ensureCapacity(sbuf, sp);
+-        sbuf[sp++] = ch;
+-        if (scan)
+-            scanChar();
++    protected int position() {
++        return position;
+     }
+ 
+-    protected void putChar(char ch) {
+-        putChar(ch, false);
++
++    /**
++     * Reset the reader to the specified position.
++     * Warning: Do not use when previous character was an ASCII or unicode backslash.
++     * @param pos
++     */
++    protected void reset(int pos) {
++        position = pos;
++        width = 0;
++        wasBackslash = false;
++        nextCodePoint();
+     }
+ 
+-    protected void putChar(boolean scan) {
+-        putChar(ch, scan);
++    /**
++     * Return the current character in at the current position.
++     *
++     * @return current character in at the current position.
++     */
++    protected char get() {
++        return character;
+     }
+ 
+-    protected void nextChar(boolean skip) {
+-        if (!skip) {
+-            sbuf = ArrayUtils.ensureCapacity(sbuf, sp);
+-            sbuf[sp++] = ch;
+-        }
++    /**
++     * Return the current codepoint in at the current position.
++     *
++     * @return current codepoint in at the current position.
++     */
++    protected int getCodepoint() {
++        return codepoint;
++    }
+ 
+-        scanChar();
++    /**
++     * Returns true if the current codepoint is a surrogate.
++     *
++     * @return true if the current codepoint is a surrogate.
++     */
++    protected boolean isSurrogate() {
++        return 0xFFFF < codepoint;
+     }
+ 
+-    Name name() {
+-        return names.fromChars(sbuf, 0, sp);
++    /**
++     * Returns true if the current character is ASCII.
++     *
++     * @return true if the current character is ASCII.
++     */
++    protected boolean isASCII() {
++        return character <= 0x7F;
+     }
+ 
+-    String chars() {
+-        return new String(sbuf, 0, sp);
++    /**
++     * Advances the current character to the next character.
++     *
++     * @return next character.
++     */
++    protected char next() {
++        nextCodePoint();
++
++        return character;
+     }
+ 
+-    /** Add 'count' copies of the character 'ch' to the string buffer.
++    /**
++     * Compare character. Returns true if a match.
++     *
++     * @param ch  character to match.
++     *
++     * @return true if a match.
+      */
+-    protected void repeat(char ch, int count) {
+-        for ( ; 0 < count; count--) {
+-            putChar(ch, false);
+-        }
++    protected boolean is(char ch) {
++        return character == ch;
+     }
+ 
+-    /** Reset the scan buffer pointer to 'pos'.
++    /**
++     * Match one of the arguments. Returns true if a match.
+      */
+-    protected void reset(int pos) {
+-        bp = pos - 1;
+-        scanChar();
++    protected boolean isOneOf(char ch1, char ch2) {
++        return is(ch1) || is(ch2);
++    }
++    protected boolean isOneOf(char ch1, char ch2, char ch3) {
++        return is(ch1) || is(ch2) || is(ch3);
++    }
++    protected boolean isOneOf(char ch1, char ch2, char ch3, char ch4, char ch5, char ch6) {
++        return is(ch1) || is(ch2) || is(ch3) || is(ch4) || is(ch5) || is(ch6);
+     }
+ 
+-    /** Convert unicode escape; bp points to initial '\' character
+-     *  (Spec 3.3).
+-     */
+-    protected void convertUnicode() {
+-        if (ch == '\\' && unicodeConversionBp != bp ) {
+-            bp++; ch = buf[bp];
+-            if (ch == 'u') {
+-                do {
+-                    bp++; ch = buf[bp];
+-                } while (ch == 'u');
+-                int limit = bp + 3;
+-                if (limit < buflen) {
+-                    int d = digit(bp, 16);
+-                    int code = d;
+-                    while (bp < limit && d >= 0) {
+-                        bp++; ch = buf[bp];
+-                        d = digit(bp, 16);
+-                        code = (code << 4) + d;
+-                    }
+-                    if (d >= 0) {
+-                        ch = (char)code;
+-                        unicodeConversionBp = bp;
+-                        return;
+-                    }
+-                }
+-                log.error(bp, Errors.IllegalUnicodeEsc);
+-            } else {
+-                bp--;
+-                ch = '\\';
+-            }
+-        }
++    /**
++     * Tests to see if current character is in the range of lo to hi characters (inclusive).
++     *
++     * @param lo  lowest character in range.
++     * @param hi  highest character in range.
++     *
++     * @return true if the current character is in range.
++     */
++    protected boolean inRange(char lo, char hi) {
++        return lo <= character && character <= hi;
+     }
+ 
+-    /** Are surrogates supported?
++    /**
++     * Compare character and advance if a match. Returns true if a match.
++     *
++     * @param ch  character to match.
++     *
++     * @return true if a match.
+      */
+-    final static boolean surrogatesSupported = surrogatesSupported();
+-    private static boolean surrogatesSupported() {
+-        try {
+-            Character.isHighSurrogate('a');
++    protected boolean accept(char ch) {
++        if (is(ch)) {
++            next();
++
+             return true;
+-        } catch (NoSuchMethodError ex) {
+-            return false;
+         }
++
++        return false;
+     }
+ 
+-    /** Scan surrogate pairs.  If 'ch' is a high surrogate and
+-     *  the next character is a low surrogate, returns the code point
+-     *  constructed from these surrogates. Otherwise, returns -1.
+-     *  This method will not consume any of the characters.
++    /**
++     * Match one of the arguments and advance if a match. Returns true if a match.
+      */
+-    protected int peekSurrogates() {
+-        if (surrogatesSupported && Character.isHighSurrogate(ch)) {
+-            char high = ch;
+-            int prevBP = bp;
++    protected boolean acceptOneOf(char ch1, char ch2) {
++        if (isOneOf(ch1, ch2)) {
++            next();
+ 
+-            scanChar();
++            return true;
++        }
+ 
+-            char low = ch;
++        return false;
++    }
+ 
+-            ch = high;
+-            bp = prevBP;
++    protected boolean acceptOneOf(char ch1, char ch2, char ch3) {
++        if (isOneOf(ch1, ch2, ch3)) {
++            next();
+ 
+-            if (Character.isLowSurrogate(low)) {
+-                return Character.toCodePoint(high, low);
+-            }
++            return true;
+         }
+ 
+-        return -1;
++        return false;
+     }
+ 
+-    /** Convert an ASCII digit from its base (8, 10, or 16)
+-     *  to its value.
+-     */
+-    protected int digit(int pos, int base) {
+-        char c = ch;
+-        if ('0' <= c && c <= '9')
+-            return Character.digit(c, base); //a fast common case
+-        int codePoint = peekSurrogates();
+-        int result = codePoint >= 0 ? Character.digit(codePoint, base) : Character.digit(c, base);
+-        if (result >= 0 && c > 0x7f) {
+-            log.error(pos + 1, Errors.IllegalNonasciiDigit);
+-            if (codePoint >= 0)
+-                scanChar();
+-            ch = "0123456789abcdef".charAt(result);
++    /**
++     * Skip over all occurances of character.
++     *
++     * @param ch character to accept.
++     */
++    protected void skip(char ch) {
++        while (accept(ch)) {
++            // next
+         }
+-        return result;
+     }
+ 
+-    protected boolean isUnicode() {
+-        return unicodeConversionBp == bp;
++    /**
++     * Skip over ASCII white space characters.
++     */
++    protected void skipWhitespace() {
++        while (acceptOneOf(' ', '\t', '\f')) {
++            // next
++        }
+     }
+ 
+-    protected void skipChar() {
+-        bp++;
++    /**
++     * Skip to end of line.
++     */
++    protected void skipToEOLN() {
++        while (isAvailable()) {
++            if (isOneOf('\r', '\n')) {
++                break;
++            }
++
++            next();
++        }
++
+     }
+ 
+-    protected char peekChar() {
+-        return buf[bp + 1];
++    /**
++     * Compare string and advance if a match. Returns true if a match.
++     * Warning: Do not use when previous character was a backslash
++     * (confuses state of wasBackslash.)
++     *
++     * @param string string to match character for character.
++     *
++     * @return true if a match.
++     */
++    protected boolean accept(String string) {
++        // Quick test.
++        if (string.length() == 0 || !is(string.charAt(0))) {
++            return false;
++        }
++
++        // Be prepared to retreat if not a match.
++        int savedPosition = position;
++
++        nextCodePoint();
++
++        // Check each character.
++        for (int i = 1; i < string.length(); i++) {
++            if (!is(string.charAt(i))) {
++                // Restart if not a match.
++                reset(savedPosition);
++
++                return false;
++            }
++
++            nextCodePoint();
++        }
++
++        return true;
+     }
+ 
+     /**
+-     * Returns a copy of the input buffer, up to its inputLength.
+-     * Unicode escape sequences are not translated.
++     * Convert an ASCII digit from its base (8, 10, or 16) to its value. Does not
++     * advance character.
++     *
++     * @param pos         starting position.
++     * @param digitRadix  base of number being converted.
++     *
++     * @return value of digit.
++     */
++    protected int digit(int pos, int digitRadix) {
++        int result;
++
++        // Just an ASCII digit.
++        if (inRange('0', '9')) {
++            // Fast common case.
++            result = character - '0';
++
++            return result < digitRadix ? result : -1;
++        }
++
++        // Handle other digits.
++        result = isSurrogate() ? Character.digit(codepoint, digitRadix) :
++                                 Character.digit(character, digitRadix);
++
++        if (result >= 0 && !isASCII()) {
++            log.error(position(), Errors.IllegalNonasciiDigit);
++            character = "0123456789abcdef".charAt(result);
++        }
++
++        return result;
++    }
++
++    /**
++     * Returns the input buffer. Unicode escape sequences are not translated.
++     *
++     * @return the input buffer.
+      */
+     public char[] getRawCharacters() {
+-        char[] chars = new char[buflen];
+-        System.arraycopy(buf, 0, chars, 0, buflen);
+-        return chars;
++        return length == buffer.length ? buffer : Arrays.copyOf(buffer, length);
+     }
+ 
+     /**
+      * Returns a copy of a character array subset of the input buffer.
+      * The returned array begins at the {@code beginIndex} and
+@@ -295,17 +527,85 @@
+      * Thus the length of the substring is {@code endIndex-beginIndex}.
+      * This behavior is like
+      * {@code String.substring(beginIndex, endIndex)}.
+      * Unicode escape sequences are not translated.
+      *
+-     * @param beginIndex the beginning index, inclusive.
+-     * @param endIndex the ending index, exclusive.
++     * @param  beginIndex the beginning index, inclusive.
++     * @param  endIndex the ending index, exclusive.
++     *
+      * @throws ArrayIndexOutOfBoundsException if either offset is outside of the
+      *         array bounds
+      */
+     public char[] getRawCharacters(int beginIndex, int endIndex) {
+-        int length = endIndex - beginIndex;
+-        char[] chars = new char[length];
+-        System.arraycopy(buf, beginIndex, chars, 0, length);
+-        return chars;
++        return Arrays.copyOfRange(buffer, beginIndex, endIndex);
++    }
++
++    /**
++     * This is a specialized version of UnicodeReader that keeps track of the
++     * column position within a given character stream. Used for Javadoc
++     * processing to build a table for mapping positions in the comment string
++     * to positions in the source file.
++     */
++    static class PositionTrackingReader extends UnicodeReader {
++        /**
++         * Offset from the beginning of the original reader buffer.
++         */
++        private int offset;
++
++        /**
++         * Current column in the comment.
++         */
++        private int column;
++
++        /**
++         * Constructor.
++         *
++         * @param sf      Scan factory.
++         * @param array   Array containing contents of source.
++         * @param offset  Position offset in original source buffer.
++         */
++        protected PositionTrackingReader(ScannerFactory sf, char[] array, int offset) {
++            super(sf, array, array.length);
++            this.offset = offset;
++            this.column = 0;
++        }
++
++        /**
++         * Advances the current character to the next character. Tracks column.
++         *
++         * @return next character.
++         */
++        @Override
++        protected char next() {
++            super.next();
++
++            if (isOneOf('\n', '\r', '\f')) {
++                column = 0;
++            } else if (is('\t')) {
++                column = tabulate(column);
++            } else {
++                column++;
++            }
++
++            return get();
++        }
++
++        /**
++         * Returns the current column.
++         *
++         * @return  the current column.
++         */
++        protected int column() {
++            return column;
++        }
++
++        /**
++         * Returns position relative to the original source buffer.
++         *
++         * @return
++         */
++        protected int offsetPosition() {
++            return position() + offset;
++        }
+     }
++
+ }
+diff a/src/jdk.compiler/share/classes/com/sun/tools/javac/resources/compiler.properties b/src/jdk.compiler/share/classes/com/sun/tools/javac/resources/compiler.properties
+--- a/src/jdk.compiler/share/classes/com/sun/tools/javac/resources/compiler.properties
++++ b/src/jdk.compiler/share/classes/com/sun/tools/javac/resources/compiler.properties
+@@ -1381,13 +1381,10 @@
+ # 0: type, 1: name
+ compiler.err.unreported.exception.implicit.close=\
+     unreported exception {0}; must be caught or declared to be thrown\n\
+     exception thrown from implicit call to close() on resource variable ''{1}''
+ 
+-compiler.err.unsupported.cross.fp.lit=\
+-    hexadecimal floating-point literals are not supported on this VM
+-
+ compiler.err.void.not.allowed.here=\
+     ''void'' type not allowed here
+ 
+ # 0: string
+ compiler.err.wrong.number.type.args=\
+diff a/src/jdk.compiler/share/classes/com/sun/tools/javac/resources/compiler_ja.properties b/src/jdk.compiler/share/classes/com/sun/tools/javac/resources/compiler_ja.properties
+--- a/src/jdk.compiler/share/classes/com/sun/tools/javac/resources/compiler_ja.properties
++++ b/src/jdk.compiler/share/classes/com/sun/tools/javac/resources/compiler_ja.properties
+@@ -982,12 +982,10 @@
+ compiler.err.unreported.exception.default.constructor=\u30C7\u30D5\u30A9\u30EB\u30C8\u306E\u30B3\u30F3\u30B9\u30C8\u30E9\u30AF\u30BF\u5185\u306B\u5831\u544A\u3055\u308C\u306A\u3044\u4F8B\u5916{0}\u304C\u5B58\u5728\u3057\u307E\u3059
+ 
+ # 0: type, 1: name
+ compiler.err.unreported.exception.implicit.close=\u5831\u544A\u3055\u308C\u306A\u3044\u4F8B\u5916{0}\u306F\u3001\u30B9\u30ED\u30FC\u3059\u308B\u306B\u306F\u6355\u6349\u307E\u305F\u306F\u5BA3\u8A00\u3059\u308B\u5FC5\u8981\u304C\u3042\u308A\u307E\u3059\n\u30EA\u30BD\u30FC\u30B9\u5909\u6570''{1}''\u3067\u306Eclose()\u306E\u6697\u9ED9\u7684\u306A\u30B3\u30FC\u30EB\u304B\u3089\u4F8B\u5916\u304C\u30B9\u30ED\u30FC\u3055\u308C\u307E\u3057\u305F
+ 
+-compiler.err.unsupported.cross.fp.lit=16\u9032\u6D6E\u52D5\u5C0F\u6570\u70B9\u30EA\u30C6\u30E9\u30EB\u306F\u3053\u306EVM\u3067\u306F\u30B5\u30DD\u30FC\u30C8\u3055\u308C\u3066\u3044\u307E\u305B\u3093
+-
+ compiler.err.void.not.allowed.here=\u3053\u3053\u3067''void''\u578B\u3092\u4F7F\u7528\u3059\u308B\u3053\u3068\u306F\u3067\u304D\u307E\u305B\u3093
+ 
+ # 0: string
+ compiler.err.wrong.number.type.args=\u578B\u5F15\u6570\u306E\u6570\u304C\u4E0D\u6B63\u3067\u3059\u3002{0}\u500B\u5FC5\u8981\u3067\u3059
+ 
+diff a/src/jdk.compiler/share/classes/com/sun/tools/javac/resources/compiler_zh_CN.properties b/src/jdk.compiler/share/classes/com/sun/tools/javac/resources/compiler_zh_CN.properties
+--- a/src/jdk.compiler/share/classes/com/sun/tools/javac/resources/compiler_zh_CN.properties
++++ b/src/jdk.compiler/share/classes/com/sun/tools/javac/resources/compiler_zh_CN.properties
+@@ -982,12 +982,10 @@
+ compiler.err.unreported.exception.default.constructor=\u9ED8\u8BA4\u6784\u9020\u5668\u4E2D\u672A\u62A5\u544A\u7684\u5F02\u5E38\u9519\u8BEF{0}
+ 
+ # 0: type, 1: name
+ compiler.err.unreported.exception.implicit.close=\u672A\u62A5\u544A\u7684\u5F02\u5E38\u9519\u8BEF{0}; \u5FC5\u987B\u5BF9\u5176\u8FDB\u884C\u6355\u83B7\u6216\u58F0\u660E\u4EE5\u4FBF\u629B\u51FA\n\u5BF9\u8D44\u6E90\u53D8\u91CF ''{1}'' \u9690\u5F0F\u8C03\u7528 close() \u65F6\u629B\u51FA\u4E86\u5F02\u5E38\u9519\u8BEF
+ 
+-compiler.err.unsupported.cross.fp.lit=\u8BE5 VM \u4E0D\u652F\u6301\u5341\u516D\u8FDB\u5236\u6D6E\u70B9\u6587\u5B57
+-
+ compiler.err.void.not.allowed.here=\u6B64\u5904\u4E0D\u5141\u8BB8\u4F7F\u7528 ''\u7A7A'' \u7C7B\u578B
+ 
+ # 0: string
+ compiler.err.wrong.number.type.args=\u7C7B\u578B\u53D8\u91CF\u6570\u76EE\u9519\u8BEF; \u9700\u8981{0}
+ 
+diff a/src/jdk.compiler/share/classes/com/sun/tools/javac/util/DiagnosticSource.java b/src/jdk.compiler/share/classes/com/sun/tools/javac/util/DiagnosticSource.java
+--- a/src/jdk.compiler/share/classes/com/sun/tools/javac/util/DiagnosticSource.java
++++ b/src/jdk.compiler/share/classes/com/sun/tools/javac/util/DiagnosticSource.java
+@@ -1,7 +1,7 @@
+ /*
+- * Copyright (c) 1999, 2012, Oracle and/or its affiliates. All rights reserved.
++ * Copyright (c) 1999, 2020, Oracle and/or its affiliates. All rights reserved.
+  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
+  *
+  * This code is free software; you can redistribute it and/or modify it
+  * under the terms of the GNU General Public License version 2 only, as
+  * published by the Free Software Foundation.  Oracle designates this
+@@ -94,11 +94,11 @@
+                 for (int bp = lineStart; bp < pos; bp++) {
+                     if (bp >= bufLen) {
+                         return 0;
+                     }
+                     if (buf[bp] == '\t' && expandTabs) {
+-                        column = (column / TabInc * TabInc) + TabInc;
++                        column = tabulate(column);
+                     } else {
+                         column++;
+                     }
+                 }
+                 return column + 1; // positions are one-based
+diff a/src/jdk.compiler/share/classes/com/sun/tools/javac/util/LayoutCharacters.java b/src/jdk.compiler/share/classes/com/sun/tools/javac/util/LayoutCharacters.java
+--- a/src/jdk.compiler/share/classes/com/sun/tools/javac/util/LayoutCharacters.java
++++ b/src/jdk.compiler/share/classes/com/sun/tools/javac/util/LayoutCharacters.java
+@@ -1,7 +1,7 @@
+ /*
+- * Copyright (c) 1999, 2010, Oracle and/or its affiliates. All rights reserved.
++ * Copyright (c) 1999, 2020, Oracle and/or its affiliates. All rights reserved.
+  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
+  *
+  * This code is free software; you can redistribute it and/or modify it
+  * under the terms of the GNU General Public License version 2 only, as
+  * published by the Free Software Foundation.  Oracle designates this
+@@ -66,6 +66,12 @@
+     /** End of input character.  Used as a sentinel to denote the
+      *  character one beyond the last defined character in a
+      *  source file.
+      */
+     final static byte EOI   = 0x1A;
++
++    /** Bump column to the next tab.
++     */
++    static int tabulate(int column) {
++        return (column / TabInc * TabInc) + TabInc;
++    }
+ }
+diff a/src/jdk.compiler/share/classes/com/sun/tools/javac/util/Position.java b/src/jdk.compiler/share/classes/com/sun/tools/javac/util/Position.java
+--- a/src/jdk.compiler/share/classes/com/sun/tools/javac/util/Position.java
++++ b/src/jdk.compiler/share/classes/com/sun/tools/javac/util/Position.java
+@@ -1,7 +1,7 @@
+ /*
+- * Copyright (c) 1999, 2019, Oracle and/or its affiliates. All rights reserved.
++ * Copyright (c) 1999, 2020, Oracle and/or its affiliates. All rights reserved.
+  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
+  *
+  * This code is free software; you can redistribute it and/or modify it
+  * under the terms of the GNU General Public License version 2 only, as
+  * published by the Free Software Foundation.  Oracle designates this
+@@ -263,11 +263,11 @@
+         public int getColumnNumber(int pos) {
+             int lineStart = startPosition[getLineNumber(pos) - FIRSTLINE];
+             int column = 0;
+             for (int bp = lineStart; bp < pos; bp++) {
+                 if (tabMap.get(bp))
+-                    column = (column / TabInc * TabInc) + TabInc;
++                    column = tabulate(column);
+                 else
+                     column++;
+             }
+             return column + FIRSTCOLUMN;
+         }
+@@ -277,11 +277,11 @@
+             column -= FIRSTCOLUMN;
+             int col = 0;
+             while (col < column) {
+                 pos++;
+                 if (tabMap.get(pos))
+-                    col = (col / TabInc * TabInc) + TabInc;
++                    col = tabulate(col);
+                 else
+                     col++;
+             }
+             return pos;
+         }
+diff a/test/langtools/tools/javac/Digits.out b/test/langtools/tools/javac/Digits.out
+--- a/test/langtools/tools/javac/Digits.out
++++ b/test/langtools/tools/javac/Digits.out
+@@ -1,2 +1,2 @@
+-Digits.java:11:41: compiler.err.illegal.nonascii.digit
++Digits.java:11:43: compiler.err.illegal.nonascii.digit
+ 1 error
+diff a/test/langtools/tools/javac/diags/examples.not-yet.txt b/test/langtools/tools/javac/diags/examples.not-yet.txt
+--- a/test/langtools/tools/javac/diags/examples.not-yet.txt
++++ b/test/langtools/tools/javac/diags/examples.not-yet.txt
+@@ -42,11 +42,10 @@
+ compiler.err.source.cant.overwrite.input.file
+ compiler.err.stack.sim.error
+ compiler.err.type.var.more.than.once                    # UNUSED
+ compiler.err.type.var.more.than.once.in.result          # UNUSED
+ compiler.err.unexpected.type
+-compiler.err.unsupported.cross.fp.lit                   # Scanner: host system dependent
+ compiler.misc.bad.class.signature                       # bad class file
+ compiler.misc.bad.const.pool.tag                        # bad class file
+ compiler.misc.bad.const.pool.tag.at                     # bad class file
+ compiler.misc.unexpected.const.pool.tag.at              # bad class file
+ compiler.misc.bad.const.pool.index                      # bad class file
+diff a/test/langtools/tools/javac/unicode/NonasciiDigit.out b/test/langtools/tools/javac/unicode/NonasciiDigit.out
+--- a/test/langtools/tools/javac/unicode/NonasciiDigit.out
++++ b/test/langtools/tools/javac/unicode/NonasciiDigit.out
+@@ -1,10 +1,10 @@
+-NonasciiDigit.java:12:24: compiler.err.illegal.nonascii.digit
++NonasciiDigit.java:12:18: compiler.err.illegal.nonascii.digit
+ NonasciiDigit.java:13:19: compiler.err.illegal.nonascii.digit
+-NonasciiDigit.java:14:24: compiler.err.illegal.nonascii.digit
+-NonasciiDigit.java:16:27: compiler.err.illegal.nonascii.digit
+-NonasciiDigit.java:17:22: compiler.err.illegal.nonascii.digit
+-NonasciiDigit.java:18:22: compiler.err.illegal.nonascii.digit
+-NonasciiDigit.java:19:22: compiler.err.illegal.nonascii.digit
++NonasciiDigit.java:14:18: compiler.err.illegal.nonascii.digit
++NonasciiDigit.java:16:21: compiler.err.illegal.nonascii.digit
++NonasciiDigit.java:17:23: compiler.err.illegal.nonascii.digit
++NonasciiDigit.java:18:25: compiler.err.illegal.nonascii.digit
++NonasciiDigit.java:19:23: compiler.err.illegal.nonascii.digit
+ NonasciiDigit.java:20:22: compiler.err.illegal.nonascii.digit
+-NonasciiDigit.java:21:27: compiler.err.illegal.nonascii.digit
++NonasciiDigit.java:21:21: compiler.err.illegal.nonascii.digit
+ 9 errors
+diff a/test/langtools/tools/javac/unicode/SubChar.java b/test/langtools/tools/javac/unicode/SubChar.java
+--- a/test/langtools/tools/javac/unicode/SubChar.java
++++ b/test/langtools/tools/javac/unicode/SubChar.java
+@@ -1,7 +1,7 @@
+ /*
+- * Copyright (c) 2002, Oracle and/or its affiliates. All rights reserved.
++ * Copyright (c) 2002, 2020, Oracle and/or its affiliates. All rights reserved.
+  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
+  *
+  * This code is free software; you can redistribute it and/or modify it
+  * under the terms of the GNU General Public License version 2 only, as
+  * published by the Free Software Foundation.
+@@ -23,26 +23,50 @@
+ 
+ /*
+  * @test
+  * @bug 4330479
+  * @summary ASCII SUB character is rejected in multi-line comments
+- * @author gafter
+- *
+- * @compile SubChar.java
++ * @library /tools/lib
++ * @modules jdk.compiler/com.sun.tools.javac.api
++ *          jdk.compiler/com.sun.tools.javac.main
++ * @build toolbox.ToolBox toolbox.JavacTask
++ * @run main SubChar
+  */
+ 
++import toolbox.JavacTask;
++import toolbox.JavaTask;
++import toolbox.Task;
++import toolbox.ToolBox;
+ 
+-/*
+-Note: this source file has been crafted very carefully to end with the
+-unicode escape sequence for the control-Z character without a
+-following newline.  The scanner is specified to allow control-Z there.
+-If you edit this source file, please make sure that your editor does
+-not insert a newline after that trailing line.
+-*/
+ 
+-/** \u001A */
+-class SubChar {
+-    public static void main(String args[]) {
+-        return;
+-    }
++public class SubChar {
++    private static final ToolBox TOOLBOX = new ToolBox();
++
++    private static final String SOURCE = """
++        /*
++        Note: this source file has been crafted very carefully to end with the
++        unicode escape sequence for the control-Z character without a
++        following newline.  The scanner is specified to allow control-Z there.
++        If you edit this source file, please make sure that your editor does
++        not insert a newline after that trailing line.
++        */
++
++        /** \\u001A */
++        class ControlZTest {
++            public static void main(String args[]) {
++                return;
++            }
++        }
++        /* \\u001A */\
++        """;
++
++        public static void main(String... args) {
++            String output = new JavacTask(TOOLBOX)
++                    .sources(SOURCE)
++                    .classpath(".")
++                    .options("-encoding", "utf8")
++                    .run()
++                    .writeAll()
++                    .getOutput(Task.OutputKind.DIRECT);
++            System.out.println(output);
++        }
+ }
+-/* \u001A */
+diff a/test/langtools/tools/javac/unicode/SupplementaryJavaID2.out b/test/langtools/tools/javac/unicode/SupplementaryJavaID2.out
+--- a/test/langtools/tools/javac/unicode/SupplementaryJavaID2.out
++++ b/test/langtools/tools/javac/unicode/SupplementaryJavaID2.out
+@@ -1,4 +1,4 @@
+-SupplementaryJavaID2.java:12:14: compiler.err.illegal.char: \ud801
+-SupplementaryJavaID2.java:12:20: compiler.err.illegal.char: \ud801
++SupplementaryJavaID2.java:12:9: compiler.err.illegal.char: \ud801
++SupplementaryJavaID2.java:12:15: compiler.err.illegal.char: \ud801
+ SupplementaryJavaID2.java:12:24: compiler.err.expected: token.identifier
+ 3 errors
+diff a/test/langtools/tools/javac/unicode/SupplementaryJavaID3.out b/test/langtools/tools/javac/unicode/SupplementaryJavaID3.out
+--- a/test/langtools/tools/javac/unicode/SupplementaryJavaID3.out
++++ b/test/langtools/tools/javac/unicode/SupplementaryJavaID3.out
+@@ -1,3 +1,3 @@
+-SupplementaryJavaID3.java:12:17: compiler.err.illegal.char: \ud801
+-SupplementaryJavaID3.java:12:23: compiler.err.illegal.char: \ud801
++SupplementaryJavaID3.java:12:12: compiler.err.illegal.char: \ud801
++SupplementaryJavaID3.java:12:18: compiler.err.illegal.char: \ud801
+ 2 errors
+diff a/test/langtools/tools/javac/unicode/SupplementaryJavaID4.out b/test/langtools/tools/javac/unicode/SupplementaryJavaID4.out
+--- a/test/langtools/tools/javac/unicode/SupplementaryJavaID4.out
++++ b/test/langtools/tools/javac/unicode/SupplementaryJavaID4.out
+@@ -1,2 +1,2 @@
+-SupplementaryJavaID4.java:14:14: compiler.err.illegal.char: \ud834\udd7b
++SupplementaryJavaID4.java:14:9: compiler.err.illegal.char: \ud834\udd7b
+ 1 error
+diff a/test/langtools/tools/javac/unicode/SupplementaryJavaID5.out b/test/langtools/tools/javac/unicode/SupplementaryJavaID5.out
+--- a/test/langtools/tools/javac/unicode/SupplementaryJavaID5.out
++++ b/test/langtools/tools/javac/unicode/SupplementaryJavaID5.out
+@@ -1,2 +1,2 @@
+-SupplementaryJavaID5.java:14:17: compiler.err.illegal.char: \ud834\udd00
++SupplementaryJavaID5.java:14:12: compiler.err.illegal.char: \ud834\udd00
+ 1 error

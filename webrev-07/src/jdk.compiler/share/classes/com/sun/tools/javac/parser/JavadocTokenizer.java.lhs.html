@@ -1,0 +1,793 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Frames src/jdk.compiler/share/classes/com/sun/tools/javac/parser/JavadocTokenizer.java</title>
+    <link rel="stylesheet" href="../../../../../../../../../style.css" />
+    <script type="text/javascript" src="../../../../../../../../../navigation.js"></script>
+  </head>
+<body onkeypress="keypress(event);">
+<a name="0"></a>
+<hr />
+<pre>  1 /*
+<a name="1" id="anc1"></a><span class="line-modified">  2  * Copyright (c) 2004, 2018, Oracle and/or its affiliates. All rights reserved.</span>
+  3  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
+  4  *
+  5  * This code is free software; you can redistribute it and/or modify it
+  6  * under the terms of the GNU General Public License version 2 only, as
+  7  * published by the Free Software Foundation.  Oracle designates this
+  8  * particular file as subject to the &quot;Classpath&quot; exception as provided
+  9  * by Oracle in the LICENSE file that accompanied this code.
+ 10  *
+ 11  * This code is distributed in the hope that it will be useful, but WITHOUT
+ 12  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ 13  * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+ 14  * version 2 for more details (a copy is included in the LICENSE file that
+ 15  * accompanied this code).
+ 16  *
+ 17  * You should have received a copy of the GNU General Public License version
+ 18  * 2 along with this work; if not, write to the Free Software Foundation,
+ 19  * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
+ 20  *
+ 21  * Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
+ 22  * or visit www.oracle.com if you need additional information or have any
+ 23  * questions.
+ 24  */
+ 25 
+ 26 package com.sun.tools.javac.parser;
+ 27 
+ 28 import com.sun.tools.javac.parser.Tokens.Comment;
+ 29 import com.sun.tools.javac.parser.Tokens.Comment.CommentStyle;
+ 30 import com.sun.tools.javac.util.*;
+ 31 
+<a name="2" id="anc2"></a><span class="line-modified"> 32 import java.nio.*;</span>
+
+ 33 import java.util.regex.Pattern;
+ 34 
+<a name="3" id="anc3"></a><span class="line-modified"> 35 import static com.sun.tools.javac.util.LayoutCharacters.*;</span>
+<span class="line-modified"> 36 </span>
+<span class="line-modified"> 37 /** An extension to the base lexical analyzer that captures</span>
+<span class="line-modified"> 38  *  and processes the contents of doc comments.  It does so by</span>
+<span class="line-modified"> 39  *  translating Unicode escape sequences and by stripping the</span>
+<span class="line-removed"> 40  *  leading whitespace and starts from each line of the comment.</span>
+ 41  *
+ 42  *  &lt;p&gt;&lt;b&gt;This is NOT part of any supported API.
+ 43  *  If you write code that depends on this, you do so at your own risk.
+ 44  *  This code and its internal interfaces are subject to change or
+ 45  *  deletion without notice.&lt;/b&gt;
+ 46  */
+ 47 public class JavadocTokenizer extends JavaTokenizer {
+<a name="4" id="anc4"></a>
+
+
+
+ 48 
+<a name="5" id="anc5"></a><span class="line-modified"> 49     /** Create a scanner from the input buffer.  buffer must implement</span>
+<span class="line-modified"> 50      *  array() and compact(), and remaining() must be less than limit().</span>
+
+
+
+
+
+ 51      */
+<a name="6" id="anc6"></a><span class="line-modified"> 52     protected JavadocTokenizer(ScannerFactory fac, CharBuffer buffer) {</span>
+<span class="line-modified"> 53         super(fac, buffer);</span>
+
+ 54     }
+ 55 
+<a name="7" id="anc7"></a><span class="line-modified"> 56     /** Create a scanner from the input array.  The array must have at</span>
+<span class="line-modified"> 57      *  least a single character of extra space.</span>
+
+
+
+
+
+
+ 58      */
+<a name="8" id="anc8"></a><span class="line-modified"> 59     protected JavadocTokenizer(ScannerFactory fac, char[] input, int inputLength) {</span>
+<span class="line-modified"> 60         super(fac, input, inputLength);</span>
+
+ 61     }
+ 62 
+ 63     @Override
+ 64     protected Comment processComment(int pos, int endPos, CommentStyle style) {
+<a name="9" id="anc9"></a><span class="line-modified"> 65         char[] buf = reader.getRawCharacters(pos, endPos);</span>
+<span class="line-modified"> 66         return new JavadocComment(new DocReader(fac, buf, buf.length, pos), style);</span>
+ 67     }
+ 68 
+ 69     /**
+<a name="10" id="anc10"></a><span class="line-modified"> 70      * This is a specialized version of UnicodeReader that keeps track of the</span>
+<span class="line-modified"> 71      * column position within a given character stream (used for Javadoc processing),</span>
+<span class="line-removed"> 72      * and which builds a table for mapping positions in the comment string to</span>
+<span class="line-removed"> 73      * positions in the source file.</span>
+ 74      */
+<a name="11" id="anc11"></a><span class="line-modified"> 75     static class DocReader extends UnicodeReader {</span>
+<span class="line-modified"> 76 </span>
+<span class="line-modified"> 77          int col;</span>
+<span class="line-modified"> 78          int startPos;</span>
+<span class="line-modified"> 79 </span>
+<span class="line-modified"> 80          /**</span>
+<span class="line-modified"> 81           * A buffer for building a table for mapping positions in {@link #sbuf}</span>
+<span class="line-removed"> 82           * to positions in the source buffer.</span>
+<span class="line-removed"> 83           *</span>
+<span class="line-removed"> 84           * The array is organized as a series of pairs of integers: the first</span>
+<span class="line-removed"> 85           * number in each pair specifies a position in the comment text,</span>
+<span class="line-removed"> 86           * the second number in each pair specifies the corresponding position</span>
+<span class="line-removed"> 87           * in the source buffer. The pairs are sorted in ascending order.</span>
+<span class="line-removed"> 88           *</span>
+<span class="line-removed"> 89           * Since the mapping function is generally continuous, with successive</span>
+<span class="line-removed"> 90           * positions in the string corresponding to successive positions in the</span>
+<span class="line-removed"> 91           * source buffer, the table only needs to record discontinuities in</span>
+<span class="line-removed"> 92           * the mapping. The values of intermediate positions can be inferred.</span>
+<span class="line-removed"> 93           *</span>
+<span class="line-removed"> 94           * Discontinuities may occur in a number of places: when a newline</span>
+<span class="line-removed"> 95           * is followed by whitespace and asterisks (which are ignored),</span>
+<span class="line-removed"> 96           * when a tab is expanded into spaces, and when unicode escapes</span>
+<span class="line-removed"> 97           * are used in the source buffer.</span>
+<span class="line-removed"> 98           *</span>
+<span class="line-removed"> 99           * Thus, to find the source position of any position, p, in the comment</span>
+<span class="line-removed">100           * string, find the index, i, of the pair whose string offset</span>
+<span class="line-removed">101           * ({@code pbuf[i] }) is closest to but not greater than p. Then,</span>
+<span class="line-removed">102           * {@code sourcePos(p) = pbuf[i+1] + (p - pbuf[i]) }.</span>
+<span class="line-removed">103           */</span>
+<span class="line-removed">104          int[] pbuf = new int[128];</span>
+<span class="line-removed">105 </span>
+<span class="line-removed">106          /**</span>
+<span class="line-removed">107           * The index of the next empty slot in the pbuf buffer.</span>
+<span class="line-removed">108           */</span>
+<span class="line-removed">109          int pp = 0;</span>
+<span class="line-removed">110 </span>
+<span class="line-removed">111          /** The buffer index of the last double backslash sequence</span>
+<span class="line-removed">112           */</span>
+<span class="line-removed">113          private int doubleBackslashBp = -1;</span>
+<span class="line-removed">114 </span>
+<span class="line-removed">115          DocReader(ScannerFactory fac, char[] input, int inputLength, int startPos) {</span>
+<span class="line-removed">116              super(fac, input, inputLength);</span>
+<span class="line-removed">117              this.startPos = startPos;</span>
+<span class="line-removed">118          }</span>
+<span class="line-removed">119 </span>
+<span class="line-removed">120          @Override</span>
+<span class="line-removed">121          protected void convertUnicode() {</span>
+<span class="line-removed">122              if (ch == &#39;\\&#39; &amp;&amp; unicodeConversionBp != bp) {</span>
+<span class="line-removed">123                  bp++; ch = buf[bp]; col++;</span>
+<span class="line-removed">124                  if (ch == &#39;u&#39;) {</span>
+<span class="line-removed">125                      do {</span>
+<span class="line-removed">126                          bp++; ch = buf[bp]; col++;</span>
+<span class="line-removed">127                      } while (ch == &#39;u&#39;);</span>
+<span class="line-removed">128                      int limit = bp + 3;</span>
+<span class="line-removed">129                      if (limit &lt; buflen) {</span>
+<span class="line-removed">130                          int d = digit(bp, 16);</span>
+<span class="line-removed">131                          int code = d;</span>
+<span class="line-removed">132                          while (bp &lt; limit &amp;&amp; d &gt;= 0) {</span>
+<span class="line-removed">133                              bp++; ch = buf[bp]; col++;</span>
+<span class="line-removed">134                              d = digit(bp, 16);</span>
+<span class="line-removed">135                              code = (code &lt;&lt; 4) + d;</span>
+<span class="line-removed">136                          }</span>
+<span class="line-removed">137                          if (d &gt;= 0) {</span>
+<span class="line-removed">138                              ch = (char)code;</span>
+<span class="line-removed">139                              unicodeConversionBp = bp;</span>
+<span class="line-removed">140                              return;</span>
+<span class="line-removed">141                          }</span>
+<span class="line-removed">142                      }</span>
+<span class="line-removed">143                      // &quot;illegal.Unicode.esc&quot;, reported by base scanner</span>
+<span class="line-removed">144                  } else {</span>
+<span class="line-removed">145                      bp--;</span>
+<span class="line-removed">146                      ch = &#39;\\&#39;;</span>
+<span class="line-removed">147                      col--;</span>
+<span class="line-removed">148                  }</span>
+<span class="line-removed">149              }</span>
+<span class="line-removed">150          }</span>
+<span class="line-removed">151 </span>
+<span class="line-removed">152          @Override</span>
+<span class="line-removed">153          protected void scanCommentChar() {</span>
+<span class="line-removed">154              scanChar();</span>
+<span class="line-removed">155              if (ch == &#39;\\&#39;) {</span>
+<span class="line-removed">156                  if (peekChar() == &#39;\\&#39; &amp;&amp; !isUnicode()) {</span>
+<span class="line-removed">157                      bp++; col++;</span>
+<span class="line-removed">158                      doubleBackslashBp = bp;</span>
+<span class="line-removed">159                  } else {</span>
+<span class="line-removed">160                      convertUnicode();</span>
+<span class="line-removed">161                  }</span>
+<span class="line-removed">162              }</span>
+<span class="line-removed">163          }</span>
+<span class="line-removed">164 </span>
+<span class="line-removed">165          @Override</span>
+<span class="line-removed">166          protected void scanChar() {</span>
+<span class="line-removed">167              bp++;</span>
+<span class="line-removed">168              ch = buf[bp];</span>
+<span class="line-removed">169              switch (ch) {</span>
+<span class="line-removed">170              case &#39;\r&#39;: // return</span>
+<span class="line-removed">171                  col = 0;</span>
+<span class="line-removed">172                  break;</span>
+<span class="line-removed">173              case &#39;\n&#39;: // newline</span>
+<span class="line-removed">174                  if (bp == 0 || buf[bp-1] != &#39;\r&#39;) {</span>
+<span class="line-removed">175                      col = 0;</span>
+<span class="line-removed">176                  }</span>
+<span class="line-removed">177                  break;</span>
+<span class="line-removed">178              case &#39;\t&#39;: // tab</span>
+<span class="line-removed">179                  col = (col / TabInc * TabInc) + TabInc;</span>
+<span class="line-removed">180                  break;</span>
+<span class="line-removed">181              case &#39;\\&#39;: // possible Unicode</span>
+<span class="line-removed">182                  col++;</span>
+<span class="line-removed">183                  convertUnicode();</span>
+<span class="line-removed">184                  break;</span>
+<span class="line-removed">185              default:</span>
+<span class="line-removed">186                  col++;</span>
+<span class="line-removed">187                  break;</span>
+<span class="line-removed">188              }</span>
+<span class="line-removed">189          }</span>
+<span class="line-removed">190 </span>
+<span class="line-removed">191          @Override</span>
+<span class="line-removed">192          public void putChar(char ch, boolean scan) {</span>
+<span class="line-removed">193              // At this point, bp is the position of the current character in buf,</span>
+<span class="line-removed">194              // and sp is the position in sbuf where this character will be put.</span>
+<span class="line-removed">195              // Record a new entry in pbuf if pbuf is empty or if sp and its</span>
+<span class="line-removed">196              // corresponding source position are not equidistant from the</span>
+<span class="line-removed">197              // corresponding values in the latest entry in the pbuf array.</span>
+<span class="line-removed">198              // (i.e. there is a discontinuity in the map function.)</span>
+<span class="line-removed">199              if ((pp == 0)</span>
+<span class="line-removed">200                      || (sp - pbuf[pp - 2] != (startPos + bp) - pbuf[pp - 1])) {</span>
+<span class="line-removed">201                  if (pp + 1 &gt;= pbuf.length) {</span>
+<span class="line-removed">202                      int[] new_pbuf = new int[pbuf.length * 2];</span>
+<span class="line-removed">203                      System.arraycopy(pbuf, 0, new_pbuf, 0, pbuf.length);</span>
+<span class="line-removed">204                      pbuf = new_pbuf;</span>
+<span class="line-removed">205                  }</span>
+<span class="line-removed">206                  pbuf[pp] = sp;</span>
+<span class="line-removed">207                  pbuf[pp + 1] = startPos + bp;</span>
+<span class="line-removed">208                  pp += 2;</span>
+<span class="line-removed">209              }</span>
+<span class="line-removed">210              super.putChar(ch, scan);</span>
+<span class="line-removed">211          }</span>
+212 
+<a name="12" id="anc12"></a><span class="line-modified">213          /** Whether the ch represents a sequence of two backslashes. */</span>
+<span class="line-modified">214          boolean isDoubleBackslash() {</span>
+<span class="line-modified">215              return doubleBackslashBp == bp;</span>
+<span class="line-modified">216          }</span>
+
+217 
+<a name="13" id="anc13"></a>
+
+
+
+218 
+<a name="14" id="anc14"></a><span class="line-modified">219      }</span>
+
+
+
+
+
+
+
+
+
+220 
+<a name="15" id="anc15"></a><span class="line-modified">221      protected static class JavadocComment extends JavaTokenizer.BasicComment&lt;DocReader&gt; {</span>
+
+
+
+
+
+
+
+
+222 
+223         /**
+<a name="16" id="anc16"></a><span class="line-modified">224         * Translated and stripped contents of doc comment</span>
+<span class="line-modified">225         */</span>
+<span class="line-modified">226         private String docComment = null;</span>
+<span class="line-modified">227         private int[] docPosns = null;</span>
+
+
+
+
+228 
+<a name="17" id="anc17"></a><span class="line-modified">229         JavadocComment(DocReader reader, CommentStyle cs) {</span>
+<span class="line-modified">230             super(reader, cs);</span>
+
+
+
+
+
+
+
+231         }
+232 
+233         @Override
+234         public String getText() {
+235             if (!scanned &amp;&amp; cs == CommentStyle.JAVADOC) {
+236                 scanDocComment();
+237             }
+238             return docComment;
+239         }
+240 
+241         @Override
+242         public int getSourcePos(int pos) {
+<a name="18" id="anc18"></a><span class="line-modified">243             // Binary search to find the entry for which the string index is</span>
+<span class="line-removed">244             // less than pos. Since docPosns is a list of pairs of integers</span>
+<span class="line-removed">245             // we must make sure the index is always even.</span>
+<span class="line-removed">246             // If we find an exact match for pos, the other item in the pair</span>
+<span class="line-removed">247             // gives the source pos; otherwise, compute the source position</span>
+<span class="line-removed">248             // relative to the best match found in the array.</span>
+<span class="line-removed">249             if (pos == Position.NOPOS)</span>
+250                 return Position.NOPOS;
+<a name="19" id="anc19"></a><span class="line-modified">251             if (pos &lt; 0 || pos &gt; docComment.length())</span>
+
+
+252                 throw new StringIndexOutOfBoundsException(String.valueOf(pos));
+<a name="20" id="anc20"></a><span class="line-removed">253             if (docPosns == null)</span>
+<span class="line-removed">254                 return Position.NOPOS;</span>
+<span class="line-removed">255             int start = 0;</span>
+<span class="line-removed">256             int end = docPosns.length;</span>
+<span class="line-removed">257             while (start &lt; end - 2) {</span>
+<span class="line-removed">258                 // find an even index midway between start and end</span>
+<span class="line-removed">259                 int index = ((start  + end) / 4) * 2;</span>
+<span class="line-removed">260                 if (docPosns[index] &lt; pos)</span>
+<span class="line-removed">261                     start = index;</span>
+<span class="line-removed">262                 else if (docPosns[index] == pos)</span>
+<span class="line-removed">263                     return docPosns[index + 1];</span>
+<span class="line-removed">264                 else</span>
+<span class="line-removed">265                     end = index;</span>
+266             }
+<a name="21" id="anc21"></a><span class="line-modified">267             return docPosns[start + 1] + (pos - docPosns[start]);</span>
+
+268         }
+269 
+270         @Override
+<a name="22" id="anc22"></a><span class="line-removed">271         @SuppressWarnings(&quot;fallthrough&quot;)</span>
+272         protected void scanDocComment() {
+273              try {
+274                  boolean firstLine = true;
+275 
+<a name="23" id="anc23"></a><span class="line-modified">276                  // Skip over first slash</span>
+<span class="line-modified">277                  comment_reader.scanCommentChar();</span>
+<span class="line-removed">278                  // Skip over first star</span>
+<span class="line-removed">279                  comment_reader.scanCommentChar();</span>
+280 
+<a name="24" id="anc24"></a><span class="line-modified">281                  // consume any number of stars</span>
+<span class="line-modified">282                  while (comment_reader.bp &lt; comment_reader.buflen &amp;&amp; comment_reader.ch == &#39;*&#39;) {</span>
+<span class="line-modified">283                      comment_reader.scanCommentChar();</span>
+<span class="line-modified">284                  }</span>
+<span class="line-modified">285                  // is the comment in the form /**/, /***/, /****/, etc. ?</span>
+<span class="line-removed">286                  if (comment_reader.bp &lt; comment_reader.buflen &amp;&amp; comment_reader.ch == &#39;/&#39;) {</span>
+287                      docComment = &quot;&quot;;
+288                      return;
+289                  }
+290 
+<a name="25" id="anc25"></a><span class="line-modified">291                  // skip a newline on the first line of the comment.</span>
+<span class="line-modified">292                  if (comment_reader.bp &lt; comment_reader.buflen) {</span>
+<span class="line-modified">293                      if (comment_reader.ch == LF) {</span>
+<span class="line-modified">294                          comment_reader.scanCommentChar();</span>
+<span class="line-modified">295                          firstLine = false;</span>
+<span class="line-removed">296                      } else if (comment_reader.ch == CR) {</span>
+<span class="line-removed">297                          comment_reader.scanCommentChar();</span>
+<span class="line-removed">298                          if (comment_reader.ch == LF) {</span>
+<span class="line-removed">299                              comment_reader.scanCommentChar();</span>
+<span class="line-removed">300                              firstLine = false;</span>
+<span class="line-removed">301                          }</span>
+<span class="line-removed">302                      }</span>
+303                  }
+304 
+305              outerLoop:
+<a name="26" id="anc26"></a><span class="line-removed">306 </span>
+307                  // The outerLoop processes the doc comment, looping once
+308                  // for each line.  For each line, it first strips off
+309                  // whitespace, then it consumes any stars, then it
+<a name="27" id="anc27"></a><span class="line-modified">310                  // puts the rest of the line into our buffer.</span>
+<span class="line-modified">311                  while (comment_reader.bp &lt; comment_reader.buflen) {</span>
+<span class="line-modified">312                      int begin_bp = comment_reader.bp;</span>
+<span class="line-modified">313                      char begin_ch = comment_reader.ch;</span>
+<span class="line-modified">314                      // The wsLoop consumes whitespace from the beginning</span>
+<span class="line-removed">315                      // of each line.</span>
+<span class="line-removed">316                  wsLoop:</span>
+<span class="line-removed">317 </span>
+<span class="line-removed">318                      while (comment_reader.bp &lt; comment_reader.buflen) {</span>
+<span class="line-removed">319                          switch(comment_reader.ch) {</span>
+<span class="line-removed">320                          case &#39; &#39;:</span>
+<span class="line-removed">321                              comment_reader.scanCommentChar();</span>
+<span class="line-removed">322                              break;</span>
+<span class="line-removed">323                          case &#39;\t&#39;:</span>
+<span class="line-removed">324                              comment_reader.col = ((comment_reader.col - 1) / TabInc * TabInc) + TabInc;</span>
+<span class="line-removed">325                              comment_reader.scanCommentChar();</span>
+<span class="line-removed">326                              break;</span>
+<span class="line-removed">327                          case FF:</span>
+<span class="line-removed">328                              comment_reader.col = 0;</span>
+<span class="line-removed">329                              comment_reader.scanCommentChar();</span>
+<span class="line-removed">330                              break;</span>
+<span class="line-removed">331          // Treat newline at beginning of line (blank line, no star)</span>
+<span class="line-removed">332          // as comment text.  Old Javadoc compatibility requires this.</span>
+<span class="line-removed">333          /*---------------------------------*</span>
+<span class="line-removed">334                          case CR: // (Spec 3.4)</span>
+<span class="line-removed">335                              doc_reader.scanCommentChar();</span>
+<span class="line-removed">336                              if (ch == LF) {</span>
+<span class="line-removed">337                                  col = 0;</span>
+<span class="line-removed">338                                  doc_reader.scanCommentChar();</span>
+<span class="line-removed">339                              }</span>
+<span class="line-removed">340                              break;</span>
+<span class="line-removed">341                          case LF: // (Spec 3.4)</span>
+<span class="line-removed">342                              doc_reader.scanCommentChar();</span>
+<span class="line-removed">343                              break;</span>
+<span class="line-removed">344          *---------------------------------*/</span>
+<span class="line-removed">345                          default:</span>
+<span class="line-removed">346                              // we&#39;ve seen something that isn&#39;t whitespace;</span>
+<span class="line-removed">347                              // jump out.</span>
+<span class="line-removed">348                              break wsLoop;</span>
+<span class="line-removed">349                          }</span>
+<span class="line-removed">350                      }</span>
+<span class="line-removed">351 </span>
+352                      // Are there stars here?  If so, consume them all
+353                      // and check for the end of comment.
+<a name="28" id="anc28"></a><span class="line-modified">354                      if (comment_reader.ch == &#39;*&#39;) {</span>
+355                          // skip all of the stars
+<a name="29" id="anc29"></a><span class="line-modified">356                          do {</span>
+<span class="line-removed">357                              comment_reader.scanCommentChar();</span>
+<span class="line-removed">358                          } while (comment_reader.ch == &#39;*&#39;);</span>
+359 
+360                          // check for the closing slash.
+<a name="30" id="anc30"></a><span class="line-modified">361                          if (comment_reader.ch == &#39;/&#39;) {</span>
+<span class="line-modified">362                              // We&#39;re done with the doc comment</span>
+<span class="line-removed">363                              // scanChar() and breakout.</span>
+364                              break outerLoop;
+365                          }
+<a name="31" id="anc31"></a><span class="line-modified">366                      } else if (! firstLine) {</span>
+367                          // The current line does not begin with a &#39;*&#39; so we will
+368                          // treat it as comment
+<a name="32" id="anc32"></a><span class="line-modified">369                          comment_reader.bp = begin_bp;</span>
+<span class="line-removed">370                          comment_reader.ch = begin_ch;</span>
+371                      }
+<a name="33" id="anc33"></a><span class="line-modified">372                      // The textLoop processes the rest of the characters</span>
+<span class="line-removed">373                      // on the line, adding them to our buffer.</span>
+374                  textLoop:
+<a name="34" id="anc34"></a><span class="line-modified">375                      while (comment_reader.bp &lt; comment_reader.buflen) {</span>
+<span class="line-modified">376                          switch (comment_reader.ch) {</span>
+<span class="line-modified">377                          case &#39;*&#39;:</span>
+<span class="line-modified">378                              // Is this just a star?  Or is this the</span>
+<span class="line-modified">379                              // end of a comment?</span>
+<span class="line-modified">380                              comment_reader.scanCommentChar();</span>
+<span class="line-modified">381                              if (comment_reader.ch == &#39;/&#39;) {</span>
+<span class="line-modified">382                                  // This is the end of the comment,</span>
+<span class="line-removed">383                                  // set ch and return our buffer.</span>
+<span class="line-removed">384                                  break outerLoop;</span>
+<span class="line-removed">385                              }</span>
+<span class="line-removed">386                              // This is just an ordinary star.  Add it to</span>
+<span class="line-removed">387                              // the buffer.</span>
+<span class="line-removed">388                              comment_reader.putChar(&#39;*&#39;, false);</span>
+<span class="line-removed">389                              break;</span>
+<span class="line-removed">390                          case &#39;\\&#39;:</span>
+<span class="line-removed">391                              comment_reader.putChar(&#39;\\&#39;, false);</span>
+<span class="line-removed">392                              // If a double backslash was found, write two</span>
+<span class="line-removed">393                              if (comment_reader.isDoubleBackslash()) {</span>
+<span class="line-removed">394                                  comment_reader.putChar(&#39;\\&#39;, false);</span>
+<span class="line-removed">395                              }</span>
+<span class="line-removed">396                              comment_reader.scanCommentChar();</span>
+<span class="line-removed">397                              break;</span>
+<span class="line-removed">398                          case &#39; &#39;:</span>
+<span class="line-removed">399                          case &#39;\t&#39;:</span>
+<span class="line-removed">400                              comment_reader.putChar(comment_reader.ch, false);</span>
+<span class="line-removed">401                              comment_reader.scanCommentChar();</span>
+<span class="line-removed">402                              break;</span>
+<span class="line-removed">403                          case FF:</span>
+<span class="line-removed">404                              comment_reader.scanCommentChar();</span>
+<span class="line-removed">405                              break textLoop; // treat as end of line</span>
+<span class="line-removed">406                          case CR: // (Spec 3.4)</span>
+<span class="line-removed">407                              comment_reader.scanCommentChar();</span>
+<span class="line-removed">408                              if (comment_reader.ch != LF) {</span>
+<span class="line-removed">409                                  // Canonicalize CR-only line terminator to LF</span>
+<span class="line-removed">410                                  comment_reader.putChar((char)LF, false);</span>
+<span class="line-removed">411                                  break textLoop;</span>
+<span class="line-removed">412                              }</span>
+<span class="line-removed">413                              /* fall through to LF case */</span>
+<span class="line-removed">414                          case LF: // (Spec 3.4)</span>
+415                              // We&#39;ve seen a newline.  Add it to our
+416                              // buffer and break out of this loop,
+417                              // starting fresh on a new line.
+<a name="35" id="anc35"></a><span class="line-modified">418                              comment_reader.putChar(comment_reader.ch, false);</span>
+<span class="line-modified">419                              comment_reader.scanCommentChar();</span>
+
+420                              break textLoop;
+<a name="36" id="anc36"></a><span class="line-modified">421                          default:</span>
+
+
+
+
+422                              // Add the character to our buffer.
+<a name="37" id="anc37"></a><span class="line-modified">423                              comment_reader.putChar(comment_reader.ch, false);</span>
+<span class="line-modified">424                              comment_reader.scanCommentChar();</span>
+425                          }
+426                      } // end textLoop
+427                      firstLine = false;
+428                  } // end outerLoop
+429 
+<a name="38" id="anc38"></a><span class="line-modified">430                  if (comment_reader.sp &gt; 0) {</span>
+<span class="line-modified">431                      int i = comment_reader.sp - 1;</span>
+<span class="line-modified">432                  trailLoop:</span>
+<span class="line-modified">433                      while (i &gt; -1) {</span>
+<span class="line-modified">434                          switch (comment_reader.sbuf[i]) {</span>
+<span class="line-modified">435                          case &#39;*&#39;:</span>
+<span class="line-removed">436                              i--;</span>
+<span class="line-removed">437                              break;</span>
+<span class="line-removed">438                          default:</span>
+<span class="line-removed">439                              break trailLoop;</span>
+<span class="line-removed">440                          }</span>
+441                      }
+<a name="39" id="anc39"></a><span class="line-modified">442                      comment_reader.sp = i + 1;</span>
+443 
+444                      // Store the text of the doc comment
+<a name="40" id="anc40"></a><span class="line-modified">445                     docComment = comment_reader.chars();</span>
+<span class="line-modified">446                     docPosns = new int[comment_reader.pp];</span>
+<span class="line-removed">447                     System.arraycopy(comment_reader.pbuf, 0, docPosns, 0, docPosns.length);</span>
+<span class="line-removed">448                 } else {</span>
+449                     docComment = &quot;&quot;;
+450                 }
+451             } finally {
+452                 scanned = true;
+<a name="41" id="anc41"></a><span class="line-modified">453                 comment_reader = null;</span>
+<span class="line-modified">454                 if (docComment != null &amp;&amp;</span>
+<span class="line-modified">455                         DEPRECATED_PATTERN.matcher(docComment).matches()) {</span>
+456                     deprecatedFlag = true;
+457                 }
+458             }
+459         }
+<a name="42" id="anc42"></a><span class="line-removed">460         //where:</span>
+<span class="line-removed">461             private static final Pattern DEPRECATED_PATTERN =</span>
+<span class="line-removed">462                     Pattern.compile(&quot;(?sm).*^\\s*@deprecated( |$).*&quot;);</span>
+<span class="line-removed">463 </span>
+464     }
+465 
+<a name="43" id="anc43"></a>
+
+
+
+
+
+466     @Override
+467     public Position.LineMap getLineMap() {
+<a name="44" id="anc44"></a><span class="line-modified">468         char[] buf = reader.getRawCharacters();</span>
+469         return Position.makeLineMap(buf, buf.length, true);
+470     }
+<a name="45" id="anc45"></a>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+471 }
+<a name="46" id="anc46"></a><b style="font-size: large; color: red">--- EOF ---</b>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</pre>
+<input id="eof" value="46" type="hidden" />
+</body>
+</html>

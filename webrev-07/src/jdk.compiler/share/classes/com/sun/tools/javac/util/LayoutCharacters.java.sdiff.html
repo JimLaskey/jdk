@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Sdiff src/jdk.compiler/share/classes/com/sun/tools/javac/util/LayoutCharacters.java</title>
+    <link rel="stylesheet" href="../../../../../../../../../style.css" />
+  </head>
+<body>
+<center><a href="DiagnosticSource.java.sdiff.html" target="_top">&lt; prev</a> <a href="../../../../../../../../../index.html" target="_top">index</a> <a href="Position.java.sdiff.html" target="_top">next &gt;</a></center>    <h2>src/jdk.compiler/share/classes/com/sun/tools/javac/util/LayoutCharacters.java</h2>
+     <a class="print" href="javascript:print()">Print this page</a>
+<table>
+<tr valign="top">
+<td>
+<hr />
+<pre>
+ 1 /*
+<span class="line-modified"> 2  * Copyright (c) 1999, 2010, Oracle and/or its affiliates. All rights reserved.</span>
+ 3  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
+ 4  *
+ 5  * This code is free software; you can redistribute it and/or modify it
+ 6  * under the terms of the GNU General Public License version 2 only, as
+ 7  * published by the Free Software Foundation.  Oracle designates this
+ 8  * particular file as subject to the &quot;Classpath&quot; exception as provided
+ 9  * by Oracle in the LICENSE file that accompanied this code.
+10  *
+11  * This code is distributed in the hope that it will be useful, but WITHOUT
+12  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+13  * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+14  * version 2 for more details (a copy is included in the LICENSE file that
+15  * accompanied this code).
+16  *
+17  * You should have received a copy of the GNU General Public License version
+18  * 2 along with this work; if not, write to the Free Software Foundation,
+19  * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
+20  *
+21  * Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
+22  * or visit www.oracle.com if you need additional information or have any
+</pre>
+<hr />
+<pre>
+51      */
+52     final static byte TAB   = 0x9;
+53 
+54     /** Line feed character.
+55      */
+56     final static byte LF    = 0xA;
+57 
+58     /** Form feed character.
+59      */
+60     final static byte FF    = 0xC;
+61 
+62     /** Carriage return character.
+63      */
+64     final static byte CR    = 0xD;
+65 
+66     /** End of input character.  Used as a sentinel to denote the
+67      *  character one beyond the last defined character in a
+68      *  source file.
+69      */
+70     final static byte EOI   = 0x1A;
+
+
+
+
+
+
+71 }
+</pre>
+</td>
+<td>
+<hr />
+<pre>
+ 1 /*
+<span class="line-modified"> 2  * Copyright (c) 1999, 2020, Oracle and/or its affiliates. All rights reserved.</span>
+ 3  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
+ 4  *
+ 5  * This code is free software; you can redistribute it and/or modify it
+ 6  * under the terms of the GNU General Public License version 2 only, as
+ 7  * published by the Free Software Foundation.  Oracle designates this
+ 8  * particular file as subject to the &quot;Classpath&quot; exception as provided
+ 9  * by Oracle in the LICENSE file that accompanied this code.
+10  *
+11  * This code is distributed in the hope that it will be useful, but WITHOUT
+12  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+13  * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+14  * version 2 for more details (a copy is included in the LICENSE file that
+15  * accompanied this code).
+16  *
+17  * You should have received a copy of the GNU General Public License version
+18  * 2 along with this work; if not, write to the Free Software Foundation,
+19  * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
+20  *
+21  * Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
+22  * or visit www.oracle.com if you need additional information or have any
+</pre>
+<hr />
+<pre>
+51      */
+52     final static byte TAB   = 0x9;
+53 
+54     /** Line feed character.
+55      */
+56     final static byte LF    = 0xA;
+57 
+58     /** Form feed character.
+59      */
+60     final static byte FF    = 0xC;
+61 
+62     /** Carriage return character.
+63      */
+64     final static byte CR    = 0xD;
+65 
+66     /** End of input character.  Used as a sentinel to denote the
+67      *  character one beyond the last defined character in a
+68      *  source file.
+69      */
+70     final static byte EOI   = 0x1A;
+<span class="line-added">71 </span>
+<span class="line-added">72     /** Bump column to the next tab.</span>
+<span class="line-added">73      */</span>
+<span class="line-added">74     static int tabulate(int column) {</span>
+<span class="line-added">75         return (column / TabInc * TabInc) + TabInc;</span>
+<span class="line-added">76     }</span>
+77 }
+</pre>
+</td>
+</tr>
+</table>
+<center><a href="DiagnosticSource.java.sdiff.html" target="_top">&lt; prev</a> <a href="../../../../../../../../../index.html" target="_top">index</a> <a href="Position.java.sdiff.html" target="_top">next &gt;</a></center>  </body>
+</html>

@@ -1,0 +1,38 @@
+diff a/src/jdk.compiler/share/classes/com/sun/tools/javac/util/Position.java b/src/jdk.compiler/share/classes/com/sun/tools/javac/util/Position.java
+--- a/src/jdk.compiler/share/classes/com/sun/tools/javac/util/Position.java
++++ b/src/jdk.compiler/share/classes/com/sun/tools/javac/util/Position.java
+@@ -1,7 +1,7 @@
+ /*
+- * Copyright (c) 1999, 2019, Oracle and/or its affiliates. All rights reserved.
++ * Copyright (c) 1999, 2020, Oracle and/or its affiliates. All rights reserved.
+  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
+  *
+  * This code is free software; you can redistribute it and/or modify it
+  * under the terms of the GNU General Public License version 2 only, as
+  * published by the Free Software Foundation.  Oracle designates this
+@@ -263,11 +263,11 @@
+         public int getColumnNumber(int pos) {
+             int lineStart = startPosition[getLineNumber(pos) - FIRSTLINE];
+             int column = 0;
+             for (int bp = lineStart; bp < pos; bp++) {
+                 if (tabMap.get(bp))
+-                    column = (column / TabInc * TabInc) + TabInc;
++                    column = tabulate(column);
+                 else
+                     column++;
+             }
+             return column + FIRSTCOLUMN;
+         }
+@@ -277,11 +277,11 @@
+             column -= FIRSTCOLUMN;
+             int col = 0;
+             while (col < column) {
+                 pos++;
+                 if (tabMap.get(pos))
+-                    col = (col / TabInc * TabInc) + TabInc;
++                    col = tabulate(col);
+                 else
+                     col++;
+             }
+             return pos;
+         }

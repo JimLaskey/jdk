@@ -1,0 +1,764 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Frames src/jdk.compiler/share/classes/com/sun/tools/javac/parser/UnicodeReader.java</title>
+    <link rel="stylesheet" href="../../../../../../../../../style.css" />
+    <script type="text/javascript" src="../../../../../../../../../navigation.js"></script>
+  </head>
+<body onkeypress="keypress(event);">
+<a name="0"></a>
+<hr />
+<pre>  1 /*
+<a name="1" id="anc1"></a><span class="line-modified">  2  * Copyright (c) 2011, 2018, Oracle and/or its affiliates. All rights reserved.</span>
+  3  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
+  4  *
+  5  * This code is free software; you can redistribute it and/or modify it
+  6  * under the terms of the GNU General Public License version 2 only, as
+  7  * published by the Free Software Foundation.  Oracle designates this
+  8  * particular file as subject to the &quot;Classpath&quot; exception as provided
+  9  * by Oracle in the LICENSE file that accompanied this code.
+ 10  *
+ 11  * This code is distributed in the hope that it will be useful, but WITHOUT
+ 12  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ 13  * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+ 14  * version 2 for more details (a copy is included in the LICENSE file that
+ 15  * accompanied this code).
+ 16  *
+ 17  * You should have received a copy of the GNU General Public License version
+ 18  * 2 along with this work; if not, write to the Free Software Foundation,
+ 19  * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
+ 20  *
+ 21  * Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
+ 22  * or visit www.oracle.com if you need additional information or have any
+ 23  * questions.
+ 24  */
+ 25 
+ 26 package com.sun.tools.javac.parser;
+ 27 
+<a name="2" id="anc2"></a><span class="line-removed"> 28 import java.nio.CharBuffer;</span>
+ 29 import java.util.Arrays;
+ 30 
+<a name="3" id="anc3"></a><span class="line-removed"> 31 import com.sun.tools.javac.file.JavacFileManager;</span>
+ 32 import com.sun.tools.javac.resources.CompilerProperties.Errors;
+<a name="4" id="anc4"></a><span class="line-removed"> 33 import com.sun.tools.javac.util.ArrayUtils;</span>
+ 34 import com.sun.tools.javac.util.Log;
+<a name="5" id="anc5"></a><span class="line-removed"> 35 import com.sun.tools.javac.util.Name;</span>
+<span class="line-removed"> 36 import com.sun.tools.javac.util.Names;</span>
+ 37 
+<a name="6" id="anc6"></a><span class="line-modified"> 38 import static com.sun.tools.javac.util.LayoutCharacters.*;</span>
+
+ 39 
+<a name="7" id="anc7"></a><span class="line-modified"> 40 /** The char reader used by the javac lexer/tokenizer. Returns the sequence of</span>
+<span class="line-modified"> 41  * characters contained in the input stream, handling unicode escape accordingly.</span>
+<span class="line-modified"> 42  * Additionally, it provides features for saving chars into a buffer and to retrieve</span>
+<span class="line-removed"> 43  * them at a later stage.</span>
+ 44  *
+ 45  *  &lt;p&gt;&lt;b&gt;This is NOT part of any supported API.
+ 46  *  If you write code that depends on this, you do so at your own risk.
+ 47  *  This code and its internal interfaces are subject to change or
+<a name="8" id="anc8"></a><span class="line-modified"> 48  *  deletion without notice.&lt;/b&gt;</span>
+ 49  */
+ 50 public class UnicodeReader {
+<a name="9" id="anc9"></a>
+
+
+
+
+ 51 
+<a name="10" id="anc10"></a><span class="line-modified"> 52     /** The input buffer, index of next character to be read,</span>
+<span class="line-modified"> 53      *  index of one past last character in buffer.</span>
+ 54      */
+<a name="11" id="anc11"></a><span class="line-modified"> 55     protected char[] buf;</span>
+<span class="line-removed"> 56     protected int bp;</span>
+<span class="line-removed"> 57     protected final int buflen;</span>
+ 58 
+<a name="12" id="anc12"></a><span class="line-modified"> 59     /** The current character.</span>
+
+ 60      */
+<a name="13" id="anc13"></a><span class="line-modified"> 61     protected char ch;</span>
+ 62 
+<a name="14" id="anc14"></a><span class="line-modified"> 63     /** The buffer index of the last converted unicode character</span>
+
+
+
+ 64      */
+<a name="15" id="anc15"></a><span class="line-modified"> 65     protected int unicodeConversionBp = -1;</span>
+ 66 
+<a name="16" id="anc16"></a><span class="line-modified"> 67     protected Log log;</span>
+<span class="line-modified"> 68     protected Names names;</span>
+
+
+
+ 69 
+<a name="17" id="anc17"></a><span class="line-modified"> 70     /** A character buffer for saved chars.</span>
+
+
+
+
+
+
+
+
+
+ 71      */
+<a name="18" id="anc18"></a><span class="line-modified"> 72     protected char[] sbuf = new char[128];</span>
+<span class="line-removed"> 73     protected int realLength;</span>
+<span class="line-removed"> 74     protected int sp;</span>
+ 75 
+ 76     /**
+<a name="19" id="anc19"></a><span class="line-modified"> 77      * Create a scanner from the input array.  This method might</span>
+<span class="line-modified"> 78      * modify the array.  To avoid copying the input array, ensure</span>
+<span class="line-modified"> 79      * that {@code inputLength &lt; input.length} or</span>
+<span class="line-modified"> 80      * {@code input[input.length -1]} is a white space character.</span>
+
+
+ 81      *
+<a name="20" id="anc20"></a><span class="line-modified"> 82      * @param sf the factory which created this Scanner</span>
+<span class="line-modified"> 83      * @param buffer the input, might be modified</span>
+<span class="line-modified"> 84      * Must be positive and less than or equal to input.length.</span>
+ 85      */
+<a name="21" id="anc21"></a><span class="line-modified"> 86     protected UnicodeReader(ScannerFactory sf, CharBuffer buffer) {</span>
+<span class="line-modified"> 87         this(sf, JavacFileManager.toArray(buffer), buffer.limit());</span>
+
+
+
+
+
+
+
+
+
+ 88     }
+ 89 
+<a name="22" id="anc22"></a><span class="line-modified"> 90     protected UnicodeReader(ScannerFactory sf, char[] input, int inputLength) {</span>
+<span class="line-modified"> 91         log = sf.log;</span>
+<span class="line-modified"> 92         names = sf.names;</span>
+<span class="line-modified"> 93         realLength = inputLength;</span>
+<span class="line-modified"> 94         if (inputLength == input.length) {</span>
+<span class="line-modified"> 95             if (input.length &gt; 0 &amp;&amp; Character.isWhitespace(input[input.length - 1])) {</span>
+<span class="line-modified"> 96                 inputLength--;</span>
+<span class="line-modified"> 97             } else {</span>
+<span class="line-modified"> 98                 input = Arrays.copyOf(input, inputLength + 1);</span>
+<span class="line-modified"> 99             }</span>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+100         }
+<a name="23" id="anc23"></a><span class="line-removed">101         buf = input;</span>
+<span class="line-removed">102         buflen = inputLength;</span>
+<span class="line-removed">103         buf[buflen] = EOI;</span>
+<span class="line-removed">104         bp = -1;</span>
+<span class="line-removed">105         scanChar();</span>
+106     }
+107 
+<a name="24" id="anc24"></a><span class="line-modified">108     /** Read next character.</span>
+
+
+109      */
+<a name="25" id="anc25"></a><span class="line-modified">110     protected void scanChar() {</span>
+<span class="line-modified">111         if (bp &lt; buflen) {</span>
+<span class="line-modified">112             ch = buf[++bp];</span>
+<span class="line-modified">113             if (ch == &#39;\\&#39;) {</span>
+<span class="line-modified">114                 convertUnicode();</span>
+<span class="line-modified">115             }</span>
+
+
+
+
+
+
+
+
+
+
+116         }
+<a name="26" id="anc26"></a>
+
+
+117     }
+118 
+<a name="27" id="anc27"></a><span class="line-modified">119     /** Read next character in comment, skipping over double &#39;\&#39; characters.</span>
+
+
+
+120      */
+<a name="28" id="anc28"></a><span class="line-modified">121     protected void scanCommentChar() {</span>
+<span class="line-modified">122         scanChar();</span>
+<span class="line-modified">123         if (ch == &#39;\\&#39;) {</span>
+<span class="line-modified">124             if (peekChar() == &#39;\\&#39; &amp;&amp; !isUnicode()) {</span>
+<span class="line-modified">125                 skipChar();</span>
+<span class="line-modified">126             } else {</span>
+<span class="line-modified">127                 convertUnicode();</span>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+128             }
+<a name="29" id="anc29"></a>
+
+
+
+
+
+
+129         }
+<a name="30" id="anc30"></a>
+
+
+
+
+
+130     }
+131 
+<a name="31" id="anc31"></a><span class="line-modified">132     /** Append a character to sbuf.</span>
+
+
+
+133      */
+<a name="32" id="anc32"></a><span class="line-modified">134     protected void putChar(char ch, boolean scan) {</span>
+<span class="line-modified">135         sbuf = ArrayUtils.ensureCapacity(sbuf, sp);</span>
+<span class="line-removed">136         sbuf[sp++] = ch;</span>
+<span class="line-removed">137         if (scan)</span>
+<span class="line-removed">138             scanChar();</span>
+139     }
+140 
+<a name="33" id="anc33"></a><span class="line-modified">141     protected void putChar(char ch) {</span>
+<span class="line-modified">142         putChar(ch, false);</span>
+
+
+
+
+
+
+
+
+
+143     }
+144 
+<a name="34" id="anc34"></a><span class="line-modified">145     protected void putChar(boolean scan) {</span>
+<span class="line-modified">146         putChar(ch, scan);</span>
+
+
+
+
+
+147     }
+148 
+<a name="35" id="anc35"></a><span class="line-modified">149     protected void nextChar(boolean skip) {</span>
+<span class="line-modified">150         if (!skip) {</span>
+<span class="line-modified">151             sbuf = ArrayUtils.ensureCapacity(sbuf, sp);</span>
+<span class="line-modified">152             sbuf[sp++] = ch;</span>
+<span class="line-modified">153         }</span>
+
+
+
+154 
+<a name="36" id="anc36"></a><span class="line-modified">155         scanChar();</span>
+
+
+
+
+
+
+156     }
+157 
+<a name="37" id="anc37"></a><span class="line-modified">158     Name name() {</span>
+<span class="line-modified">159         return names.fromChars(sbuf, 0, sp);</span>
+
+
+
+
+
+160     }
+161 
+<a name="38" id="anc38"></a><span class="line-modified">162     String chars() {</span>
+<span class="line-modified">163         return new String(sbuf, 0, sp);</span>
+
+
+
+
+
+
+
+164     }
+165 
+<a name="39" id="anc39"></a><span class="line-modified">166     /** Add &#39;count&#39; copies of the character &#39;ch&#39; to the string buffer.</span>
+
+
+
+
+
+167      */
+<a name="40" id="anc40"></a><span class="line-modified">168     protected void repeat(char ch, int count) {</span>
+<span class="line-modified">169         for ( ; 0 &lt; count; count--) {</span>
+<span class="line-removed">170             putChar(ch, false);</span>
+<span class="line-removed">171         }</span>
+172     }
+173 
+<a name="41" id="anc41"></a><span class="line-modified">174     /** Reset the scan buffer pointer to &#39;pos&#39;.</span>
+
+175      */
+<a name="42" id="anc42"></a><span class="line-modified">176     protected void reset(int pos) {</span>
+<span class="line-modified">177         bp = pos - 1;</span>
+<span class="line-modified">178         scanChar();</span>
+
+
+
+
+
+179     }
+180 
+<a name="43" id="anc43"></a><span class="line-modified">181     /** Convert unicode escape; bp points to initial &#39;\&#39; character</span>
+<span class="line-modified">182      *  (Spec 3.3).</span>
+<span class="line-modified">183      */</span>
+<span class="line-modified">184     protected void convertUnicode() {</span>
+<span class="line-modified">185         if (ch == &#39;\\&#39; &amp;&amp; unicodeConversionBp != bp ) {</span>
+<span class="line-modified">186             bp++; ch = buf[bp];</span>
+<span class="line-modified">187             if (ch == &#39;u&#39;) {</span>
+<span class="line-modified">188                 do {</span>
+<span class="line-modified">189                     bp++; ch = buf[bp];</span>
+<span class="line-modified">190                 } while (ch == &#39;u&#39;);</span>
+<span class="line-removed">191                 int limit = bp + 3;</span>
+<span class="line-removed">192                 if (limit &lt; buflen) {</span>
+<span class="line-removed">193                     int d = digit(bp, 16);</span>
+<span class="line-removed">194                     int code = d;</span>
+<span class="line-removed">195                     while (bp &lt; limit &amp;&amp; d &gt;= 0) {</span>
+<span class="line-removed">196                         bp++; ch = buf[bp];</span>
+<span class="line-removed">197                         d = digit(bp, 16);</span>
+<span class="line-removed">198                         code = (code &lt;&lt; 4) + d;</span>
+<span class="line-removed">199                     }</span>
+<span class="line-removed">200                     if (d &gt;= 0) {</span>
+<span class="line-removed">201                         ch = (char)code;</span>
+<span class="line-removed">202                         unicodeConversionBp = bp;</span>
+<span class="line-removed">203                         return;</span>
+<span class="line-removed">204                     }</span>
+<span class="line-removed">205                 }</span>
+<span class="line-removed">206                 log.error(bp, Errors.IllegalUnicodeEsc);</span>
+<span class="line-removed">207             } else {</span>
+<span class="line-removed">208                 bp--;</span>
+<span class="line-removed">209                 ch = &#39;\\&#39;;</span>
+<span class="line-removed">210             }</span>
+<span class="line-removed">211         }</span>
+212     }
+213 
+<a name="44" id="anc44"></a><span class="line-modified">214     /** Are surrogates supported?</span>
+
+
+
+
+
+215      */
+<a name="45" id="anc45"></a><span class="line-modified">216     final static boolean surrogatesSupported = surrogatesSupported();</span>
+<span class="line-modified">217     private static boolean surrogatesSupported() {</span>
+<span class="line-modified">218         try {</span>
+<span class="line-modified">219             Character.isHighSurrogate(&#39;a&#39;);</span>
+220             return true;
+<a name="46" id="anc46"></a><span class="line-removed">221         } catch (NoSuchMethodError ex) {</span>
+<span class="line-removed">222             return false;</span>
+223         }
+<a name="47" id="anc47"></a>
+
+224     }
+225 
+<a name="48" id="anc48"></a><span class="line-modified">226     /** Scan surrogate pairs.  If &#39;ch&#39; is a high surrogate and</span>
+<span class="line-modified">227      *  the next character is a low surrogate, returns the code point</span>
+<span class="line-removed">228      *  constructed from these surrogates. Otherwise, returns -1.</span>
+<span class="line-removed">229      *  This method will not consume any of the characters.</span>
+230      */
+<a name="49" id="anc49"></a><span class="line-modified">231     protected int peekSurrogates() {</span>
+<span class="line-modified">232         if (surrogatesSupported &amp;&amp; Character.isHighSurrogate(ch)) {</span>
+<span class="line-modified">233             char high = ch;</span>
+<span class="line-removed">234             int prevBP = bp;</span>
+235 
+<a name="50" id="anc50"></a><span class="line-modified">236             scanChar();</span>
+
+237 
+<a name="51" id="anc51"></a><span class="line-modified">238             char low = ch;</span>
+
+239 
+<a name="52" id="anc52"></a><span class="line-modified">240             ch = high;</span>
+<span class="line-modified">241             bp = prevBP;</span>
+
+242 
+<a name="53" id="anc53"></a><span class="line-modified">243             if (Character.isLowSurrogate(low)) {</span>
+<span class="line-removed">244                 return Character.toCodePoint(high, low);</span>
+<span class="line-removed">245             }</span>
+246         }
+247 
+<a name="54" id="anc54"></a><span class="line-modified">248         return -1;</span>
+249     }
+250 
+<a name="55" id="anc55"></a><span class="line-modified">251     /** Convert an ASCII digit from its base (8, 10, or 16)</span>
+<span class="line-modified">252      *  to its value.</span>
+<span class="line-modified">253      */</span>
+<span class="line-modified">254     protected int digit(int pos, int base) {</span>
+<span class="line-modified">255         char c = ch;</span>
+<span class="line-modified">256         if (&#39;0&#39; &lt;= c &amp;&amp; c &lt;= &#39;9&#39;)</span>
+<span class="line-modified">257             return Character.digit(c, base); //a fast common case</span>
+<span class="line-modified">258         int codePoint = peekSurrogates();</span>
+<span class="line-removed">259         int result = codePoint &gt;= 0 ? Character.digit(codePoint, base) : Character.digit(c, base);</span>
+<span class="line-removed">260         if (result &gt;= 0 &amp;&amp; c &gt; 0x7f) {</span>
+<span class="line-removed">261             log.error(pos + 1, Errors.IllegalNonasciiDigit);</span>
+<span class="line-removed">262             if (codePoint &gt;= 0)</span>
+<span class="line-removed">263                 scanChar();</span>
+<span class="line-removed">264             ch = &quot;0123456789abcdef&quot;.charAt(result);</span>
+265         }
+<a name="56" id="anc56"></a><span class="line-removed">266         return result;</span>
+267     }
+268 
+<a name="57" id="anc57"></a><span class="line-modified">269     protected boolean isUnicode() {</span>
+<span class="line-modified">270         return unicodeConversionBp == bp;</span>
+
+
+
+
+
+271     }
+272 
+<a name="58" id="anc58"></a><span class="line-modified">273     protected void skipChar() {</span>
+<span class="line-modified">274         bp++;</span>
+
+
+
+
+
+
+
+
+
+
+275     }
+276 
+<a name="59" id="anc59"></a><span class="line-modified">277     protected char peekChar() {</span>
+<span class="line-modified">278         return buf[bp + 1];</span>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+279     }
+280 
+281     /**
+<a name="60" id="anc60"></a><span class="line-modified">282      * Returns a copy of the input buffer, up to its inputLength.</span>
+<span class="line-modified">283      * Unicode escape sequences are not translated.</span>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+284      */
+285     public char[] getRawCharacters() {
+<a name="61" id="anc61"></a><span class="line-modified">286         char[] chars = new char[buflen];</span>
+<span class="line-removed">287         System.arraycopy(buf, 0, chars, 0, buflen);</span>
+<span class="line-removed">288         return chars;</span>
+289     }
+290 
+291     /**
+292      * Returns a copy of a character array subset of the input buffer.
+293      * The returned array begins at the {@code beginIndex} and
+294      * extends to the character at index {@code endIndex - 1}.
+295      * Thus the length of the substring is {@code endIndex-beginIndex}.
+296      * This behavior is like
+297      * {@code String.substring(beginIndex, endIndex)}.
+298      * Unicode escape sequences are not translated.
+299      *
+<a name="62" id="anc62"></a><span class="line-modified">300      * @param beginIndex the beginning index, inclusive.</span>
+<span class="line-modified">301      * @param endIndex the ending index, exclusive.</span>
+
+302      * @throws ArrayIndexOutOfBoundsException if either offset is outside of the
+303      *         array bounds
+304      */
+305     public char[] getRawCharacters(int beginIndex, int endIndex) {
+<a name="63" id="anc63"></a><span class="line-modified">306         int length = endIndex - beginIndex;</span>
+<span class="line-modified">307         char[] chars = new char[length];</span>
+<span class="line-modified">308         System.arraycopy(buf, beginIndex, chars, 0, length);</span>
+<span class="line-modified">309         return chars;</span>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+310     }
+<a name="64" id="anc64"></a>
+311 }
+<a name="65" id="anc65"></a><b style="font-size: large; color: red">--- EOF ---</b>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</pre>
+<input id="eof" value="65" type="hidden" />
+</body>
+</html>

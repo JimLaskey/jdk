@@ -1,7 +1,0 @@
-diff a/test/langtools/tools/javac/Digits.out b/test/langtools/tools/javac/Digits.out
---- a/test/langtools/tools/javac/Digits.out
-+++ b/test/langtools/tools/javac/Digits.out
-@@ -1,2 +1,2 @@
--Digits.java:11:41: compiler.err.illegal.nonascii.digit
-+Digits.java:11:43: compiler.err.illegal.nonascii.digit
- 1 error

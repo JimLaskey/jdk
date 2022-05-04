@@ -73,11 +73,10 @@ import jdk.internal.reflect.CallerSensitive;
 import jdk.internal.reflect.Reflection;
 import jdk.internal.access.JavaLangAccess;
 import jdk.internal.access.SharedSecrets;
-import jdk.internal.javac.PreviewFeature;
+import jdk.internal.misc.VM;
 import jdk.internal.logger.LoggerFinderLoader;
 import jdk.internal.logger.LazyLoggers;
 import jdk.internal.logger.LocalizedLoggerWrapper;
-import jdk.internal.misc.VM;
 import jdk.internal.util.SystemProps;
 import jdk.internal.vm.annotation.IntrinsicCandidate;
 import jdk.internal.vm.annotation.Stable;
@@ -2480,29 +2479,8 @@ public final class System {
                 return StringConcatHelper.initialCoder();
             }
 
-            public long stringConcatCoder(char value) {
-                return StringConcatHelper.coder(value);
-            }
-
             public long stringConcatMix(long lengthCoder, String constant) {
                 return StringConcatHelper.mix(lengthCoder, constant);
-            }
-
-            @PreviewFeature(feature=PreviewFeature.Feature.TEMPLATED_STRINGS)
-            public long stringBuilderConcatMix(long lengthCoder,
-                                               StringBuilder sb) {
-                return sb.mix(lengthCoder);
-            }
-
-            @PreviewFeature(feature=PreviewFeature.Feature.TEMPLATED_STRINGS)
-            public long stringBuilderConcatPrepend(long lengthCoder, byte[] buf,
-                                                   StringBuilder sb) {
-                return sb.prepend(lengthCoder, buf);
-            }
-
-            @PreviewFeature(feature=PreviewFeature.Feature.TEMPLATED_STRINGS)
-            public TemplatedString newTemplatedString(String stencil, List<Object> values, List<String> fragments) {
-                return new SimpleTemplatedString(stencil, values, fragments);
             }
 
             public String join(String prefix, String suffix, String delimiter, String[] elements, int size) {

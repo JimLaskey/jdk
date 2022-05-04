@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2003, 2021, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2003, 2022, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -43,6 +43,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Stream;
 
+import jdk.internal.javac.PreviewFeature;
 import jdk.internal.module.ServicesCatalog;
 import jdk.internal.reflect.ConstantPool;
 import sun.reflect.annotation.AnnotationType;
@@ -387,9 +388,32 @@ public interface JavaLangAccess {
     long stringConcatInitialCoder();
 
     /**
+     * Get the coder for the supplied character.
+     */
+    long stringConcatCoder(char value);
+
+    /**
      * Update lengthCoder for constant
      */
     long stringConcatMix(long lengthCoder, String constant);
+
+    /**
+     * Update lengthCoder for StringBuilder.
+     */
+    @PreviewFeature(feature=PreviewFeature.Feature.TEMPLATED_STRINGS)
+    long stringBuilderConcatMix(long lengthCoder, StringBuilder sb);
+
+    /**
+     * Prepend StringBuilder content.
+     */
+    @PreviewFeature(feature=PreviewFeature.Feature.TEMPLATED_STRINGS)
+    long stringBuilderConcatPrepend(long lengthCoder, byte[] buf, StringBuilder sb);
+
+    /**
+     * Create a new TemplatedString.
+     */
+    @PreviewFeature(feature=PreviewFeature.Feature.TEMPLATED_STRINGS)
+    TemplatedString newTemplatedString(String stencil, List<Object> values, List<String> fragments);
 
     /**
      * Join strings

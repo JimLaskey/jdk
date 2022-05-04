@@ -27,13 +27,12 @@ package java.lang.invoke;
 
 import jdk.internal.access.JavaLangAccess;
 import jdk.internal.access.SharedSecrets;
+import jdk.internal.javac.PreviewFeature;
 import jdk.internal.vm.annotation.Stable;
 import sun.invoke.util.Wrapper;
 
 import java.lang.invoke.MethodHandles.Lookup;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.function.Function;
@@ -116,7 +115,7 @@ public final class StringConcatFactory {
      * we do not use all those slots, to let the strategies with MethodHandle
      * combinators to use some arguments.
      */
-    private static final int MAX_INDY_CONCAT_ARG_SLOTS = 200;
+    public static final int MAX_INDY_CONCAT_ARG_SLOTS = 200;
 
     private static final JavaLangAccess JLA = SharedSecrets.getJavaLangAccess();
 
@@ -326,6 +325,7 @@ public final class StringConcatFactory {
     {
         Objects.requireNonNull(lookup, "Lookup is null");
         Objects.requireNonNull(name, "Name is null");
+        Objects.requireNonNull(recipe, "Recipe is null");
         Objects.requireNonNull(concatType, "Concat type is null");
         Objects.requireNonNull(constants, "Constants are null");
 
@@ -854,5 +854,328 @@ public final class StringConcatFactory {
 
     private StringConcatFactory() {
         // no instantiation
+    }
+
+    /**
+     * {@link TemplatedString} allows more slots because of controlled usage.
+     */
+    public static final int MAX_TEMPLATE_CONCAT_ARG_SLOTS = 253;
+
+    /**
+     * Implementations of this class provide information necessary to
+     * assist {@link StringConcatFactory} perform optimal addition.
+     */
+    @PreviewFeature(feature=PreviewFeature.Feature.TEMPLATED_STRINGS)
+    public interface StringConcatItem {
+        /**
+         * Calculate the length of the insertion.
+         *
+         * @param lengthCoder current value of the length + coder
+         * @return adjusted value of the length + coder
+         */
+        long mix(long lengthCoder);
+
+        /**
+         * Insert content into buffer prior to the current length.
+         *
+         * @param lengthCoder current value of the length + coder
+         * @param buffer      buffer to right into
+         *
+         * @return adjusted value of the length + coder
+         *
+         * @throws Throwable if fails to prepend value (unusual).
+         */
+        long prepend(long lengthCoder, byte[] buffer) throws Throwable;
+    }
+
+    /**
+     * Simplified concatenation method to facilitate {@link TemplatedString}
+     * concatenation. This method returns a single concatenation method that
+     * interleaves fragments and values. fragment|value|fragment|value|...|value|fragment.
+     * The number of fragments must be one more that the number of ptypes.
+     * The total number of slots used by the ptypes must be less than or equal
+     * to MAX_TEMPLATE_CONCAT_ARG_SLOTS.
+     *
+     * @param fragments list of string fragments
+     * @param ptypes    list of expression types
+     *
+     * @return List of {@link MethodHandles}
+     *
+     * @throws StringConcatException If any of the linkage invariants are violated.
+     * @throws NullPointerException If any of the incoming arguments is null.
+     *
+     * @since 19
+     */
+    @PreviewFeature(feature=PreviewFeature.Feature.TEMPLATED_STRINGS)
+    public static MethodHandle makeConcatWithTemplate(
+            List<String> fragments,
+            List<Class<?>> ptypes)
+            throws StringConcatException
+    {
+        Objects.requireNonNull(fragments, "fragments is null");
+        Objects.requireNonNull(ptypes, "ptypes is null");
+
+        if (fragments.size() != ptypes.size() + 1) {
+            throw new StringConcatException("fragments size not equal ptypes size plus one");
+        }
+
+        if (ptypes.isEmpty()) {
+            return MethodHandles.constant(String.class, fragments.get(0));
+        }
+
+        Class<?>[] ttypes = new Class<?>[ptypes.size()];
+        MethodHandle[] filters = new MethodHandle[ptypes.size()];
+        int slots = 0;
+
+        int pos = 0;
+        for (Class<?> ptype : ptypes) {
+            slots += ptype == long.class || ptype == double.class ? 2 : 1;
+
+            if (MAX_TEMPLATE_CONCAT_ARG_SLOTS < slots) {
+                throw new StringConcatException("Too many concat argument slots: " +
+                        slots + ", can only accept " + MAX_TEMPLATE_CONCAT_ARG_SLOTS);
+            }
+
+            boolean isSpecialized = ptype.isPrimitive() ||
+                                    StringConcatItem.class == ptype;
+            Class<?> ttype = isSpecialized ? ptype : Object.class;
+            MethodHandle filter = stringifierFor(ttype);
+
+            if (filter != null) {
+                filters[pos] = filter;
+                ttype = String.class;
+            }
+
+            ttypes[pos++] = ttype;
+        }
+
+        MethodHandle mh = MethodHandles.dropArguments(newString(), 2, ttypes);
+
+        long initialLengthCoder = INITIAL_CODER;
+        String lastFragment = "";
+        pos = 0;
+        for (String fragment : fragments) {
+            lastFragment = fragment;
+
+            if (ttypes.length <= pos) {
+                break;
+            }
+
+            initialLengthCoder = JLA.stringConcatMix(initialLengthCoder, fragment);
+            mh = MethodHandles.filterArgumentsWithCombiner(
+                    mh, 1,
+                    prepender(lastFragment.isEmpty() ? null : fragment, ttypes[pos]),
+                    1, 0, // indexCoder, storage
+                    2 + pos  // selected argument
+            );
+
+            pos++;
+        }
+
+        MethodHandle newArrayCombinator = lastFragment.isEmpty() ? newArray() :
+                newArrayWithSuffix(lastFragment);
+        mh = MethodHandles.foldArgumentsWithCombiner(mh, 0, newArrayCombinator,
+                1 // index
+        );
+
+        pos = 0;
+        for (Class<?> ttype : ttypes) {
+            MethodHandle mix = mixer(ttypes[pos]);
+            boolean lastPType = pos == ttypes.length - 1;
+
+            if (lastPType) {
+                mix = MethodHandles.insertArguments(mix, 0, initialLengthCoder);
+                mh = MethodHandles.foldArgumentsWithCombiner(mh, 0, mix,
+                        1 + pos // selected argument
+                );
+            } else {
+                mh = MethodHandles.filterArgumentsWithCombiner(mh, 0, mix,
+                        0, // old-index
+                        1 + pos // selected argument
+                );
+            }
+
+            pos++;
+        }
+
+        mh = MethodHandles.filterArguments(mh, 0, filters);
+        MethodType mt = MethodType.methodType(String.class, ptypes);
+        mh = mh.viewAsType(mt, true);
+
+        return mh;
+    }
+
+    /**
+     * This method breaks up large concatenations into separate
+     * {@link MethodHandle MethodHandles} based on the number of slots required
+     * per {@link MethodHandle}. Each {@link MethodHandle} after the first will
+     * have an extra {@link String} slot for the result from the previous
+     * {@link MethodHandle}.
+     * {@link java.lang.invoke.StringConcatFactory#makeConcatWithTemplate}
+     * is used to construct the {@link MethodHandle MethodHandles}. The total
+     * number of slots used by the ptypes is open ended. However, care must
+     * be given when combining the {@link MethodHandle MethodHandles} so that
+     * the combine total does not exceed the 255 slot limit.
+     *
+     * @param fragments list of string fragments
+     * @param ptypes    list of expression types
+     * @param maxSlots  maximum number of slots per {@link MethodHandle}.
+     *
+     * @return List of {@link MethodHandle MethodHandles}
+     *
+     * @throws IllegalArgumentException If maxSlots is not between 1 and
+     *                                  MAX_TEMPLATE_CONCAT_ARG_SLOTS.
+     * @throws StringConcatException If any of the linkage invariants are violated.
+     * @throws NullPointerException If any of the incoming arguments is null.
+     *
+     * @since 19
+     */
+    @PreviewFeature(feature=PreviewFeature.Feature.TEMPLATED_STRINGS)
+    public static List<MethodHandle> makeConcatWithTemplateCluster(
+            List<String> fragments,
+            List<Class<?>> ptypes,
+            int maxSlots)
+            throws StringConcatException
+    {
+        Objects.requireNonNull(fragments, "fragments is null");
+        Objects.requireNonNull(ptypes, "ptypes is null");
+
+        if (fragments.size() != ptypes.size() + 1) {
+            throw new StringConcatException("fragments size not equal ptypes size plus one");
+        }
+
+        if (maxSlots < 1 || MAX_TEMPLATE_CONCAT_ARG_SLOTS < maxSlots) {
+            throw new StringConcatException("maxSlots must be between 1 and " +
+                    MAX_TEMPLATE_CONCAT_ARG_SLOTS);
+
+        }
+
+        if (ptypes.isEmpty()) {
+            return List.of(MethodHandles.constant(String.class, fragments.get(0)));
+        }
+
+        List<MethodHandle> mhs = new ArrayList<>();
+        List<String> segmentsSection = new ArrayList<>();
+        List<Class<?>> ptypeSection = new ArrayList<>();
+        int slots = 0;
+
+        int pos = 0;
+        for (Class<?> ptype : ptypes) {
+            boolean lastPType = pos == ptypes.size() - 1;
+            segmentsSection.add(fragments.get(pos));
+            ptypeSection.add(ptype);
+
+            slots += ptype == long.class || ptype == double.class ? 2 : 1;
+
+            if (maxSlots <= slots || lastPType) {
+                segmentsSection.add(lastPType ? fragments.get(pos + 1) : "");
+                MethodHandle mh = makeConcatWithTemplate(segmentsSection,
+                        ptypeSection);
+                mhs.add(mh);
+                segmentsSection.clear();
+                segmentsSection.add("");
+                ptypeSection.clear();
+                ptypeSection.add(String.class);
+                slots = 1;
+            }
+
+            pos++;
+        }
+
+        return mhs;
+    }
+
+    /**
+     * This method creates a {@link MethodHandle} expecting one input, the
+     * receiver of the supplied getters. This method uses
+     * {@link java.lang.invoke.StringConcatFactory#makeConcatWithTemplateCluster}
+     * to create the intermediate {@link MethodHandle MethodHandles}.
+     *
+     * @param fragments list of string fragments
+     * @param getters   list of getter {@link MethodHandle MethodHandles}
+     * @param maxSlots  maximum number of slots per {@link MethodHandle} in
+     *                  cluster.
+     *
+     * @return {@link MethodHandle}
+     *
+     * @throws IllegalArgumentException If maxSlots is not between 1 and
+     *                                  MAX_TEMPLATE_CONCAT_ARG_SLOTS or if the
+     *                                  getters don't use the same argument type
+     * @throws StringConcatException If any of the linkage invariants are violated
+     * @throws NullPointerException If any of the incoming arguments is null
+     *
+     * @since 19
+     */
+    @PreviewFeature(feature=PreviewFeature.Feature.TEMPLATED_STRINGS)
+    public static MethodHandle makeConcatWithTemplateGetters(
+            List<String> fragments,
+            List<MethodHandle> getters,
+            int maxSlots)
+            throws StringConcatException
+    {
+        Objects.requireNonNull(fragments, "fragments is null");
+        Objects.requireNonNull(getters, "getters is null");
+
+        if (fragments.size() != getters.size() + 1) {
+            throw new StringConcatException("fragments size not equal getters size plus one");
+        }
+
+        if (maxSlots < 1 || MAX_TEMPLATE_CONCAT_ARG_SLOTS < maxSlots) {
+            throw new StringConcatException("maxSlots must be between 1 and " +
+                    MAX_TEMPLATE_CONCAT_ARG_SLOTS);
+
+        }
+
+        if (getters.size() == 0) {
+            throw new StringConcatException("no getters supplied");
+        }
+
+        Class<?> receiverType = null;
+        List<Class<?>> ptypes = new ArrayList<>();
+
+        for (MethodHandle getter : getters) {
+            MethodType mt = getter.type();
+            Class<?> returnType = mt.returnType();
+
+            if (returnType == void.class || mt.parameterCount() != 1) {
+                throw new StringConcatException("not a getter " + mt);
+            }
+
+            if (receiverType == null) {
+                receiverType = mt.parameterType(0);
+            } else if (receiverType != mt.parameterType(0)) {
+                throw new StringConcatException("not the same receiever type " +
+                        mt + " needs " + receiverType);
+            }
+
+            ptypes.add(returnType);
+        }
+
+        MethodType resultType = MethodType.methodType(String.class, receiverType);
+        List<MethodHandle> clusters = makeConcatWithTemplateCluster(fragments, ptypes,
+                maxSlots);
+
+        MethodHandle mh = null;
+        Iterator<MethodHandle> getterIterator = getters.iterator();
+
+        for (MethodHandle cluster : clusters) {
+            MethodType mt = cluster.type();
+            MethodHandle[] filters = new MethodHandle[mt.parameterCount()];
+            int pos = 0;
+
+            if (mh != null) {
+                filters[pos++] = mh;
+            }
+
+            while (pos < filters.length) {
+                filters[pos++] = getterIterator.next();
+            }
+
+            cluster = MethodHandles.filterArguments(cluster, 0, filters);
+            mh = MethodHandles.permuteArguments(cluster, resultType,
+                    new int[filters.length]);
+        }
+
+        return mh;
     }
 }

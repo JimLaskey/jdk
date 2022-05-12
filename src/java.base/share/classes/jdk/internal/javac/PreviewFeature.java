@@ -62,6 +62,8 @@ public @interface PreviewFeature {
     public enum Feature {
         SWITCH_PATTERN_MATCHING,
         TEMPLATED_STRINGS,
+        VIRTUAL_THREADS,
+        FOREIGN,
         /**
          * A key for testing.
          */

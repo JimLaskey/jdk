@@ -394,14 +394,15 @@ public interface JavaLangAccess {
     long stringConcatInitialCoder();
 
     /**
-     * Get the coder for the supplied character.
-     */
-    long stringConcatCoder(char value);
-
-    /**
      * Update lengthCoder for constant
      */
     long stringConcatMix(long lengthCoder, String constant);
+
+    /**
+     * Get the coder for the supplied character.
+     */
+    @PreviewFeature(feature=PreviewFeature.Feature.TEMPLATED_STRINGS)
+    long stringConcatCoder(char value);
 
     /**
      * Update lengthCoder for StringBuilder.
@@ -409,17 +410,17 @@ public interface JavaLangAccess {
     @PreviewFeature(feature=PreviewFeature.Feature.TEMPLATED_STRINGS)
     long stringBuilderConcatMix(long lengthCoder, StringBuilder sb);
 
-    /**
-     * Prepend StringBuilder content.
-     */
-    @PreviewFeature(feature=PreviewFeature.Feature.TEMPLATED_STRINGS)
-    long stringBuilderConcatPrepend(long lengthCoder, byte[] buf, StringBuilder sb);
+     /**
+      * Prepend StringBuilder content.
+      */
+     @PreviewFeature(feature=PreviewFeature.Feature.TEMPLATED_STRINGS)
+     long stringBuilderConcatPrepend(long lengthCoder, byte[] buf, StringBuilder sb);
 
-    /**
-     * Create a new TemplatedString.
-     */
-    @PreviewFeature(feature=PreviewFeature.Feature.TEMPLATED_STRINGS)
-    TemplatedString newTemplatedString(String stencil, List<Object> values, List<String> fragments);
+     /**
+      * Create a new TemplatedString.
+      */
+     @PreviewFeature(feature=PreviewFeature.Feature.TEMPLATED_STRINGS)
+     TemplatedString newTemplatedString(String stencil, List<Object> values, List<String> fragments);
 
     /**
      * Join strings

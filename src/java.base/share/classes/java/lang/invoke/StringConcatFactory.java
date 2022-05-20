@@ -496,19 +496,8 @@ public final class StringConcatFactory {
         Class<?>[] ptypes = mt.erase().parameterArray();
         MethodHandle[] filters = null;
         for (int i = 0; i < ptypes.length; i++) {
-            Class<?> cl = ptypes[i];
-            MethodHandle filter = null;
-            if (cl == byte.class || cl == short.class) {
-                // use int for subword integral types; still need special mixers
-                // and prependers for char, boolean
-                ptypes[i] = int.class;
-            } else if (cl == Object.class) {
-                filter = objectStringifier();
-            } else if (cl == float.class) {
-                filter = floatStringifier();
-            } else if (cl == double.class) {
-                filter = doubleStringifier();
-            }
+            ptypes[i] = promoteIntType(ptypes[i]);
+            MethodHandle filter = stringifierFor(ptypes[i]);
             if (filter != null) {
                 if (filters == null) {
                     filters = new MethodHandle[ptypes.length];
@@ -837,6 +826,33 @@ public final class StringConcatFactory {
         MIXERS = new ConcurrentHashMap<>();
     }
 
+    /**
+     * Promote integral types to int.
+     */
+    private static Class<?> promoteIntType(Class<?> t) {
+        // use int for subword integral types; still need special mixers
+        // and prependers for char, boolean
+        return t == byte.class || t == short.class ? int.class : t;
+    }
+
+    /**
+     * Returns a stringifier for references and floats/doubles only.
+     * Always returns null for other primitives.
+     *
+     * @param t class to stringify
+     * @return stringifier; null, if not available
+     */
+    private static MethodHandle stringifierFor(Class<?> t) {
+        if (t == Object.class) {
+            return objectStringifier();
+        } else if (t == float.class) {
+            return floatStringifier();
+        } else if (t == double.class) {
+            return doubleStringifier();
+        }
+        return null;
+    }
+
     private static MethodHandle lookupStatic(Lookup lookup, Class<?> refc, String name,
                                      Class<?> rtype, Class<?>... ptypes) {
         try {
@@ -932,7 +948,7 @@ public final class StringConcatFactory {
 
             boolean isSpecialized = ptype.isPrimitive() ||
                                     StringConcatItem.class == ptype;
-            Class<?> ttype = isSpecialized ? ptype : Object.class;
+            Class<?> ttype = isSpecialized ? promoteIntType(ptype) : Object.class;
             MethodHandle filter = stringifierFor(ttype);
 
             if (filter != null) {

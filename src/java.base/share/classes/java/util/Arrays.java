@@ -3455,6 +3455,343 @@ public class Arrays {
             a[i] = val;
     }
 
+    // Tiling
+
+    private static boolean tileCommon(Object array, int fromIndex, int toIndex, Object tile) {
+        Objects.requireNonNull(array, "array must not be null");
+        Objects.requireNonNull(tile, "filler must not be null");
+        rangeCheck(Array.getLength(array), fromIndex, toIndex);
+        int length = Array.getLength(tile);
+        if (length == 0) {
+            return false;
+        } else if (length == 1) {
+            return true;
+        } else {
+            int remaining = toIndex - fromIndex;
+            if (remaining <= length) {
+                System.arraycopy(tile, 0, array, fromIndex, remaining);
+            } else {
+                System.arraycopy(tile, 0, array, fromIndex, length);
+                remaining -= length;
+                int offset = fromIndex + length;
+                while (length < remaining) {
+                    System.arraycopy(array, fromIndex, array, offset, length);
+                    remaining -= length;
+                    length <<= 1;
+                    offset = fromIndex + length;
+                }
+                System.arraycopy(array, fromIndex, array, offset, remaining);
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Tile the {@code array} char array by progressively copying the {@code tile} char
+     * array contents until the range, {@code fromIndex} to {@code toIndex}, is filled.
+     *
+     * @param array      destination char array
+     * @param fromIndex  starting index in the destination char array where tiling begins
+     * @param toIndex    last index plus one in the destination char array where tiling ends
+     * @param tile       source char array
+     *
+     * @throws NullPointerException if {@code array} or {@code tile} is null
+     * @throws IllegalArgumentException if {@code fromIndex > toIndex}
+     * @throws ArrayIndexOutOfBoundsException
+     *     if {@code fromIndex < 0} or {@code toIndex > a.length}
+     *
+     */
+    public static void tile(char[] array, int fromIndex, int toIndex, char[] tile) {
+        if (tileCommon(array, fromIndex, toIndex, tile)) {
+            Arrays.fill(array, fromIndex, toIndex, tile[0]);
+        }
+    }
+
+    /**
+     * Tile the {@code array} char array by progressively copying the {@code tile} char
+     * array contents until the {@code array} char array is filled.
+     *
+     * @param array    destination array
+     * @param tile     source array
+     *
+     * @throws NullPointerException if {@code array} or {@code tile} is null
+     */
+    public static void tile(char[] array, char[] tile) {
+        tile(array, 0, array.length, tile);
+    }
+
+    /**
+     * Tile the {@code array} byte array by progressively copying the {@code tile} byte
+     * array contents until the range, {@code fromIndex} to {@code toIndex}, is filled.
+     *
+     * @param array      destination byte array
+     * @param fromIndex  starting index in the destination byte array where tiling begins
+     * @param toIndex    last index plus one in the destination byte array where tiling ends
+     * @param tile       source byte array
+     *
+     * @throws NullPointerException if {@code array} or {@code tile} is null
+     * @throws IllegalArgumentException if {@code fromIndex > toIndex}
+     * @throws ArrayIndexOutOfBoundsException
+     *     if {@code fromIndex < 0} or {@code toIndex > a.length}
+     *
+     */
+    public static void tile(byte[] array, int fromIndex, int toIndex, byte[] tile) {
+        if (tileCommon(array, fromIndex, toIndex, tile)) {
+            Arrays.fill(array, fromIndex, toIndex, tile[0]);
+        }
+    }
+
+    /**
+     * Tile the {@code array} byte array by progressively copying the {@code tile} byte
+     * array contents until the {@code array} byte array is filled.
+     *
+     * @param array    destination array
+     * @param tile     source array
+     *
+     * @throws NullPointerException if {@code array} or {@code tile} is null
+     */
+    public static void tile(byte[] array, byte[] tile) {
+        tile(array, 0, array.length, tile);
+    }
+
+    /**
+     * Tile the {@code array} short array by progressively copying the {@code tile} short
+     * array contents until the range, {@code fromIndex} to {@code toIndex}, is filled.
+     *
+     * @param array      destination short array
+     * @param fromIndex  starting index in the destination short array where tiling begins
+     * @param toIndex    last index plus one in the destination short array where tiling ends
+     * @param tile       source short array
+     *
+     * @throws NullPointerException if {@code array} or {@code tile} is null
+     * @throws IllegalArgumentException if {@code fromIndex > toIndex}
+     * @throws ArrayIndexOutOfBoundsException
+     *     if {@code fromIndex < 0} or {@code toIndex > a.length}
+     *
+     */
+    public static void tile(short[] array, int fromIndex, int toIndex, short[] tile) {
+        if (tileCommon(array, fromIndex, toIndex, tile)) {
+            Arrays.fill(array, fromIndex, toIndex, tile[0]);
+        }
+    }
+
+    /**
+     * Tile the {@code array} short array by progressively copying the {@code tile} short
+     * array contents until the {@code array} short array is filled.
+     *
+     * @param array    destination array
+     * @param tile     source array
+     *
+     * @throws NullPointerException if {@code array} or {@code tile} is null
+     */
+    public static void tile(short[] array, short[] tile) {
+        tile(array, 0, array.length, tile);
+    }
+
+    /**
+     * Tile the {@code array} int array by progressively copying the {@code tile} int
+     * array contents until the range, {@code fromIndex} to {@code toIndex}, is filled.
+     *
+     * @param array      destination int array
+     * @param fromIndex  starting index in the destination int array where tiling begins
+     * @param toIndex    last index plus one in the destination int array where tiling ends
+     * @param tile       source int array
+     *
+     * @throws NullPointerException if {@code array} or {@code tile} is null
+     * @throws IllegalArgumentException if {@code fromIndex > toIndex}
+     * @throws ArrayIndexOutOfBoundsException
+     *     if {@code fromIndex < 0} or {@code toIndex > a.length}
+     *
+     */
+    public static void tile(int[] array, int fromIndex, int toIndex, int[] tile) {
+        if (tileCommon(array, fromIndex, toIndex, tile)) {
+            Arrays.fill(array, fromIndex, toIndex, tile[0]);
+        }
+    }
+
+    /**
+     * Tile the {@code array} int array by progressively copying the {@code tile} int
+     * array contents until the {@code array} int array is filled.
+     *
+     * @param array    destination array
+     * @param tile     source array
+     *
+     * @throws NullPointerException if {@code array} or {@code tile} is null
+     */
+    public static void tile(int[] array, int[] tile) {
+        tile(array, 0, array.length, tile);
+    }
+
+    /**
+     * Tile the {@code array} long array by progressively copying the {@code tile} long
+     * array contents until the range, {@code fromIndex} to {@code toIndex}, is filled.
+     *
+     * @param array      destination long array
+     * @param fromIndex  starting index in the destination long array where tiling begins
+     * @param toIndex    last index plus one in the destination long array where tiling ends
+     * @param tile       source long array
+     *
+     * @throws NullPointerException if {@code array} or {@code tile} is null
+     * @throws IllegalArgumentException if {@code fromIndex > toIndex}
+     * @throws ArrayIndexOutOfBoundsException
+     *     if {@code fromIndex < 0} or {@code toIndex > a.length}
+     *
+     */
+    public static void tile(long[] array, int fromIndex, int toIndex, long[] tile) {
+        if (tileCommon(array, fromIndex, toIndex, tile)) {
+            Arrays.fill(array, fromIndex, toIndex, tile[0]);
+        }
+    }
+
+    /**
+     * Tile the {@code array} long array by progressively copying the {@code tile} long
+     * array contents until the {@code array} long array is filled.
+     *
+     * @param array    destination array
+     * @param tile     source array
+     *
+     * @throws NullPointerException if {@code array} or {@code tile} is null
+     */
+    public static void tile(long[] array, long[] tile) {
+        tile(array, 0, array.length, tile);
+    }
+
+    /**
+     * Tile the {@code array} float array by progressively copying the {@code tile} float
+     * array contents until the range, {@code fromIndex} to {@code toIndex}, is filled.
+     *
+     * @param array      destination float array
+     * @param fromIndex  starting index in the destination float array where tiling begins
+     * @param toIndex    last index plus one in the destination float array where tiling ends
+     * @param tile       source float array
+     *
+     * @throws NullPointerException if {@code array} or {@code tile} is null
+     * @throws IllegalArgumentException if {@code fromIndex > toIndex}
+     * @throws ArrayIndexOutOfBoundsException
+     *     if {@code fromIndex < 0} or {@code toIndex > a.length}
+     *
+     */
+    public static void tile(float[] array, int fromIndex, int toIndex, float[] tile) {
+        if (tileCommon(array, fromIndex, toIndex, tile)) {
+            Arrays.fill(array, fromIndex, toIndex, tile[0]);
+        }
+    }
+
+    /**
+     * Tile the {@code array} float array by progressively copying the {@code tile} float
+     * array contents until the {@code array} float array is filled.
+     *
+     * @param array    destination array
+     * @param tile     source array
+     *
+     * @throws NullPointerException if {@code array} or {@code tile} is null
+     */
+    public static void tile(float[] array, float[] tile) {
+        tile(array, 0, array.length, tile);
+    }
+
+    /**
+     * Tile the {@code array} double array by progressively copying the {@code tile} double
+     * array contents until the range, {@code fromIndex} to {@code toIndex}, is filled.
+     *
+     * @param array      destination double array
+     * @param fromIndex  starting index in the destination double array where tiling begins
+     * @param toIndex    last index plus one in the destination double array where tiling ends
+     * @param tile       source double array
+     *
+     * @throws NullPointerException if {@code array} or {@code tile} is null
+     * @throws IllegalArgumentException if {@code fromIndex > toIndex}
+     * @throws ArrayIndexOutOfBoundsException
+     *     if {@code fromIndex < 0} or {@code toIndex > a.length}
+     *
+     */
+    public static void tile(double[] array, int fromIndex, int toIndex, double[] tile) {
+        if (tileCommon(array, fromIndex, toIndex, tile)) {
+            Arrays.fill(array, fromIndex, toIndex, tile[0]);
+        }
+    }
+
+    /**
+     * Tile the {@code array} double array by progressively copying the {@code tile} double
+     * array contents until the {@code array} double array is filled.
+     *
+     * @param array    destination array
+     * @param tile     source array
+     *
+     * @throws NullPointerException if {@code array} or {@code tile} is null
+     */
+    public static void tile(double[] array, double[] tile) {
+        tile(array, 0, array.length, tile);
+    }
+
+    /**
+     * Tile the {@code array} boolean array by progressively copying the {@code tile} boolean
+     * array contents until the range, {@code fromIndex} to {@code toIndex}, is filled.
+     *
+     * @param array      destination boolean array
+     * @param fromIndex  starting index in the destination boolean array where tiling begins
+     * @param toIndex    last index plus one in the destination boolean array where tiling ends
+     * @param tile       source boolean array
+     *
+     * @throws NullPointerException if {@code array} or {@code tile} is null
+     * @throws IllegalArgumentException if {@code fromIndex > toIndex}
+     * @throws ArrayIndexOutOfBoundsException
+     *     if {@code fromIndex < 0} or {@code toIndex > a.length}
+     *
+     */
+    public static void tile(boolean[] array, int fromIndex, int toIndex, boolean[] tile) {
+        if (tileCommon(array, fromIndex, toIndex, tile)) {
+            Arrays.fill(array, fromIndex, toIndex, tile[0]);
+        }
+    }
+
+    /**
+     * Tile the {@code array} boolean array by progressively copying the {@code tile} boolean
+     * array contents until the {@code array} boolean array is filled.
+     *
+     * @param array    destination array
+     * @param tile     source array
+     *
+     * @throws NullPointerException if {@code array} or {@code tile} is null
+     */
+    public static void tile(boolean[] array, boolean[] tile) {
+        tile(array, 0, array.length, tile);
+    }
+
+    /**
+     * Tile the {@code array} Object array by progressively copying the {@code tile} Object
+     * array contents until the range, {@code fromIndex} to {@code toIndex}, is filled.
+     *
+     * @param array      destination Object array
+     * @param fromIndex  starting index in the destination Object array where tiling begins
+     * @param toIndex    last index plus one in the destination Object array where tiling ends
+     * @param tile       source Object array
+     *
+     * @throws NullPointerException if {@code array} or {@code tile} is null
+     * @throws IllegalArgumentException if {@code fromIndex > toIndex}
+     * @throws ArrayIndexOutOfBoundsException
+     *     if {@code fromIndex < 0} or {@code toIndex > a.length}
+     *
+     */
+    public static void tile(Object[] array, int fromIndex, int toIndex, Object[] tile) {
+        if (tileCommon(array, fromIndex, toIndex, tile)) {
+            Arrays.fill(array, fromIndex, toIndex, tile[0]);
+        }
+    }
+
+    /**
+     * Tile the {@code array} Object array by progressively copying the {@code tile} Object
+     * array contents until the {@code array} Object array is filled.
+     *
+     * @param array    destination array
+     * @param tile     source array
+     *
+     * @throws NullPointerException if {@code array} or {@code tile} is null
+     */
+    public static void tile(Object[] array, Object[] tile) {
+        tile(array, 0, array.length, tile);
+    }
+
     // Cloning
 
     /**

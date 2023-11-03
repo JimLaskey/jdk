@@ -25,7 +25,6 @@
 #include "precompiled.hpp"
 #include "asm/assembler.hpp"
 #include "asm/assembler.inline.hpp"
-#include "logging/log.hpp"
 #include "opto/c2_MacroAssembler.hpp"
 #include "runtime/basicLock.hpp"
 
@@ -93,10 +92,9 @@ void C2_MacroAssembler::fast_lock(Register Roop, Register Rbox, Register Rscratc
   }
 
   if (LockingMode == LM_LIGHTWEIGHT) {
-    log_trace(fastlock)("C2_MacroAssembler::lock fast");
 
-    fast_lock_2(Roop /* obj */, Rbox /* t1 */, Rscratch /* t2 */, Rscratch2 /* t3 */,
-                1 /* savemask (save t1) */, done);
+    lightweight_lock(Roop /* obj */, Rbox /* t1 */, Rscratch /* t2 */, Rscratch2 /* t3 */,
+                     1 /* savemask (save t1) */, done);
 
     // Success: set Z
     cmp(Roop, Roop);
@@ -144,10 +142,9 @@ void C2_MacroAssembler::fast_unlock(Register Roop, Register Rbox, Register Rscra
   Label done;
 
   if (LockingMode == LM_LIGHTWEIGHT) {
-    log_trace(fastlock)("C2_MacroAssembler::unlock fast");
 
-    fast_unlock_2(Roop /* obj */, Rbox /* t1 */, Rscratch /* t2 */, Rscratch2 /* t3 */,
-                  1 /* savemask (save t1) */, done);
+    lightweight_unlock(Roop /* obj */, Rbox /* t1 */, Rscratch /* t2 */, Rscratch2 /* t3 */,
+                       1 /* savemask (save t1) */, done);
 
     cmp(Roop, Roop); // Success: Set Z
     // Fall through

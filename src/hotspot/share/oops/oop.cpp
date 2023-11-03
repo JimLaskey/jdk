@@ -23,6 +23,7 @@
  */
 
 #include "precompiled.hpp"
+#include "cds/cdsConfig.hpp"
 #include "classfile/altHashing.hpp"
 #include "classfile/javaClasses.inline.hpp"
 #include "gc/shared/collectedHeap.inline.hpp"
@@ -30,6 +31,7 @@
 #include "memory/resourceArea.hpp"
 #include "memory/universe.hpp"
 #include "oops/access.inline.hpp"
+#include "oops/compressedKlass.inline.hpp"
 #include "oops/compressedOops.inline.hpp"
 #include "oops/oop.inline.hpp"
 #include "oops/verifyOopClosure.hpp"
@@ -161,7 +163,7 @@ bool oopDesc::has_klass_gap() {
 
 #if INCLUDE_CDS_JAVA_HEAP
 void oopDesc::set_narrow_klass(narrowKlass nk) {
-  assert(DumpSharedSpaces, "Used by CDS only. Do not abuse!");
+  assert(CDSConfig::is_dumping_heap(), "Used by CDS only. Do not abuse!");
   assert(UseCompressedClassPointers, "must be");
   _metadata._compressed_klass = nk;
 }
@@ -190,7 +192,8 @@ void* oopDesc::load_oop_raw(oop obj, int offset) {
 
 oop oopDesc::obj_field_acquire(int offset) const                      { return HeapAccess<MO_ACQUIRE>::oop_load_at(as_oop(), offset); }
 
-void oopDesc::obj_field_put_raw(int offset, oop value)                { RawAccess<>::oop_store_at(as_oop(), offset, value); }
+void oopDesc::obj_field_put_raw(int offset, oop value)                { assert(!(UseZGC && ZGenerational), "Generational ZGC must use store barriers");
+                                                                        RawAccess<>::oop_store_at(as_oop(), offset, value); }
 void oopDesc::release_obj_field_put(int offset, oop value)            { HeapAccess<MO_RELEASE>::oop_store_at(as_oop(), offset, value); }
 void oopDesc::obj_field_put_volatile(int offset, oop value)           { HeapAccess<MO_SEQ_CST>::oop_store_at(as_oop(), offset, value); }
 

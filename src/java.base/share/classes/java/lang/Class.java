@@ -4807,7 +4807,9 @@ public final class Class<T> implements java.io.Serializable,
      *  </ul>
      *  Main methods that have a {@code String[]} argument will be chosen over main
      *  methods with no argument.
-     *
+     * @apiNote The method returned may be declared in this class, a parent class
+     * or as a default method of an interface that the class or parent class
+     * implements.
      * @return the candidate main method or null if none found
      */
     @PreviewFeature(feature=PreviewFeature.Feature.IMPLICIT_CLASSES)

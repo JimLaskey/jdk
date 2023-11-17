@@ -4801,9 +4801,10 @@ public final class Class<T> implements java.io.Serializable,
      * <ul>
      *  <li>be declared this class's hierarchy</li>
      *  <li>have the name "main"</li>
-     *  <li>must have no arguments or a single argument of type {@code String[]}</li>
-     *  <li>must have the return type of void</li>
-     *  <li>must not be private or abstract</li>
+     *  <li>have no arguments or a single argument of type {@code String[]}</li>
+     *  <li>have the return type of void</li>
+     *  <li>be public, protected or package private</li>
+     *  <li>not be abstract</li>
      *  </ul>
      *  Main methods that have a {@code String[]} argument will be chosen over main
      *  methods with no argument.

@@ -4799,18 +4799,21 @@ public final class Class<T> implements java.io.Serializable,
      * Return the first method that meets the requirements of an application main method.
      * The method must:
      * <ul>
-     *  <li>be declared this class's hierarchy</li>
-     *  <li>have the name "main"</li>
-     *  <li>have no arguments or a single argument of type {@code String[]}</li>
-     *  <li>have the return type of void</li>
-     *  <li>be public, protected or package private</li>
-     *  <li>not be abstract</li>
-     *  </ul>
-     *  Main methods that have a {@code String[]} argument will be chosen over main
-     *  methods with no argument.
+     * <li>be declared this class's hierarchy</li>
+     * <li>have the name "main"</li>
+     * <li>have no arguments or a single argument of type {@code String[]}</li>
+     * <li>have the return type of void</li>
+     * <li>be public, protected or package private</li>
+     * <li>not be abstract</li>
+     * </ul>
+     * Main methods that have a {@code String[]} argument will be chosen over main
+     * methods with no argument.
      * @apiNote The method returned may be declared in this class, a parent class
      * or as a default method of an interface that the class or parent class
-     * implements.
+     * implements. It is not possible to declare a static main method and instance main
+     * method with the same signature in the same class. (@jls 8.4.2) states that
+     * "It is a compile-time error to declare two methods with override-equivalent
+     * signatures in a class."
      * @return the candidate main method or null if none found
      */
     @PreviewFeature(feature=PreviewFeature.Feature.IMPLICIT_CLASSES)

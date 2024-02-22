@@ -187,7 +187,7 @@ public final class TransLiterals extends TreeTranslator {
                     indyType,
                     staticArgValues.toArray(new LoadableConstant[0])
             );
-            JCFieldAccess qualifier = make.Select(make.Type(syms.processorType), dynSym.name);
+            JCFieldAccess qualifier = make.Select(make.Type(syms.templateRuntimeType), dynSym.name);
             qualifier.sym = dynSym;
             qualifier.type = type;
             JCMethodInvocation apply = make.Apply(List.nil(), qualifier, args);

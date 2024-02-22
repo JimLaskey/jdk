@@ -245,8 +245,6 @@ public class Symtab {
     // For string templates
     public final Type stringTemplateType;
     public final Type templateRuntimeType;
-    public final Type processorType;
-    public final Type linkageType;
 
     /** The symbol representing the length field of an array.
      */
@@ -644,8 +642,6 @@ public class Symtab {
         // For string templates
         stringTemplateType = enterClass("java.lang.StringTemplate");
         templateRuntimeType = enterClass("java.lang.runtime.TemplateRuntime");
-        processorType = enterClass("java.lang.StringTemplate$Processor");
-        linkageType = enterClass("java.lang.StringTemplate$Processor$Linkage");
 
         // Enter a synthetic class that is used to mark internal
         // proprietary classes in ct.sym.  This class does not have a

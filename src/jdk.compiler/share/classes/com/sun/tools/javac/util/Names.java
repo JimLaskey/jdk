@@ -230,10 +230,8 @@ public class Names {
     // templated string
     public final Name process;
     public final Name STR;
-    public final Name RAW;
     public final Name newStringTemplate;
     public final Name newLargeStringTemplate;
-    public final Name processStringTemplate;
 
     public final Name.Table table;
 
@@ -416,10 +414,8 @@ public class Names {
         // templated string
         process = fromString("process");
         STR = fromString("STR");
-        RAW = fromString("RAW");
         newStringTemplate = fromString("newStringTemplate");
         newLargeStringTemplate = fromString("newLargeStringTemplate");
-        processStringTemplate = fromString("processStringTemplate");
 
         // pattern switches
         typeSwitch = fromString("typeSwitch");

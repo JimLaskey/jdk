@@ -143,7 +143,7 @@ import sun.nio.cs.UTF_8;
 
 public final class String
     implements java.io.Serializable, Comparable<String>, CharSequence,
-               Constable, ConstantDesc {
+               Constable, ConstantDesc, StringTemplate {
 
     /**
      * The value is used for character storage.
@@ -2105,6 +2105,21 @@ public final class String
      */
     public static final Comparator<String> CASE_INSENSITIVE_ORDER
                                          = new CaseInsensitiveComparator();
+
+    @Override
+    public List<String> fragments() {
+        return List.of(this);
+    }
+
+    @Override
+    public List<Object> values() {
+        return List.of();
+    }
+
+    @Override
+    public String interpolate() {
+        return this;
+    }
 
     /**
      * CaseInsensitiveComparator for Strings.

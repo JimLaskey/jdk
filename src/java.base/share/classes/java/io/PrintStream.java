@@ -992,6 +992,21 @@ public class PrintStream extends FilterOutputStream
     }
 
     /**
+     * Prints a {@link StringTemplate}. If the argument is {@code null} then the string
+     * {@code "null"} is printed.  Otherwise, the {@link StringTemplate StringTemplate's}
+     * interpolation are converted into bytes according to the character encoding given
+     * to the constructor, or the default charset if none
+     * specified. These bytes are written in exactly the manner of the
+     * {@link #write(int)} method.
+     *
+     * @param      st   The {@link StringTemplate} to be printed
+     * @see Charset#defaultCharset()
+     */
+    public void print(StringTemplate st) {
+        write(String.valueOf(st.interpolate()));
+    }
+
+    /**
      * Prints a string.  If the argument is {@code null} then the string
      * {@code "null"} is printed.  Otherwise, the string's characters are
      * converted into bytes according to the character encoding given to the
@@ -1159,6 +1174,26 @@ public class PrintStream extends FilterOutputStream
             }
         }
     }
+
+    /**
+     * Prints a {@link StringTemplate} and then terminates the line.  This method behaves as
+     * though it invokes {@link #print(StringTemplate)} and then
+     * {@link #println()}.
+     *
+     * @param st  The {@code String} to be printed.
+     */
+    public void println(StringTemplate st) {
+        if (getClass() == PrintStream.class) {
+            print(st);
+            newLine();
+        } else {
+            synchronized (this) {
+                print(st);
+                newLine();
+            }
+        }
+    }
+
 
     /**
      * Prints a String and then terminates the line.  This method behaves as

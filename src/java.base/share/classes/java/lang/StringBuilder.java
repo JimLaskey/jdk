@@ -174,6 +174,12 @@ public final class StringBuilder
     }
 
     @Override
+    public StringBuilder append(StringTemplate stringTemplate) {
+        super.append(stringTemplate);
+        return this;
+    }
+
+    @Override
     @IntrinsicCandidate
     public StringBuilder append(String str) {
         super.append(str);

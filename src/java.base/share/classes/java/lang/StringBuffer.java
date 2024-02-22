@@ -307,6 +307,13 @@ import jdk.internal.vm.annotation.IntrinsicCandidate;
     }
 
     @Override
+    public synchronized StringBuffer append(StringTemplate stringTemplate) {
+        toStringCache = null;
+        super.append(stringTemplate);
+        return this;
+    }
+
+    @Override
     @IntrinsicCandidate
     public synchronized StringBuffer append(String str) {
         toStringCache = null;

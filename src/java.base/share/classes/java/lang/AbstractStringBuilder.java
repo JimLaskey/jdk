@@ -31,6 +31,7 @@ import jdk.internal.math.FloatToDecimal;
 import java.io.IOException;
 import java.nio.CharBuffer;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Spliterator;
 import java.util.stream.IntStream;
 import java.util.stream.StreamSupport;
@@ -547,6 +548,33 @@ abstract sealed class AbstractStringBuilder implements Appendable, CharSequence
             StringUTF16.putCharSB(value, index, ch);
             maybeLatin1 = true;
         }
+    }
+
+    /**
+     * Appends the specified {@link StringTemplate} to this character sequence.
+     * <p>
+     * The fragments and values of the {@link StringTemplate} argument are appended, in
+     * order, increasing the length of this sequence by the length of the
+     * argument. If {@code stringTemplate} is {@code null}, then the four
+     * characters {@code "null"} are appended.
+     *
+     * @param   stringTemplate   a {@link StringTemplate}.
+     *
+     * @return  a reference to this object.
+     */
+    public AbstractStringBuilder append(StringTemplate stringTemplate) {
+        if (stringTemplate == null) {
+            return appendNull();
+        }
+        List<String> fragments = stringTemplate.fragments();
+        List<Object> values = stringTemplate.values();
+        int n = values.size();
+        for (int i = 0; i < n; i++) {
+            append(fragments.get(i));
+            append(values.get(i));
+        }
+        append(fragments.get(n));
+        return this;
     }
 
     /**

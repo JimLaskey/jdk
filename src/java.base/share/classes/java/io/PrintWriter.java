@@ -769,6 +769,20 @@ public class PrintWriter extends Writer {
     }
 
     /**
+     * Prints a {@link StringTemplate}.  If the argument is {@code null} then the string
+     * {@code "null"} is printed.  Otherwise, the {@link StringTemplate StringTemplate's}
+     * interpolation are converted into bytes according to the default charset,
+     * and these bytes are written in exactly the manner of the
+     * {@link #write(int)} method.
+     *
+     * @param      st   The {@code StringTemplate} to be printed
+     * @see Charset#defaultCharset()
+     */
+    public void print(StringTemplate st) {
+        write(String.valueOf(st.interpolate()));
+    }
+
+    /**
      * Prints a string.  If the argument is {@code null} then the string
      * {@code "null"} is printed.  Otherwise, the string's characters are
      * converted into bytes according to the default charset,
@@ -978,6 +992,31 @@ public class PrintWriter extends Writer {
         } else {
             synchronized (lock) {
                 print(x);
+                println();
+            }
+        }
+    }
+
+    /**
+     * Prints a {@link StringTemplate} and then terminates the line.  This method behaves as
+     * though it invokes {@link #print(StringTemplate)} and then
+     * {@link #println()}.
+     *
+     * @param st the {@code String} value to be printed
+     */
+    public void println(StringTemplate st) {
+        Object lock = this.lock;
+        if (lock instanceof InternalLock locker) {
+            locker.lock();
+            try {
+                print(st);
+                println();
+            } finally {
+                locker.unlock();
+            }
+        } else {
+            synchronized (lock) {
+                print(st);
                 println();
             }
         }

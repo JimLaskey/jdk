@@ -28,6 +28,6 @@
 class StringTemplate {
     String m() {
         int x = 10, y = 20;
-        return STR."\{x} + \{y} = \{x + y}";
+        return STR("\{x} + \{y} = \{x + y}");
     }
 }

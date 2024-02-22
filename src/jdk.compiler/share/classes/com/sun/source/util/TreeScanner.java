@@ -788,8 +788,7 @@ public class TreeScanner<R,P> implements TreeVisitor<R,P> {
     @Override
     @PreviewFeature(feature=PreviewFeature.Feature.STRING_TEMPLATES, reflective=true)
     public R visitStringTemplate(StringTemplateTree node, P p) {
-        R r = scan(node.getProcessor(), p);
-        r = scanAndReduce(node.getExpressions(), p, r);
+        R r = scan(node.getExpressions(), p);
         return r;
     }
 

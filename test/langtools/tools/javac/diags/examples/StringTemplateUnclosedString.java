@@ -32,6 +32,6 @@ import java.lang.*;
 class StringTemplateUnclosedString {
     String m() {
         int x = 10;
-        return STR."\{x";
+        return STR("\{x");
     }
 }

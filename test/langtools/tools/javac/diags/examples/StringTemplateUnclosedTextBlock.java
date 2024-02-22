@@ -33,10 +33,10 @@ import java.lang.*;
 class StringTemplateUnclosedTextBlock {
     String m() {
         int x = 10;
-        return STR."""
+        return STR("""
                 aaa
                 \{x
-                """
+                """)
         ;
     }
 }

@@ -44,7 +44,7 @@ import jdk.internal.javac.PreviewFeature;
  * {@snippet :
  * int x = 10;
  * int y = 20;
- * StringTemplate st = RAW."\{x} + \{y} = \{x + y}";
+ * StringTemplate st = "\{x} + \{y} = \{x + y}";
  * }
  * to byte code that invokes the {@link java.lang.runtime.TemplateRuntime#newStringTemplate}
  * bootstrap method to construct a {@link CallSite} that accepts two integers and produces a new

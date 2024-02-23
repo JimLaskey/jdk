@@ -52,51 +52,31 @@ import java.util.Objects;
  */
 final class StringTemplateImpl extends Carriers.CarrierObject implements StringTemplate {
     /**
-     * List of string fragments for the string template. This value of this list is shared by
-     * all instances created at the {@link java.lang.invoke.CallSite CallSite}.
+     * StringTemplate shared data.
      */
-    private final List<String> fragments;
-
-    /**
-     * Specialized {@link MethodHandle} used to implement the {@link StringTemplate StringTemplate's}
-     * {@code values} method. This {@link MethodHandle} is shared by all instances created at the
-     * {@link java.lang.invoke.CallSite CallSite}.
-     */
-    private final MethodHandle valuesMH;
-
-    /**
-     * Specialized {@link MethodHandle} used to implement the {@link StringTemplate StringTemplate's}
-     * {@code interpolate} method. This {@link MethodHandle} is shared by all instances created at the
-     * {@link java.lang.invoke.CallSite CallSite}.
-     */
-    private final MethodHandle interpolateMH;
+    private final StringTemplateSharedData sharedData;
 
     /**
      * Constructor.
      *
      * @param primitiveCount  number of primitive slots required (bound at callsite)
      * @param objectCount     number of object slots required (bound at callsite)
-     * @param fragments       list of string fragments (bound in (bound at callsite)
-     * @param valuesMH        {@link MethodHandle} to produce list of values (bound at callsite)
-     * @param interpolateMH   {@link MethodHandle} to produce interpolation (bound at callsite)
+     * @param sharedData      StringTemplate shared data
      */
-    StringTemplateImpl(int primitiveCount, int objectCount,
-                       List<String> fragments, MethodHandle valuesMH, MethodHandle interpolateMH) {
+    StringTemplateImpl(int primitiveCount, int objectCount, StringTemplateSharedData sharedData) {
         super(primitiveCount, objectCount);
-        this.fragments = fragments;
-        this.valuesMH = valuesMH;
-        this.interpolateMH = interpolateMH;
+        this.sharedData = sharedData;
     }
 
     @Override
     public List<String> fragments() {
-        return fragments;
+        return sharedData.fragments();
     }
 
     @Override
     public List<Object> values() {
         try {
-            return (List<Object>)valuesMH.invokeExact(this);
+            return (List<Object>)sharedData.valuesMH().invokeExact(this);
         } catch (RuntimeException | Error ex) {
             throw ex;
         } catch (Throwable ex) {
@@ -107,7 +87,7 @@ final class StringTemplateImpl extends Carriers.CarrierObject implements StringT
     @Override
     public String interpolate() {
         try {
-            return (String)interpolateMH.invokeExact(this);
+            return (String)sharedData.interpolateMH().invokeExact(this);
         } catch (RuntimeException | Error ex) {
             throw ex;
         } catch (Throwable ex) {

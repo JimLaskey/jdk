@@ -81,6 +81,7 @@ public final class TransLiterals extends TreeTranslator {
     private Env<AttrContext> env = null;
     private ClassSymbol currentClass = null;
     private MethodSymbol currentMethodSym = null;
+    private boolean currentIsConcat = false;
 
     protected TransLiterals(Context context) {
         context.put(transLiteralsKey, this);
@@ -136,6 +137,32 @@ public final class TransLiterals extends TreeTranslator {
             currentMethodSym = prevMethodSym;
         }
     }
+
+    @Override
+    public void visitApply(JCMethodInvocation tree) {
+
+        Symbol meth = TreeInfo.symbol(tree.meth);
+        if (meth.name == names.STR && meth.owner == syms.stringTemplateType.tsym &&
+                tree.args.head instanceof JCStringTemplate st) {
+            int prevPos = make.pos;
+            boolean saveIsConcat = currentIsConcat;
+            currentIsConcat = true;
+            try {
+                st.expressions = translate(st.expressions);
+                TransStringTemplate transStringTemplate = new TransStringTemplate(st);
+                result = transStringTemplate.visit();
+            } catch (Throwable ex) {
+                ex.printStackTrace();
+                throw ex;
+            } finally {
+                make.at(prevPos);
+                currentIsConcat = saveIsConcat;
+            }
+
+        } else {
+            super.visitApply(tree);
+        }
+     }
 
     final class TransStringTemplate {
         final JCStringTemplate tree;
@@ -225,26 +252,29 @@ public final class TransLiterals extends TreeTranslator {
             JCExpression result;
             make.at(tree.pos);
 
-            // isNamedProcessor(names.STR)
-            result = concatExpression(fragments, expressions);
-            result = newStringTemplate();
+            if (currentIsConcat) {
+                result = concatExpression(fragments, expressions);
+            } else {
+                result = newStringTemplate();
+            }
             return result;
         }
     }
 
     public void visitStringTemplate(JCStringTemplate tree) {
         int prevPos = make.pos;
+        boolean saveIsConcat = currentIsConcat;
+        currentIsConcat = false;
         try {
             tree.expressions = translate(tree.expressions);
-
             TransStringTemplate transStringTemplate = new TransStringTemplate(tree);
-
             result = transStringTemplate.visit();
         } catch (Throwable ex) {
             ex.printStackTrace();
             throw ex;
         } finally {
             make.at(prevPos);
+            currentIsConcat = saveIsConcat;
         }
     }
 

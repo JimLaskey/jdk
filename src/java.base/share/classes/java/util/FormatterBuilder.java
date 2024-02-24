@@ -47,15 +47,24 @@ import static java.lang.invoke.MethodHandles.*;
 import static java.lang.invoke.MethodType.*;
 
 /**
- * This package private class supports the construction of the {@link MethodHandle}
- * used by {@link FormatProcessor}.
+ * This  class supports the construction of the {@link MethodHandle}
+ * primarily used by {@link Formatter} and {@link String}. The class
+ * takes a format string, a local and an array of primitive types to
+ *  produce a {@link MethodHandle} that takes primitive types and
+ *  produces a string. For example:
+ * {@snippet lang=JAVA :
+ * String format = "%d + %d = %d";
+ * Class<?>[] types = new Class<?>[] { int.class, int.class, int.class };
+ * MethodHandle mh = FormatterBuilder.create(format, types);
+ * String result = (String)mh.invokeExact( 10, 20, 30 );
+ * }
  *
  * @since 21
  *
  * Warning: This class is part of PreviewFeature.Feature.STRING_TEMPLATES.
  *          Do not rely on its availability.
  */
-final class FormatterBuilder {
+public final class FormatterBuilder {
     private static final Lookup LOOKUP = lookup();
 
     private final String format;
@@ -64,7 +73,63 @@ final class FormatterBuilder {
     private final DecimalFormatSymbols dfs;
     private final boolean isGenericDFS;
 
-    FormatterBuilder(String format, Locale locale, Class<?>[] ptypes) {
+    /**
+     * Create a specialized {@link MethodHandle} that will format a specific
+     * set of data types.
+     *
+     * @param format  format string <a href="Formatter#syntax">Format string syntax</a>
+     * @param locale  {@link Locale} to use
+     * @param ptypes  array of the argument types
+     *
+     * @return specialized {@link MethodHandle}
+     */
+    public static MethodHandle create(String format, Locale locale, Class<?>[] ptypes) {
+        return new FormatterBuilder(format, locale, ptypes).build();
+    }
+
+    /**
+     * Create a specialized {@link MethodHandle} that will format a specific
+     * set of data types, using {@link Locale#ROOT}.
+     *
+     * @param format  format string <a href="Formatter#syntax">Format string syntax</a>
+     * @param ptypes  array of the argument types
+     *
+     * @return specialized {@link MethodHandle}
+     */
+    public static MethodHandle create(String format, Class<?>[] ptypes) {
+        return new FormatterBuilder(format, Locale.ROOT, ptypes).build();
+    }
+
+    /**
+     * Create a specialized {@link MethodHandle} that will format a specific
+     * set of data types, based on a {@link StringTemplate} and locale.
+     *
+     * @param st      a {@link StringTemplate}
+     * @param locale  {@link Locale} to use
+     *
+     * @return specialized {@link MethodHandle}
+     */
+    public static MethodHandle create(StringTemplate st, Locale locale) {
+        Objects.requireNonNull(st, "st must not be null");
+        Objects.requireNonNull(locale, "locale must not be null");
+        String format = Formatter.stringTemplateFormat(st.fragments());
+        Class<?>[] ptypes = st.getTypes().toArray(new Class<?>[0]);
+        return FormatterBuilder.create(format, locale, ptypes);
+    }
+
+    /**
+     * Create a specialized {@link MethodHandle} that will format a specific
+     * set of data types, based on a {@link StringTemplate} and link Locale#ROOT}.
+     *
+     * @param st  a {@link StringTemplate}
+     *
+     * @return specialized {@link MethodHandle}
+     */
+    public static MethodHandle create(StringTemplate st) {
+        return create(st, Locale.ROOT);
+    }
+
+    private FormatterBuilder(String format, Locale locale, Class<?>[] ptypes) {
         this.format = format;
         this.locale = locale;
         this.ptypes = ptypes;
@@ -465,7 +530,7 @@ final class FormatterBuilder {
      *
      * @return new {@link MethodHandle} to format arguments
      */
-    MethodHandle build() {
+    private MethodHandle build() {
         List<String> segments = new ArrayList<>();
         MethodHandle[] filters = new MethodHandle[ptypes.length];
         buildFilters(Formatter.parse(format), segments, filters);

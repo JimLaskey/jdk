@@ -1323,6 +1323,169 @@ public class PrintWriter extends Writer {
     }
 
     /**
+     * A convenience method to write a {@link StringTemplate} to this writer using
+     * the specified format and values.  If automatic flushing is
+     * enabled, calls to this method will flush the output buffer.
+     *
+     * {@snippet lang=java :
+     *     out.format(l, st)
+     * }
+     *
+     * @param  l
+     *         The {@linkplain java.util.Locale locale} to apply during
+     *         formatting.  If {@code l} is {@code null} then no localization
+     *         is applied.
+     *
+     * @param  st
+     *         A {@link StringTemplate} containing a format as described in <a
+     *         href="../util/Formatter.html#syntax">Format string syntax</a>.
+     *
+     *
+     * @throws  java.util.IllegalFormatException
+     *          If a format string contains an illegal syntax, a format
+     *          specifier that is incompatible with the given arguments,
+     *          insufficient arguments given the format string, or other
+     *          illegal conditions.  For specification of all possible
+     *          formatting errors, see the <a
+     *          href="../util/Formatter.html#detail">Details</a> section of the
+     *          formatter class specification.
+     *
+     * @throws  NullPointerException
+     *          If the {@code format} is {@code null}
+     *
+     * @return  This writer
+     *
+     * @since  23
+     */
+    public PrintWriter printf(Locale l, StringTemplate st) {
+        return format(l, st);
+    }
+
+    /**
+     * Writes a {@link StringTemplate} to this writer using the specified format
+     * and values.  If automatic flushing is enabled, calls to this
+     * method will flush the output buffer.
+     *
+     * <p> The locale always used is the one returned by {@link
+     * java.util.Locale#getDefault() Locale.getDefault()}, regardless of any
+     * previous invocations of other formatting methods on this object.
+     *
+     * @param  st
+     *         A {@link StringTemplate} containing a format as described in <a
+     *         href="../util/Formatter.html#syntax">Format string syntax</a>.
+     *
+     * @throws  java.util.IllegalFormatException
+     *          If a format string contains an illegal syntax, a format
+     *          specifier that is incompatible with the given arguments,
+     *          insufficient arguments given the format string, or other
+     *          illegal conditions.  For specification of all possible
+     *          formatting errors, see the <a
+     *          href="../util/Formatter.html#detail">Details</a> section of the
+     *          Formatter class specification.
+     *
+     * @throws  NullPointerException
+     *          If the {@code format} is {@code null}
+     *
+     * @return  This writer
+     *
+     * @since  23
+     */
+    public PrintWriter format(StringTemplate st) {
+        Object lock = this.lock;
+        if (lock instanceof InternalLock locker) {
+            locker.lock();
+            try {
+                implFormat(st);
+            } finally {
+                locker.unlock();
+            }
+        } else {
+            synchronized (lock) {
+                implFormat(st);
+            }
+        }
+        return this;
+    }
+
+    private void implFormat(StringTemplate st) {
+        try {
+            ensureOpen();
+            if ((formatter == null)
+                    || (formatter.locale() != Locale.getDefault()))
+                formatter = new Formatter(this);
+            formatter.format(Locale.getDefault(), st);
+            if (autoFlush)
+                out.flush();
+        } catch (InterruptedIOException x) {
+            Thread.currentThread().interrupt();
+        } catch (IOException x) {
+            trouble = true;
+        }
+    }
+
+    /**
+     * Writes a {@link StringTemplate} to this writer using the specified format
+     * and values.  If automatic flushing is enabled, calls to this
+     * method will flush the output buffer.
+     *
+     * @param  l
+     *         The {@linkplain java.util.Locale locale} to apply during
+     *         formatting.  If {@code l} is {@code null} then no localization
+     *         is applied.
+     *
+     * @param  st
+     *         A {@link StringTemplate} containing a format as described in <a
+     *         href="../util/Formatter.html#syntax">Format string syntax</a>.
+     *
+     * @throws  java.util.IllegalFormatException
+     *          If a format string contains an illegal syntax, a format
+     *          specifier that is incompatible with the given arguments,
+     *          insufficient arguments given the format string, or other
+     *          illegal conditions.  For specification of all possible
+     *          formatting errors, see the <a
+     *          href="../util/Formatter.html#detail">Details</a> section of the
+     *          formatter class specification.
+     *
+     * @throws  NullPointerException
+     *          If the {@code format} is {@code null}
+     *
+     * @return  This writer
+     *
+     * @since  23
+     */
+    public PrintWriter format(Locale l, StringTemplate st) {
+        Object lock = this.lock;
+        if (lock instanceof InternalLock locker) {
+            locker.lock();
+            try {
+                implFormat(l, st);
+            } finally {
+                locker.unlock();
+            }
+        } else {
+            synchronized (lock) {
+                implFormat(l, st);
+            }
+        }
+        return this;
+    }
+
+    private void implFormat(Locale l, StringTemplate st) {
+        try {
+            ensureOpen();
+            if ((formatter == null) || (formatter.locale() != l))
+                formatter = new Formatter(this, l);
+            formatter.format(l, st);
+            if (autoFlush)
+                out.flush();
+        } catch (InterruptedIOException x) {
+            Thread.currentThread().interrupt();
+        } catch (IOException x) {
+            trouble = true;
+        }
+    }
+
+    /**
      * Appends the specified character sequence to this writer.
      *
      * <p> An invocation of this method of the form {@code out.append(csq)}

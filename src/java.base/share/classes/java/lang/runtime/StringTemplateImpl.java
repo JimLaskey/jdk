@@ -25,7 +25,12 @@
 
 package java.lang.runtime;
 
+import jdk.internal.access.SharedSecrets;
+
 import java.lang.invoke.MethodHandle;
+import java.lang.invoke.MethodHandles;
+import java.lang.invoke.MethodType;
+import java.util.function.Supplier;
 import java.util.List;
 import java.util.Objects;
 
@@ -111,4 +116,31 @@ final class StringTemplateImpl extends Carriers.CarrierObject implements StringT
     public String toString() {
         return StringTemplate.toString(this);
     }
+
+    @Override
+    public boolean isLiteral() {
+        return true;
+    }
+
+    @Override
+    public List<Class<?>> getTypes() {
+        return sharedData.types();
+    }
+
+    @Override
+    public <S, T> T getMetaData(S owner, Supplier<T> supplier) {
+        return sharedData.getMetaData(owner, supplier);
+    }
+
+    @Override
+    public MethodHandle bindTo(MethodHandle mh) {
+        MethodHandle[] components = sharedData.elements().components().toArray(new MethodHandle[0]);
+        int[] permute = new int[components.length];
+        mh = MethodHandles.filterArguments(mh, 0, components);
+        MethodType mt = MethodType.methodType(mh.type().returnType(), Carriers.CarrierObject.class);
+        mh = MethodHandles.permuteArguments(mh, mt, permute);
+        mt = mt.changeParameterType(0, StringTemplate.class);
+        return mh.asType(mt);
+    }
+
 }

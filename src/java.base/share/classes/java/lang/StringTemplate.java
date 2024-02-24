@@ -27,9 +27,11 @@ package java.lang;
 
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodType;
+import java.util.Arrays;
 import java.util.function.Function;
 import java.util.List;
 import java.util.Objects;
+import java.util.function.Supplier;
 
 import jdk.internal.access.JavaTemplateAccess;
 import jdk.internal.access.SharedSecrets;
@@ -423,6 +425,52 @@ public interface StringTemplate {
     static String STR(StringTemplate stringTemplate) {
         Objects.requireNonNull(stringTemplate, "stringTemplate must not be null");
         return stringTemplate.interpolate();
+    }
+
+    /**
+     * {@return true if the {@link StringTemplate} was constructed from a literal, false
+     * otherwise}
+     */
+    default boolean isLiteral() {
+        return false;
+    }
+
+    /**
+     * Get processor meta data.
+     *
+     * @param owner     owner object
+     * @param supplier  supplier of meta data
+     * @return meta data
+     *
+     * @param <S> type of owner
+     * @param <T> type of meta data
+     */
+    default <S, T> T getMetaData(S owner, Supplier<T> supplier) {
+        return supplier.get();
+    }
+
+    /**
+     * {@return a list of value types.}
+     */
+    default List<Class<?>> getTypes() {
+        int size = fragments().size() - 1; // cheaper than getting list of values
+        Class<?>[] array = new Class<?>[size];
+        Arrays.fill(array, Object.class);
+        return Arrays.asList(array);
+    }
+
+    /**
+     * Bind the getters of this {@link StringTemplate StringTemplate's} values to the inputs of the
+     * supplied  {@link MethodHandle}.
+     *
+     * @param mh  {@link MethodHandle} to bind to
+     *
+     * @return bound {@link MethodHandle}
+     */
+    default MethodHandle bindTo(MethodHandle mh) {
+        Objects.requireNonNull(mh, "mh must not be null");
+        JavaTemplateAccess JTA = SharedSecrets.getJavaTemplateAccess();
+        return JTA.bindTo(this, mh);
     }
 
 }

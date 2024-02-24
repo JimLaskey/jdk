@@ -25,6 +25,7 @@
 
 package jdk.internal.access;
 
+import java.lang.invoke.MethodHandle;
 import java.util.List;
 
 public interface JavaTemplateAccess {
@@ -73,6 +74,17 @@ public interface JavaTemplateAccess {
      * @throws NullPointerException if sts is null or if any element of sts is null
      */
     StringTemplate combine(StringTemplate... sts);
+
+    /**
+     * Bind the getters of this {@link StringTemplate StringTemplate's} values to the inputs of the
+     * supplied  {@link MethodHandle}.
+     *
+     * @param st  target {@link StringTemplate}
+     * @param mh  {@link MethodHandle} to bind to
+     *
+     * @return bound {@link MethodHandle}
+     */
+    MethodHandle bindTo(StringTemplate st, MethodHandle mh);
 
 }
 

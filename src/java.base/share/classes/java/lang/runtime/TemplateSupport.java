@@ -25,6 +25,9 @@
 
 package java.lang.runtime;
 
+import java.lang.invoke.MethodHandle;
+import java.lang.invoke.MethodHandles;
+import java.lang.invoke.MethodType;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
@@ -45,6 +48,16 @@ import jdk.internal.access.SharedSecrets;
 final class TemplateSupport implements JavaTemplateAccess {
 
     /**
+     * {@link StringTemplate} values method.
+     */
+    private static final MethodHandle VALUES_MH;
+
+    /**
+     * {@link List} get method
+     */
+    private static final MethodHandle GET_MH;
+
+    /**
      * Private constructor.
      */
     private TemplateSupport() {
@@ -52,6 +65,17 @@ final class TemplateSupport implements JavaTemplateAccess {
 
     static {
         SharedSecrets.setJavaTemplateAccess(new TemplateSupport());
+
+        try {
+            MethodHandles.Lookup lookup = MethodHandles.lookup();
+            MethodType mt = MethodType.methodType(List.class);
+            VALUES_MH = lookup.findVirtual(StringTemplate.class, "values", mt);
+            mt = MethodType.methodType(Object.class, int.class);
+            GET_MH = lookup.findVirtual(List.class, "get", mt);
+        } catch (ReflectiveOperationException ex) {
+            throw new InternalError(ex);
+        }
+
     }
 
     private static final JavaLangAccess JLA = SharedSecrets.getJavaLangAccess();
@@ -149,4 +173,31 @@ final class TemplateSupport implements JavaTemplateAccess {
         return StringTemplateImplFactory.newTrustedStringTemplate(combinedFragments, combinedValues);
     }
 
+    /**
+     * Bind the getters of this {@link StringTemplate StringTemplate's} values to the inputs of the
+     * supplied  {@link MethodHandle}.
+     *
+     * @param st  target {@link StringTemplate}
+     * @param mh  {@link MethodHandle} to bind to
+     *
+     * @return bound {@link MethodHandle}
+     */
+    @Override
+    public MethodHandle bindTo(StringTemplate st, MethodHandle mh) {
+        Objects.requireNonNull(st, "st must not be null");
+        Objects.requireNonNull(mh, "mh must not be null");
+
+        int size = st.fragments().size() - 1; // cheaper to access than values()
+        MethodHandle[] getters = new MethodHandle[size];
+        for (int i = 0; i < size; i++) {
+            getters[i] = MethodHandles.insertArguments(GET_MH, 1, i);
+        }
+
+        mh = MethodHandles.filterArguments(mh, 0, getters);
+        int[] permute = new int[size];
+        MethodType mt = MethodType.methodType(void.class, List.class);
+        mh = MethodHandles.permuteArguments(mh, mt, permute);
+        mh = MethodHandles.filterArguments(mh, 0, VALUES_MH);
+        return mh;
+    }
 }

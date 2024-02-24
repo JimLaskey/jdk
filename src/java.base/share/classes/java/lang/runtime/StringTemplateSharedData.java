@@ -26,7 +26,9 @@
 package java.lang.runtime;
 
 import java.lang.invoke.MethodHandle;
+import java.util.function.Supplier;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * StringTemplate shared data.
@@ -37,6 +39,11 @@ final class StringTemplateSharedData {
      * all instances created at the {@link java.lang.invoke.CallSite CallSite}.
      */
     private final List<String> fragments;
+
+    /**
+     * Carrier elements.
+     */
+    private final Carriers.CarrierElements elements;
 
     /**
      * List of input argument types.
@@ -58,17 +65,33 @@ final class StringTemplateSharedData {
     private final MethodHandle interpolateMH;
 
     /**
+     * Owner of metadata.
+     */
+    private final AtomicReference<Object> owner;
+
+    /**
+     *  Value of metadata.
+     */
+    private Object metaData;
+
+    /**
      * Constructor.
      * @param fragments       list of string fragments (bound in (bound at callsite)
+     * @param elements        carrier elements
+     * @param types;          list of value types
      * @param valuesMH        {@link MethodHandle} to produce list of values (bound at callsite)
      * @param interpolateMH   {@link MethodHandle} to produce interpolation (bound at callsite)
      */
-    StringTemplateSharedData(List<String> fragments, List<Class<?>> types,
+    StringTemplateSharedData(List<String> fragments, Carriers.CarrierElements elements, List<Class<?>> types,
                              MethodHandle valuesMH, MethodHandle interpolateMH) {
         this.fragments = fragments;
+        this.elements = elements;
         this.types = types;
         this.valuesMH = valuesMH;
         this.interpolateMH = interpolateMH;
+        this.owner = new AtomicReference<>(null);
+        this.metaData = null;
+
     }
 
     /**
@@ -76,6 +99,20 @@ final class StringTemplateSharedData {
      */
     List<String> fragments() {
         return fragments;
+    }
+
+    /**
+     * {@return return carrrier elements}
+     */
+    Carriers.CarrierElements elements() {
+        return elements;
+    }
+
+    /**
+     * {@return list of input argument types}
+     */
+    List<Class<?>> types() {
+        return types;
     }
 
     /**
@@ -91,4 +128,26 @@ final class StringTemplateSharedData {
     MethodHandle interpolateMH() {
         return interpolateMH;
     }
+
+
+    /**
+     * Get processor meta data.
+     *
+     * @param owner     owner object
+     * @param supplier  supplier of meta data
+     * @return meta data
+     *
+     * @param <S> type of owner
+     * @param <T> type of meta data
+     */
+    @SuppressWarnings("unchecked")
+    <S, T> T getMetaData(S owner, Supplier<T> supplier) {
+        boolean isOwner = this.owner.get() == owner;
+        Object temp = isOwner && metaData != null ? metaData : supplier.get();
+        if (!isOwner && this.owner.compareAndExchange(null, owner) == null) {
+            metaData = temp;
+        }
+        return (T)temp;
+    }
+
 }

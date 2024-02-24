@@ -121,7 +121,7 @@ final class StringTemplateImplFactory {
         valuesMH = MethodHandles.permuteArguments(valuesMH, MT_LIST_STIMPL, permute);
 
         StringTemplateSharedData sharedData = new StringTemplateSharedData(
-                fragments, type.parameterList(), valuesMH, interpolateMH);
+                fragments, elements, type.parameterList(), valuesMH, interpolateMH);
 
         MethodHandle constructor = MethodHandles.insertArguments(CONSTRUCTOR, 0,
                 elements.primitiveCount(), elements.objectCount(), sharedData);

@@ -64,6 +64,7 @@ import static java.lang.invoke.MethodType.*;
  * Warning: This class is part of PreviewFeature.Feature.STRING_TEMPLATES.
  *          Do not rely on its availability.
  */
+@PreviewFeature(feature=PreviewFeature.Feature.STRING_TEMPLATES)
 public final class FormatterBuilder {
     private static final Lookup LOOKUP = lookup();
 

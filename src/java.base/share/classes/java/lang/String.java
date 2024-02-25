@@ -4509,6 +4509,7 @@ public final class String
      * @see  java.util.Formatter
      * @since  23
      */
+    @PreviewFeature(feature=PreviewFeature.Feature.STRING_TEMPLATES)
     public static String format(StringTemplate st) {
         return format(Locale.ROOT, st);
     }
@@ -4541,6 +4542,7 @@ public final class String
      * @see  java.util.Formatter
      * @since  23
      */
+    @PreviewFeature(feature=PreviewFeature.Feature.STRING_TEMPLATES)
     public static String format(Locale l, StringTemplate st) {
         if (st.isLiteral()) {
             StringFormatMetaData metaData = st.getMetaData(STRING_FORMAT_OWNER, () -> {

@@ -1946,7 +1946,7 @@ public class JavacParserTest extends TestCase {
                       package test;
                       public class Test {
                            Test(int a) {
-                               String s = STR."prefix \\{a} suffix";
+                               String s = STR("prefix \\{a} suffix");
                            }
                       }
                       """;
@@ -1960,7 +1960,9 @@ public class JavacParserTest extends TestCase {
         SourcePositions sp = Trees.instance(ct).getSourcePositions();
         int initStart = (int) sp.getStartPosition(cut, decl.getInitializer());
         int initEnd   = (int) sp.getEndPosition(cut, decl.getInitializer());
-        assertEquals("correct templated String span expected", code.substring(initStart, initEnd), "STR.\"prefix \\{a} suffix\"");
+        System.out.println(code.substring(initStart, initEnd));
+        System.out.println("STR(\"prefix \\\\{a} suffix\")");
+        assertEquals("correct templated String span expected", code.substring(initStart, initEnd), "STR(\"prefix \\{a} suffix\")");
     }
 
     @Test //JDK-8293897
@@ -2051,7 +2053,7 @@ public class JavacParserTest extends TestCase {
                       package t;
                       class Test {
                           void test(Object o) {
-                              String s = STR.""";
+                              String s = STR(""";
 
         Worker<Void> verifyParseable = task -> {
             try {
@@ -2091,7 +2093,7 @@ public class JavacParserTest extends TestCase {
                              class Test {
                                  \n\
                                  void test(Object o) {
-                                     String s = STR.<error>;
+                                     String s = STR((ERROR));
                                  }
                              }""");
                 return null;

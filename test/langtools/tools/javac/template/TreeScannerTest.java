@@ -43,7 +43,7 @@ public class TreeScannerTest {
         String code = """
                       public class Test {
                           private void test(int a) {
-                              String s1 = TEST."p\\{a}s";
+                              String s1 = "p\\{a}s".interpolate();
                               String s2 = "p\\{a}s";
                           }
                       }
@@ -84,7 +84,7 @@ public class TreeScannerTest {
 
         checker.scan(task.parse(), null);
 
-        String expected = "(IDENTIFIER)(IDENTIFIER)(null)(IDENTIFIER)";
+        String expected = "(IDENTIFIER)(IDENTIFIER)";
         if (!expected.equals(output.toString())) {
             throw new AssertionError("expected output not found, found: " + output);
         }

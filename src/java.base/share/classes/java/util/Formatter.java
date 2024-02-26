@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2003, 2023, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2003, 2024, Oracle and/or its affiliates. All rights reserved.
  * Copyright (c) 2023, Alibaba Group Holding Limited. All Rights Reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
@@ -2832,7 +2832,10 @@ public final class Formatter implements Closeable, Flushable {
      *          #close()} method
      *
      * @return  This formatter
+     *
+     * @since  23
      */
+    @PreviewFeature(feature=PreviewFeature.Feature.STRING_TEMPLATES)
     public Formatter format(StringTemplate st) {
         return format(l, st);
     }
@@ -2869,7 +2872,10 @@ public final class Formatter implements Closeable, Flushable {
      *          #close()} method
      *
      * @return  This formatter
+     *
+     * @since  23
      */
+    @PreviewFeature(feature=PreviewFeature.Feature.STRING_TEMPLATES)
     public Formatter format(Locale l, StringTemplate st) {
         ensureOpen();
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1996, 2023, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1996, 2024, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -32,6 +32,7 @@ import java.nio.charset.IllegalCharsetNameException;
 import java.nio.charset.UnsupportedCharsetException;
 import jdk.internal.access.JavaIOPrintStreamAccess;
 import jdk.internal.access.SharedSecrets;
+import jdk.internal.javac.PreviewFeature;
 import jdk.internal.misc.InternalLock;
 
 /**
@@ -1001,7 +1002,10 @@ public class PrintStream extends FilterOutputStream
      *
      * @param      st   The {@link StringTemplate} to be printed
      * @see Charset#defaultCharset()
+     *
+     * @since  23
      */
+    @PreviewFeature(feature=PreviewFeature.Feature.STRING_TEMPLATES)
     public void print(StringTemplate st) {
         write(String.valueOf(st.interpolate()));
     }
@@ -1181,7 +1185,10 @@ public class PrintStream extends FilterOutputStream
      * {@link #println()}.
      *
      * @param st  The {@code String} to be printed.
+     *
+     * @since  23
      */
+    @PreviewFeature(feature=PreviewFeature.Feature.STRING_TEMPLATES)
     public void println(StringTemplate st) {
         if (getClass() == PrintStream.class) {
             print(st);

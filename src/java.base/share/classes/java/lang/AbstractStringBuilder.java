@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2003, 2023, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2003, 2024, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -35,6 +35,7 @@ import java.util.List;
 import java.util.Spliterator;
 import java.util.stream.IntStream;
 import java.util.stream.StreamSupport;
+import jdk.internal.javac.PreviewFeature;
 import jdk.internal.util.ArraysSupport;
 import jdk.internal.util.Preconditions;
 
@@ -561,7 +562,10 @@ abstract sealed class AbstractStringBuilder implements Appendable, CharSequence
      * @param   stringTemplate   a {@link StringTemplate}.
      *
      * @return  a reference to this object.
+     *
+     * @since  23
      */
+    @PreviewFeature(feature=PreviewFeature.Feature.STRING_TEMPLATES)
     public AbstractStringBuilder append(StringTemplate stringTemplate) {
         if (stringTemplate == null) {
             return appendNull();

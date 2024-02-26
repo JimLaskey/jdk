@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1996, 2022, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1996, 2024, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -33,6 +33,7 @@ import java.nio.charset.IllegalCharsetNameException;
 import java.nio.charset.UnsupportedCharsetException;
 import jdk.internal.access.JavaIOPrintWriterAccess;
 import jdk.internal.access.SharedSecrets;
+import jdk.internal.javac.PreviewFeature;
 import jdk.internal.misc.InternalLock;
 
 /**
@@ -777,7 +778,10 @@ public class PrintWriter extends Writer {
      *
      * @param      st   The {@code StringTemplate} to be printed
      * @see Charset#defaultCharset()
+     *
+     * @since  23
      */
+    @PreviewFeature(feature=PreviewFeature.Feature.STRING_TEMPLATES)
     public void print(StringTemplate st) {
         write(String.valueOf(st.interpolate()));
     }
@@ -1003,7 +1007,10 @@ public class PrintWriter extends Writer {
      * {@link #println()}.
      *
      * @param st the {@code String} value to be printed
+     *
+     * @since  23
      */
+    @PreviewFeature(feature=PreviewFeature.Feature.STRING_TEMPLATES)
     public void println(StringTemplate st) {
         Object lock = this.lock;
         if (lock instanceof InternalLock locker) {
@@ -1357,6 +1364,7 @@ public class PrintWriter extends Writer {
      *
      * @since  23
      */
+    @PreviewFeature(feature=PreviewFeature.Feature.STRING_TEMPLATES)
     public PrintWriter printf(Locale l, StringTemplate st) {
         return format(l, st);
     }
@@ -1390,6 +1398,7 @@ public class PrintWriter extends Writer {
      *
      * @since  23
      */
+    @PreviewFeature(feature=PreviewFeature.Feature.STRING_TEMPLATES)
     public PrintWriter format(StringTemplate st) {
         Object lock = this.lock;
         if (lock instanceof InternalLock locker) {
@@ -1453,6 +1462,7 @@ public class PrintWriter extends Writer {
      *
      * @since  23
      */
+    @PreviewFeature(feature=PreviewFeature.Feature.STRING_TEMPLATES)
     public PrintWriter format(Locale l, StringTemplate st) {
         Object lock = this.lock;
         if (lock instanceof InternalLock locker) {

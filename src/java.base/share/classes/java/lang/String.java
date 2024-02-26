@@ -46,6 +46,7 @@ import java.util.stream.IntStream;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
+import jdk.internal.javac.PreviewFeature;
 import jdk.internal.util.ArraysSupport;
 import jdk.internal.util.Preconditions;
 import jdk.internal.vm.annotation.ForceInline;
@@ -136,7 +137,7 @@ import sun.nio.cs.UTF_8;
 
 public final class String
     implements java.io.Serializable, Comparable<String>, CharSequence,
-               Constable, ConstantDesc, StringTemplate {
+               Constable, ConstantDesc {
 
     /**
      * The value is used for character storage.
@@ -2098,21 +2099,6 @@ public final class String
      */
     public static final Comparator<String> CASE_INSENSITIVE_ORDER
                                          = new CaseInsensitiveComparator();
-
-    @Override
-    public List<String> fragments() {
-        return List.of(this);
-    }
-
-    @Override
-    public List<Object> values() {
-        return List.of();
-    }
-
-    @Override
-    public String interpolate() {
-        return this;
-    }
 
     /**
      * CaseInsensitiveComparator for Strings.

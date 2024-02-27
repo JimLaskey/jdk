@@ -26,13 +26,14 @@
 package java.lang;
 
 import java.lang.invoke.MethodHandle;
-import java.lang.invoke.MethodType;
-import java.util.Arrays;
+import java.lang.invoke.MethodHandles;
+import java.lang.invoke.StringConcatException;
+import java.lang.invoke.StringConcatFactory;
+import java.util.*;
 import java.util.function.Function;
-import java.util.List;
-import java.util.Objects;
 import java.util.function.Supplier;
 
+import ST;
 import jdk.internal.access.JavaTemplateAccess;
 import jdk.internal.access.SharedSecrets;
 import jdk.internal.javac.PreviewFeature;
@@ -428,49 +429,339 @@ public interface StringTemplate {
     }
 
     /**
-     * {@return true if the {@link StringTemplate} was constructed from a literal, false
-     * otherwise}
+     * Metadata associated with a {@link ProcessorBuilder} built processor. The metadata must
+     * minimumly provide a {@link MethodHandle} for the fast implementation of the processor.
      */
-    default boolean isLiteral() {
-        return false;
+    interface MetaData {
+        /**
+         * {@return the {@link MethodHandle} for the fast implementation of the processor}
+         */
+        MethodHandle getMethodHandle()
     }
 
     /**
-     * Get processor meta data.
-     *
-     * @param owner     owner object
-     * @param supplier  supplier of meta data
-     * @return meta data
-     *
-     * @param <S> type of owner
-     * @param <T> type of meta data
+     * Create a {@link java.lang.StringTemplate} processor.
+     * @param <R> return type of processor
+     * @param <M> type of the metadata
      */
-    default <S, T> T getMetaData(S owner, Supplier<T> supplier) {
-        return supplier.get();
-    }
+    public class ProcessorBuilder<R, M extends ST.MetaData> {
 
-    /**
-     * {@return a list of value types.}
-     */
-    default List<Class<?>> getTypes() {
-        int size = fragments().size() - 1; // cheaper than getting list of values
-        Class<?>[] array = new Class<?>[size];
-        Arrays.fill(array, Object.class);
-        return Arrays.asList(array);
-    }
+        // Mapping support
 
-    /**
-     * Bind the getters of this {@link StringTemplate StringTemplate's} values to the inputs of the
-     * supplied  {@link MethodHandle}.
-     *
-     * @param mh  {@link MethodHandle} to bind to
-     *
-     * @return bound {@link MethodHandle}
-     */
-    default MethodHandle bindTo(MethodHandle mh) {
-        Objects.requireNonNull(mh, "mh must not be null");
-        JavaTemplateAccess JTA = SharedSecrets.getJavaTemplateAccess();
-        return JTA.bindTo(this, mh);
-    }
+        /**
+         * Interface used for indexed mapping of list elements.
+         */
+        @FunctionalInterface
+        protected interface IndexedMapFunction<T> {
+            /**
+             * Map an element at index position.
+             * @param index    index in list
+             * @param element  element to map
+             * @return mapped element
+             */
+            T map(int index, T element);
+        }
 
+        /**
+         * Index map elements of a list using the supplied function.
+         * @param list  list to map
+         * @param func  mapping function
+         * @return a new list containing mapped elements
+         */
+        protected static <T> List<T> map(List<T> list, ST.ProcessorBuilder.IndexedMapFunction<T> func) {
+            Objects.requireNonNull(list, "list must not be null");
+            Objects.requireNonNull(list, "func must not be null");
+            return map(list, func, func);
+        }
+
+        /**
+         * Index map elements of a list using the supplied function, special-casing last element.
+         * @param oldList  list to map
+         * @param func     mapping function
+         * @param last     mapping function for last element
+         * @return a new list containing mapped elements
+         */
+        protected static <T> List<T> map(List<T> oldList,
+                                         ST.ProcessorBuilder.IndexedMapFunction<T> func, ST.ProcessorBuilder.IndexedMapFunction<T> last) {
+            Objects.requireNonNull(oldList, "list must not be null");
+            Objects.requireNonNull(func, "func must not be null");
+            Objects.requireNonNull(last, "last must not be null");
+            List<T> newList = new ArrayList<>();
+            int size = oldList.size();
+            for (int index = 0; index < size; index++) {
+                T oldElement = oldList.get(index);
+                T newElement = index + 1 == size ? last.map(index, oldElement) :
+                    func.map(index, oldElement);
+                newList.add(newElement);
+            }
+            return newList;
+        }
+
+        /**
+         * Owner used to lookup metadata.
+         */
+        private final Object owner;
+
+        /**
+         * Constructor.
+         */
+        public ProcessorBuilder() {
+            owner = selectOwner();
+        }
+
+        // JavaTemplateAccess
+
+        /**
+         * Access to internal {@link java.lang.StringTemplate} internals.
+         */
+        private static JavaTemplateAccess JTA = SharedSecrets.getJavaTemplateAccess();
+
+        /**
+         * {@return true if the {@link java.lang.StringTemplate } was constructed from a literal, false
+         * otherwise}
+         * @param st  {@link java.lang.StringTemplate} to test
+         */
+        protected static boolean isLiteral(java.lang.StringTemplate st) {
+            return JTA.isLiteral(st);
+        }
+
+        /**
+         * {@return a list of value types for values in the {@link java.lang.StringTemplate }.}
+         * @param st  {@link java.lang.StringTemplate} to query
+         */
+        protected static List<Class<?>> getTypes(java.lang.StringTemplate st) {
+            return JTA.getTypes(st);
+        }
+
+        /**
+         * Get metadata associated with processor.
+         ]        * @param owner      owner of metadata
+         * @param supplier   supplier of metadata
+         * @return metadata  metadata
+         * @param <T> type of metadata
+         */
+        protected static <T> T getMetaData(java.lang.StringTemplate st, Object owner, Supplier<T> supplier) {
+            return JTA.getMetaData(st, owner, supplier);
+        }
+
+        /**
+         * Bond {@link java.lang.StringTemplate} to {@link MethodHandle}.
+         */
+        protected static MethodHandle bindTo(java.lang.StringTemplate st, MethodHandle mh) {
+            Objects.requireNonNull(mh, "mh must not be null");
+            return JTA.bindTo(st, mh);
+        }
+
+        // Fast implementation
+
+        /**
+         * {@return the metadata owner. May be overridden to use alternate value}
+         */
+        protected Object selectOwner() {
+            return this;
+        }
+
+        /**
+         * Create a {@link MethodHandle} to process a {@link java.lang.StringTemplate}. May be
+         * overridden to provide an alternate methodology.
+         * @param st  a {@link java.lang.StringTemplate}
+         * @return a {@link MethodHandle} to process a {@link java.lang.StringTemplate}
+         */
+        protected MethodHandle createMethodHandle(java.lang.StringTemplate st) {
+            Objects.requireNonNull(st, "st must not be null");
+            List<String> fragments = mapFragments(st);
+            List<Class<?>> inTypes = getTypes(st);
+            List<MethodHandle> valueFilters = createValueFilters(inTypes);
+            MethodHandle resultFilter = createResultFilter();
+            List<Class<?>> outTypes = new ArrayList<>();
+            for (MethodHandle h : valueFilters) {
+                outTypes.add(h.type().returnType());
+            }
+            try {
+                MethodHandle mh = StringConcatFactory.makeConcatWithTemplate(fragments, outTypes);
+                mh = MethodHandles.filterArguments(mh, 0,
+                    valueFilters.toArray(new MethodHandle[0]));
+                mh = bindTo(st, mh);
+                mh = MethodHandles.filterReturnValue(mh, resultFilter);
+                return mh;
+            } catch (StringConcatException ex) {
+                throw new InternalError(ex);
+            }
+        }
+
+        /**
+         * Map {@link java.lang.StringTemplate} value types. May be overridden for
+         * an alternate methodolgy. Ex. can be used to box/unbox types.
+         * @param types list of {@link java.lang.StringTemplate} value types
+         * @return mapped list of {@link java.lang.StringTemplate} value types
+         */
+        protected List<Class<?>> mapTypes(List<Class<?>> types) {
+            Objects.requireNonNull(types, "types must not be null");
+            return map(types, (i, t) -> mapType(i, t));
+        }
+
+        /**
+         * Map a {@link java.lang.StringTemplate} value type. May be overridden for
+         * an alternate methodolgy. Ex. can be used to box/unbox types.
+         * @param index  a zero based index of value
+         * @param type   a {@link java.lang.StringTemplate} value type
+         * @return mapped {@link java.lang.StringTemplate} value type
+         */
+        protected Class<?> mapType(int index, Class<?> type) {
+            Objects.requireNonNull(type, "type must not be null");
+            return type;
+        }
+
+        /**
+         * Retrieve the metadata from the specified {@link java.lang.StringTemplate}. May be overridden for
+         * an alternate methodology.
+         * @param st  {@link java.lang.StringTemplate} being queried
+         * @return found or constructed metadata,
+         */
+        @SuppressWarnings("unchecked")
+        protected M getMetaData(java.lang.StringTemplate st) {
+            Objects.requireNonNull(st, "st must not be null");
+            return  getMetaData(st, owner, () -> {
+                MethodHandle mh = createMethodHandle(st);
+                return (M)new ST.MetaData() {
+                    @Override
+                    public MethodHandle getMethodHandle() {
+                        return mh;
+                    }
+                };
+            });
+        }
+
+        /**
+         * Additional validation of the metadata. May be overridden for
+         * an alternate methodology.
+         * @param metaData metadata to test
+         * @return true if test passes
+         */
+        protected boolean isMetaDataUseful(M metaData) {
+            return metaData != null;
+        }
+
+        /**
+         * Create value filters for the {@link MethodHandle} being constructed. May
+         * be overridden to supply a different methodolgy.
+         * @param types types of the {@link java.lang.StringTemplate} values.
+         * @return a list of {@link MethodHandle} filters for the {@link java.lang.StringTemplate} values
+         */
+        protected List<MethodHandle> createValueFilters(List<Class<?>> types) {
+            return map(types, (i, t) -> createValueFilter(i, t));
+        }
+
+        /**
+         * Create a {@link MethodHandle} filter for a specific value. May
+         * be overridden to supply a different methodolgy.
+         * @param index  zero based index of the value
+         * @param type   type of the value
+         * @return {@link MethodHandle} filter
+         */
+        protected Object createValueFilter(int index, Class<?> type) {
+            return MethodHandles.identity(type);
+        }
+
+        /**
+         * Create a {@link MethodHandle} filter the string result of interpolation.
+         * This may be overridden to provide and alternate result type.
+         * @return {@link MethodHandle} filter
+         */
+        protected MethodHandle createResultFilter() {
+            return MethodHandles.identity(String.class);
+        }
+
+        /**
+         * Apply processor to {@link java.lang.StringTemplate}
+         * @param st  the {@link java.lang.StringTemplate} to process
+         * @return result of processing
+         */
+        public final R process(java.lang.StringTemplate st) {
+            if (isLiteral(st)) {
+                M metaData = getMetaData(st);
+                if (isMetaDataUseful(metaData)) {
+                    try {
+                        return (R)metaData.getMethodHandle().invokeExact(st);
+                    } catch (Throwable ex) {
+                        throw new InternalError(ex);
+                    }
+                }
+            }
+
+            return slowProcess(st);
+        }
+
+        /**
+         * Process {@link java.lang.StringTemplate} by basic interpolation.
+         * @param st  the {@link java.lang.StringTemplate} to process
+         * @return result of processing
+         */
+        R slowProcess(java.lang.StringTemplate st) {
+            List<String> fragments = map(st.fragments(),
+                (i, f) -> mapFragment(i, f, false),
+                (i, f) -> mapFragment(i, f, true));
+            List<Object> values = map(st.values(), (i, v) -> mapValue(i, v));
+            String interpolation = java.lang.StringTemplate.interpolate(fragments, values);
+            return mapInterpolation(interpolation);
+        }
+
+        /**
+         * Map a {@link java.lang.StringTemplate StringTemplate's} fragments. May be overridden for
+         * an alternate methodolgy. Ex. stripping out formattng specifications,
+         * @param st  {@link java.lang.StringTemplate} being processed
+         * @return mapped fragments
+         */
+        protected List<String> mapFragments(java.lang.StringTemplate st) {
+            List<String> fragments = map(st.fragments(),
+                (i, f) -> mapFragment(i, f, false),
+                (i, f) -> mapFragment(i, f, true));
+            return fragments;
+        }
+
+        /**
+         * Map a single fragment. May be overridden for an alternate methodolgy.
+         * Ex. stripping out formattng specifications,
+         * @param index     zero based index of the fragment
+         * @param fragment  string fragment
+         * @param isLast    true if last fragment
+         * @return mapped fragment
+         */
+        protected String mapFragment(int index, String fragment, boolean isLast) {
+            return fragment;
+        }
+
+        /**
+         * Map a {@link java.lang.StringTemplate StringTemplate's} values. May be overridden for
+         * an alternate methodolgy. Ex. convert to strings,
+         * @param st  {@link java.lang.StringTemplate} being processed
+         * @return mapped values
+         */
+        protected List<Object> mapValues(java.lang.StringTemplate st) {
+            List<Object> values = map(st.values(), this::mapValue);
+            return values;
+        }
+
+        /**
+         * Map a single value. May be overridden for an alternate methodolgy.
+         * Ex. convert to a string,
+         * @param index  zero based index of the value
+         * @param value  value to map
+         * @return mapped value
+         */
+        protected Object mapValue(int index, Object value) {
+            return value;
+        }
+
+        /**
+         * Map the result of interpolation.
+         * @param interpolation  string result from interpolation
+         * @return mapped result
+         */
+        @SuppressWarnings("unchecked")
+        protected R mapInterpolation(String interpolation) {
+            return (R)interpolation;
+        }
+
+    }
 }

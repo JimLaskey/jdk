@@ -64,7 +64,7 @@ import jdk.internal.vm.annotation.Stable;
  * <p>
  * For example, the following code contains a template expression, which simply yields
  * a {@link StringTemplate}:
- * {@snippet lang=java :
+ * {@snippet lang = java:
  * int x = 10;
  * int y = 20;
  * StringTemplate st = "\{x} + \{y} = \{x + y}";
@@ -77,10 +77,10 @@ import jdk.internal.vm.annotation.Stable;
  * <p>
  * The following code contains a template expression with the same template but converting
  * to a string using the {@link #str()} method:
- * {@snippet lang=java :
+ * {@snippet lang = java:
  * int x = 10;
  * int y = 20;
- * String s = "\{x} + \{y} = \{x + y}".join();
+ * String s = "\{x} + \{y} = \{x + y}".str();
  * }
  *
  * @since 21
@@ -124,7 +124,7 @@ public final class StringTemplate extends Carriers.CarrierObject  {
      * embedded expression. Such character sequences may be zero-length if an embedded
      * expression appears at the beginning or end of a template, or if two embedded
      * expressions are directly adjacent in a template.
-     * In the example: {@snippet lang=java :
+     * In the example: {@snippet lang = java:
      * String student = "Mary";
      * String teacher = "Johnson";
      * StringTemplate st = "The student \{student} is in \{teacher}'s classroom.";
@@ -144,7 +144,7 @@ public final class StringTemplate extends Carriers.CarrierObject  {
     /**
      * Returns a list of embedded expression results for this {@link StringTemplate}.
      * In the example:
-     * {@snippet lang=java :
+     * {@snippet lang = java:
      * String student = "Mary";
      * String teacher = "Johnson";
      * StringTemplate st = "The student \{student} is in \{teacher}'s classroom.";
@@ -182,9 +182,6 @@ public final class StringTemplate extends Carriers.CarrierObject  {
      * as if invoking {@link String#valueOf(Object)}.
      *
      * @return interpolation of this {@link StringTemplate}
-     *
-     * @implSpec The default implementation returns the result of invoking
-     * {@code StringTemplate.join(this.fragments(), this.values())}.
      */
     private String str() {
         try {
@@ -216,7 +213,7 @@ public final class StringTemplate extends Carriers.CarrierObject  {
      *
      * @throws NullPointerException if stringTemplate is null
      *
-     * @implSpec The implementation returns the result of invoking {@code stringTemplate.join()}.
+     * @implSpec The implementation returns the result of invoking {@code stringTemplate.str()}.
      */
     public static String str(StringTemplate stringTemplate) {
         Objects.requireNonNull(stringTemplate, "stringTemplate should not be null");
@@ -311,12 +308,12 @@ public final class StringTemplate extends Carriers.CarrierObject  {
      * {@link StringTemplate}.
      * {@snippet lang = java:
      * StringTemplate st = StringTemplate.combine(false, "\{a}", "\{b}", "\{c}");
-     * assert st.str().equals("\{a}\{b}\{c}".join());
+     * assert st.str().equals("\{a}\{b}\{c}".str());
      *}
      * Fragment lists from the {@link StringTemplate StringTemplates} are combined end to
      * end with the last fragment from each {@link StringTemplate} concatenated with the
      * first fragment of the next. To demonstrate, if we were to take two strings and we
-     * combined them as follows: {@snippet lang = "java":
+     * combined them as follows: {@snippet lang = java:
      * String s1 = "abc";
      * String s2 = "xyz";
      * String sc = s1 + s2;
@@ -325,7 +322,7 @@ public final class StringTemplate extends Carriers.CarrierObject  {
      * the last character {@code "c"} from the first string is juxtaposed with the first
      * character {@code "x"} of the second string. The same would be true of combining
      * {@link StringTemplate StringTemplates}.
-     * {@snippet lang=java :
+     * {@snippet lang = java:
      * StringTemplate st1 = "a\{""}b\{""}c";
      * StringTemplate st2 = "x\{""}y\{""}z";
      * StringTemplate st3 = "a\{""}b\{""}cx\{""}y\{""}z";
@@ -364,12 +361,12 @@ public final class StringTemplate extends Carriers.CarrierObject  {
      * {@link StringTemplate}.
      * {@snippet lang = java:
      * StringTemplate st = StringTemplate.combine(false, List.of("\{a}", "\{b}", "\{c}"));
-     * assert st.str().equals("\{a}\{b}\{c}".join());
+     * assert st.str().equals("\{a}\{b}\{c}".str());
      *}
      * Fragment lists from the {@link StringTemplate StringTemplates} are combined end to
      * end with the last fragment from each {@link StringTemplate} concatenated with the
      * first fragment of the next. To demonstrate, if we were to take two strings and we
-     * combined them as follows: {@snippet lang = "java":
+     * combined them as follows: {@snippet lang = java:
      * String s1 = "abc";
      * String s2 = "xyz";
      * String sc = s1 + s2;
@@ -378,7 +375,7 @@ public final class StringTemplate extends Carriers.CarrierObject  {
      * the last character {@code "c"} from the first string is juxtaposed with the first
      * character {@code "x"} of the second string. The same would be true of combining
      * {@link StringTemplate StringTemplates}.
-     * {@snippet lang=java :
+     * {@snippet lang = java:
      * StringTemplate st1 = "a\{""}b\{""}c";
      * StringTemplate st2 = "x\{""}y\{""}z";
      * StringTemplate st3 = "a\{""}b\{""}cx\{""}y\{""}z";
@@ -416,7 +413,7 @@ public final class StringTemplate extends Carriers.CarrierObject  {
      * Constructs a new {@link StringTemplate} using this instance's fragments and
      * values mapped from this instance's values by the specified
      * {@code mapper} function.
-     * {@snippet lang=java :
+     * {@snippet lang = java:
      * StringTemplate st2 = st1.mapValue(v -> {
      *      if (v instanceof Supplier<?> s) {
      *          return s.get();
@@ -850,7 +847,7 @@ public final class StringTemplate extends Carriers.CarrierObject  {
      * Manages string template bootstrap methods. These methods may be used,
      * by Java compiler implementations to create {@link StringTemplate} instances.
      * For example, the java compiler will translate the following code;
-     * {@snippet lang=java :
+     * {@snippet lang = java:
      * int x = 10;
      * int y = 20;
      * StringTemplate st = "\{x} + \{y} = \{x + y}";
@@ -858,7 +855,7 @@ public final class StringTemplate extends Carriers.CarrierObject  {
      * to byte code that invokes the {@link Runtime#newStringTemplate}
      * bootstrap method to construct a {@link CallSite} that accepts two integers
      * and produces a new {@link StringTemplate} instance.
-     * {@snippet lang=java :
+     * {@snippet lang = java:
      * MethodHandles.Lookup lookup = MethodHandles.lookup();
      * MethodType mt = MethodType.methodType(StringTemplate.class, int.class, int.class);
      * CallSite cs = Runtime.newStringTemplate(lookup, "", mt, "", " + ", " = ", "");

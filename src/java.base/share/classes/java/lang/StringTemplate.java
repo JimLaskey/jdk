@@ -173,7 +173,7 @@ public final class StringTemplate extends Carriers.CarrierObject  {
      * String student = "Mary";
      * String teacher = "Johnson";
      * StringTemplate st = "The student \{student} is in \{teacher}'s classroom.";
-     * String result = st.str(); // @highlight substring="join()"
+     * String result = st.str(); // @highlight substring="str()"
      *}
      * In the above example, the value of  {@code result} will be
      * {@code "The student Mary is in Johnson's classroom."}. This is
@@ -200,7 +200,7 @@ public final class StringTemplate extends Carriers.CarrierObject  {
      * String student = "Mary";
      * String teacher = "Johnson";
      * StringTemplate st = "The student \{student} is in \{teacher}'s classroom.";
-     * String result = StringTemplate.str(st); // @highlight substring="join()"
+     * String result = StringTemplate.str(st); // @highlight substring="str()"
      *}
      * In the above example, the value of  {@code result} will be
      * {@code "The student Mary is in Johnson's classroom."}. This is

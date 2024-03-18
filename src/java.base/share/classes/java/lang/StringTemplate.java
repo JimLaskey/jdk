@@ -267,7 +267,7 @@ public final class StringTemplate extends Carriers.CarrierObject  {
             flattenST(flatten, st, fragments, values);
         }
         if (200 < values.size()) {
-            throw new RuntimeException("string template combine too many expressions");
+            throw new IllegalArgumentException("string template combine too many expressions");
         }
         return Factory.createStringTemplate(fragments, values);
     }
@@ -346,6 +346,7 @@ public final class StringTemplate extends Carriers.CarrierObject  {
      *
      * @throws NullPointerException if stringTemplates is null or if any of the
      * {@code stringTemplates} are null
+     * @throws IllegalArgumentException if too many embedded expressions
      *
      * @implNote If zero {@link StringTemplate} arguments are provided then a
      * {@link StringTemplate} with an empty fragment and no values is returned, as if invoking
@@ -399,6 +400,7 @@ public final class StringTemplate extends Carriers.CarrierObject  {
      *
      * @throws NullPointerException if stringTemplates is null or if any of the
      * its elements are null
+     * @throws IllegalArgumentException if too many embedded expressions
      *
      * @implNote If {@code stringTemplates.size() == 0} then a {@link StringTemplate} with
      * an empty fragment and no values is returned, as if invoking

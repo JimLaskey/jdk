@@ -297,180 +297,6 @@ public final class StringTemplate extends Carriers.CarrierObject  {
     }
 
     /**
-     * Combine one or more {@link StringTemplate StringTemplates} to produce a combined {@link StringTemplate}.
-     * {@snippet lang = java:
-     * StringTemplate st = StringTemplate.combine("\{a}", "\{b}", "\{c}");
-     * assert st.str().equals("\{a}\{b}\{c}");
-     *}
-     *
-     * @param flatten  if true will flatten nested {@link StringTemplate StringTemplates} into the
-     *                 combination
-     * @param sts      zero or more {@link StringTemplate StringTemplates}
-     *
-     * @return combined {@link StringTemplate}
-     *
-     * @throws NullPointerException if sts is null or if any element of sts is null
-     * @throws IllegalArgumentException if too many embedded expressions
-     */
-    private static StringTemplate combineST(boolean flatten, StringTemplate... sts) {
-        Objects.requireNonNull(sts, "sts must not be null");
-        if (sts.length == 0) {
-            return Factory.createStringTemplate(List.of(""), List.of());
-        } else if (sts.length == 1 && !flatten) {
-            return Objects.requireNonNull(sts[0], "string templates should not be null");
-        }
-        List<String> fragments = new ArrayList<>();
-        List<Object> values = new ArrayList<>();
-        for (StringTemplate st : sts) {
-            Objects.requireNonNull(st, "string templates should not be null");
-            flattenST(flatten, st, fragments, values);
-        }
-        if (200 < values.size()) {
-            throw new IllegalArgumentException("string template combine too many expressions");
-        }
-        return Factory.createStringTemplate(fragments, values);
-    }
-
-    /**
-     * Recursively combining the specified {@link StringTemplate} to the mix.
-     *
-     * @param flatten     if true will flatten nested {@link StringTemplate StringTemplates} into the
-     *                    combination
-     * @param st          specified {@link StringTemplate}
-     * @param fragments   accumulation of fragments
-     * @param getters     accumulation of getters
-     */
-    private static void flattenST(boolean flatten, StringTemplate st,
-                                  List<String> fragments, List<Object> values) {
-        Iterator<String> fragmentsIter = st.fragments().iterator();
-        if (fragments.isEmpty()) {
-            fragments.add(fragmentsIter.next());
-        } else {
-            int last = fragments.size() - 1;
-            fragments.set(last, fragments.get(last) + fragmentsIter.next());
-        }
-        MethodType type = st.sharedData.type();
-        for(Object value : st.values()) {
-            if (flatten && value instanceof StringTemplate nested) {
-                flattenST(true, nested, fragments, values);
-                int last = fragments.size() - 1;
-                fragments.set(last, fragments.get(last) + fragmentsIter.next());
-            } else {
-                values.add(value);
-                fragments.add(fragmentsIter.next());
-            }
-        }
-    }
-
-    /**
-     * Combine zero or more {@link StringTemplate StringTemplates} into a single
-     * {@link StringTemplate}.
-     * {@snippet lang = java:
-     * StringTemplate st = StringTemplate.combine(false, "\{a}", "\{b}", "\{c}");
-     * assert st.str().equals("\{a}\{b}\{c}".str());
-     *}
-     * Fragment lists from the {@link StringTemplate StringTemplates} are combined end to
-     * end with the last fragment from each {@link StringTemplate} concatenated with the
-     * first fragment of the next. To demonstrate, if we were to take two strings and we
-     * combined them as follows: {@snippet lang = java:
-     * String s1 = "abc";
-     * String s2 = "xyz";
-     * String sc = s1 + s2;
-     * assert Objects.equals(sc, "abcxyz");
-     * }
-     * the last character {@code "c"} from the first string is juxtaposed with the first
-     * character {@code "x"} of the second string. The same would be true of combining
-     * {@link StringTemplate StringTemplates}.
-     * {@snippet lang = java:
-     * StringTemplate st1 = "a\{""}b\{""}c";
-     * StringTemplate st2 = "x\{""}y\{""}z";
-     * StringTemplate st3 = "a\{""}b\{""}cx\{""}y\{""}z";
-     * StringTemplate stc = StringTemplate.combine(false, st1, st2);
-     *
-     * assert Objects.equals(st1.fragments(), List.of("a", "b", "c"));
-     * assert Objects.equals(st2.fragments(), List.of("x", "y", "z"));
-     * assert Objects.equals(st3.fragments(), List.of("a", "b", "cx", "y", "z"));
-     * assert Objects.equals(stc.fragments(), List.of("a", "b", "cx", "y", "z"));
-     * }
-     * Values lists are simply concatenated to produce a single values list.
-     * The result is a well-formed {@link StringTemplate} with n+1 fragments and n values, where
-     * n is the total of number of values across all the supplied
-     * {@link StringTemplate StringTemplates}.
-     *
-     * @param flatten          if true will flatten nested {@link StringTemplate StringTemplates} into the
-     *                         combination
-     * @param stringTemplates  zero or more {@link StringTemplate}
-     *
-     * @return combined {@link StringTemplate}
-     *
-     * @throws NullPointerException if stringTemplates is null or if any of the
-     * {@code stringTemplates} are null
-     * @throws IllegalArgumentException if too many embedded expressions
-     *
-     * @implNote If zero {@link StringTemplate} arguments are provided then a
-     * {@link StringTemplate} with an empty fragment and no values is returned, as if invoking
-     * <code>StringTemplate.of("")</code> . If only one {@link StringTemplate} argument is provided
-     * then it is returned unchanged.
-     */
-    public static StringTemplate combine(boolean flatten, StringTemplate... stringTemplates) {
-        return combineST(flatten, stringTemplates);
-    }
-
-    /**
-     * Combine a list of {@link StringTemplate StringTemplates} into a single
-     * {@link StringTemplate}.
-     * {@snippet lang = java:
-     * StringTemplate st = StringTemplate.combine(false, List.of("\{a}", "\{b}", "\{c}"));
-     * assert st.str().equals("\{a}\{b}\{c}".str());
-     *}
-     * Fragment lists from the {@link StringTemplate StringTemplates} are combined end to
-     * end with the last fragment from each {@link StringTemplate} concatenated with the
-     * first fragment of the next. To demonstrate, if we were to take two strings and we
-     * combined them as follows: {@snippet lang = java:
-     * String s1 = "abc";
-     * String s2 = "xyz";
-     * String sc = s1 + s2;
-     * assert Objects.equals(sc, "abcxyz");
-     * }
-     * the last character {@code "c"} from the first string is juxtaposed with the first
-     * character {@code "x"} of the second string. The same would be true of combining
-     * {@link StringTemplate StringTemplates}.
-     * {@snippet lang = java:
-     * StringTemplate st1 = "a\{""}b\{""}c";
-     * StringTemplate st2 = "x\{""}y\{""}z";
-     * StringTemplate st3 = "a\{""}b\{""}cx\{""}y\{""}z";
-     * StringTemplate stc = StringTemplate.combine(false, List.of(st1, st2));
-     *
-     * assert Objects.equals(st1.fragments(), List.of("a", "b", "c"));
-     * assert Objects.equals(st2.fragments(), List.of("x", "y", "z"));
-     * assert Objects.equals(st3.fragments(), List.of("a", "b", "cx", "y", "z"));
-     * assert Objects.equals(stc.fragments(), List.of("a", "b", "cx", "y", "z"));
-     * }
-     * Values lists are simply concatenated to produce a single values list.
-     * The result is a well-formed {@link StringTemplate} with n+1 fragments and n values, where
-     * n is the total of number of values across all the supplied
-     * {@link StringTemplate StringTemplates}.
-     *
-     * @param flatten          if true will flatten nested {@link StringTemplate StringTemplates} into the
-     *                         combination
-     * @param stringTemplates  list of {@link StringTemplate}
-     *
-     * @return combined {@link StringTemplate}
-     *
-     * @throws NullPointerException if stringTemplates is null or if any of the
-     * its elements are null
-     * @throws IllegalArgumentException if too many embedded expressions
-     *
-     * @implNote If {@code stringTemplates.size() == 0} then a {@link StringTemplate} with
-     * an empty fragment and no values is returned, as if invoking
-     * <code>StringTemplate.of("")</code> . If {@code stringTemplates.size() == 1}
-     * then the first element of the list is returned unchanged.
-     */
-    public static StringTemplate combine(boolean flatten, List<StringTemplate> stringTemplates) {
-        return combineST(flatten, stringTemplates.toArray(StringTemplate[]::new));
-    }
-
-    /**
      * Test this {@link StringTemplate} against another {@link StringTemplate} for equality.
      *
      * @param other  other {@link StringTemplate}
@@ -732,43 +558,43 @@ public final class StringTemplate extends Carriers.CarrierObject  {
             return constructor;
         }
 
-        /**
-         * Create a new {@link StringTemplate} from values
-         *
-         * @param fragments  list of string fragments
-         * @param values     lisy of object values
-         *
-         * @return new {@link StringTemplate}
-         */
-        private static StringTemplate createStringTemplate(List<String> fragments, List<Object> values) {
-            SharedData sharedData = sharedDataMap.get(fragments);
-            if (sharedData != null) {
-                return new StringTemplate(values, sharedData);
-            }
-            Class<?>[] objectTypes = new Class<?>[values.size()];
-            Arrays.fill(objectTypes, Object.class);
-            MethodType type = MethodType.methodType(StringTemplate.class, objectTypes);
-            List<MethodHandle> components = Carriers.components(type);
-            List<MethodHandle> getters = components.stream()
-                .map(c -> c.asType(c.type().changeParameterType(0, StringTemplate.class)))
-                .toList();
-            List<Class<?>> ptypes = returnTypes(components);
-            int[] permute = new int[ptypes.size()];
-            MethodHandle valuesMH = createValuesMH(ptypes, getters, permute);
-            List<MethodHandle> filters = filterGetters(getters);
-            List<Class<?>> ftypes = returnTypes(filters);
-            MethodHandle joinMH = createJoinMH(fragments, ftypes, filters, permute);
-            MethodHandle concatMH = createConcatMH(fragments);
-            sharedData = new SharedData(fragments, type, type.parameterList(), valuesMH, joinMH, concatMH);
-            sharedDataMap.put(fragments, sharedData);
-            return new StringTemplate(values, sharedData);
-        }
-
-        /**
-         * Map to minimize redundant shared data.
-         */
-        private static final ReferencedKeyMap<List<String>, SharedData> sharedDataMap =
-            ReferencedKeyMap.create(true, java.util.concurrent.ConcurrentHashMap::new);
+//        /**
+//         * Create a new {@link StringTemplate} from values
+//         *
+//         * @param fragments  list of string fragments
+//         * @param values     lisy of object values
+//         *
+//         * @return new {@link StringTemplate}
+//         */
+//        private static StringTemplate createStringTemplate(List<String> fragments, List<Object> values) {
+//            SharedData sharedData = sharedDataMap.get(fragments);
+//            if (sharedData != null) {
+//                return new StringTemplate(values, sharedData);
+//            }
+//            Class<?>[] objectTypes = new Class<?>[values.size()];
+//            Arrays.fill(objectTypes, Object.class);
+//            MethodType type = MethodType.methodType(StringTemplate.class, objectTypes);
+//            List<MethodHandle> components = Carriers.components(type);
+//            List<MethodHandle> getters = components.stream()
+//                .map(c -> c.asType(c.type().changeParameterType(0, StringTemplate.class)))
+//                .toList();
+//            List<Class<?>> ptypes = returnTypes(components);
+//            int[] permute = new int[ptypes.size()];
+//            MethodHandle valuesMH = createValuesMH(ptypes, getters, permute);
+//            List<MethodHandle> filters = filterGetters(getters);
+//            List<Class<?>> ftypes = returnTypes(filters);
+//            MethodHandle joinMH = createJoinMH(fragments, ftypes, filters, permute);
+//            MethodHandle concatMH = createConcatMH(fragments);
+//            sharedData = new SharedData(fragments, type, type.parameterList(), valuesMH, joinMH, concatMH);
+//            sharedDataMap.put(fragments, sharedData);
+//            return new StringTemplate(values, sharedData);
+//        }
+//
+//        /**
+//         * Map to minimize redundant shared data.
+//         */
+//        private static final ReferencedKeyMap<List<String>, SharedData> sharedDataMap =
+//            ReferencedKeyMap.create(true, java.util.concurrent.ConcurrentHashMap::new);
 
         /**
          * Glean the return types from a list of {@link MethodHandle}.

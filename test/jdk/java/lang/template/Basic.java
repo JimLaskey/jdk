@@ -40,7 +40,6 @@ public class Basic {
         equalsHashCode();
         concatenationTests();
         componentTests();
-        limitsTests();
         stringTemplateCoverage();
     }
 
@@ -107,36 +106,6 @@ public class Basic {
     }
 
     /*
-     * Limits tests.
-     */
-    static void limitsTests() {
-        int x = 9;
-
-        StringTemplate st200 = """
-             \{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x} \{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}
-             \{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x} \{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}
-             \{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x} \{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}
-             \{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x} \{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}
-             \{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x} \{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}
-
-             \{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x} \{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}
-             \{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x} \{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}
-             \{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x} \{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}
-             \{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x} \{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}
-             \{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x} \{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}
-             """;
-        boolean failed = false;
-        try {
-            StringTemplate st400 = StringTemplate.combine(false, st200, st200);
-        } catch (IllegalArgumentException ex) {
-            failed = true;
-        }
-        if (!failed) {
-            throw new RuntimeException("Did not detect too many embedded expressions");
-        }
-    }
-
-    /*
      *  StringTemplate coverage
      */
     static void stringTemplateCoverage() {
@@ -151,18 +120,11 @@ public class Basic {
         ASSERT(src.fragments(), List.of("", " + ", " = ", ""));
         ASSERT(src.values(), List.of(x, y, x + y));
         ASSERT(str(src), x + " + " + y + " = " + (x + y));
-        ASSERT(str(StringTemplate.combine(false, src, src)),
-                str("\{x} + \{y} = \{x + y}\{x} + \{y} = \{x + y}"));
-        ASSERT(StringTemplate.combine(false, src), src);
-        ASSERT(str(StringTemplate.combine(false)), "");
-        ASSERT(str(StringTemplate.combine(false, List.of(src, src))),
-                str("\{x} + \{y} = \{x + y}\{x} + \{y} = \{x + y}"));
         ASSERT(str(src), x + " + " + y + " = " + (x + y));
         ASSERT(str(t"a string"), "a string");
         StringTemplate color = "\{"red"}";
         StringTemplate shape = "\{"triangle"}";
         StringTemplate statement = "This is a \{color} \{shape}.";
-        ASSERT(str(StringTemplate.combine(true, statement)), "This is a red triangle.");
         ASSERT(str(statement, v -> {
             if (v instanceof StringTemplate st) {
                 return str(st).toUpperCase();

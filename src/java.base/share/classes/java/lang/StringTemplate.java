@@ -175,11 +175,12 @@ public final class StringTemplate extends Carriers.CarrierObject  {
      * StringTemplate st = "The student \{student} is in \{teacher}'s classroom.";
      * String result = st.str(); // @highlight substring="str()"
      *}
-     * In the above example, the value of  {@code result} will be
+     * In the above example, the value of {@code result} will be
      * {@code "The student Mary is in Johnson's classroom."}. This is
      * produced by the interleaving concatenation of fragments and values from the supplied
      * {@link StringTemplate}. To accommodate concatenation, values are converted to strings
-     * as if invoking {@link String#valueOf(Object)}.
+     * as if invoking {@link String#valueOf(Object)}, with the exception of {@link StringTemplate}
+     * objects which are recursively converted to Strings with this method.
      *
      * @return interpolation of this {@link StringTemplate}
      */
@@ -189,7 +190,34 @@ public final class StringTemplate extends Carriers.CarrierObject  {
         } catch (RuntimeException | Error ex) {
             throw ex;
         } catch (Throwable ex) {
-            throw new RuntimeException("string template join failure", ex);
+            throw new RuntimeException("string template str failure", ex);
+        }
+    }
+
+    /**
+     * Returns the string interpolation of the fragments and values for this
+     * {@link StringTemplate} after the values have been mapped by {@code func}.
+     * {@snippet lang = java:
+     * String student = "Mary";
+     * String teacher = "Johnson";
+     * StringTemplate st = "The student \{student} is in \{teacher}'s classroom.";
+     * String result = st.str(v -> String.valueOf(v).toUpperCase()); // @highlight substring="str()"}
+     *
+     * In the above example, the value of {@code result} will be
+     * {@code "The student MARY is in JOHNSON's classroom."}. This is
+     * produced by the interleaving concatenation of fragments and strings of values mapped
+     * through {@code func}.
+     *
+     * @return mapped interpolation of this {@link StringTemplate}
+     */
+    private String str(Function<Object, String> func) {
+        try {
+            List<String> results = values().stream().map(func).toList();
+            return (String)sharedData.concatMH().invokeWithArguments(results);
+        } catch (RuntimeException | Error ex) {
+            throw ex;
+        } catch (Throwable ex) {
+            throw new RuntimeException("string template str failure", ex);
         }
     }
 
@@ -206,7 +234,8 @@ public final class StringTemplate extends Carriers.CarrierObject  {
      * {@code "The student Mary is in Johnson's classroom."}. This is
      * produced by the interleaving concatenation of fragments and values from the supplied
      * {@link StringTemplate}. To accommodate concatenation, values are converted to strings
-     * as if invoking {@link String#valueOf(Object)}.
+     * as if invoking {@link String#valueOf(Object)}, with the exception of {@link StringTemplate}
+     * objects which are recursively converted to Strings with this method.
      *
      * @param stringTemplate target {@link StringTemplate}
      * @return interpolation of this {@link StringTemplate}
@@ -218,6 +247,36 @@ public final class StringTemplate extends Carriers.CarrierObject  {
     public static String str(StringTemplate stringTemplate) {
         Objects.requireNonNull(stringTemplate, "stringTemplate should not be null");
         return stringTemplate.str();
+    }
+
+    /**
+     * Returns the string interpolation of the fragments and values for the specified
+     * {@link StringTemplate} after the values have been mapped through {@code func}.
+     * {@snippet lang = java:
+     * String student = "Mary";
+     * String teacher = "Johnson";
+     * StringTemplate st = "The student \{student} is in \{teacher}'s classroom.";
+     * String result = StringTemplate.str(st); // @highlight substring="str()"
+     *}
+     * String result = st.str(v -> String.valueOf(v).toUpperCase()); // @highlight substring="str()"}
+     *
+     * In the above example, the value of {@code result} will be
+     * {@code "The student MARY is in JOHNSON's classroom."}. This is
+     * produced by the interleaving concatenation of fragments and strings of values mapped
+     * through {@code func}.
+     *
+     * @param stringTemplate target {@link StringTemplate}
+     * @param func function that maps values to strings
+     * @return interpolation of this {@link StringTemplate}
+     *
+     * @throws NullPointerException if stringTemplate is null
+     *
+     * @implSpec The implementation returns the result of invoking {@code stringTemplate.str()}.
+     */
+    public static String str(StringTemplate stringTemplate, Function<Object, String> func) {
+        Objects.requireNonNull(stringTemplate, "stringTemplate should not be null");
+        Objects.requireNonNull(func, "func should not be null");
+        return stringTemplate.str(func);
     }
 
     /**
@@ -412,31 +471,6 @@ public final class StringTemplate extends Carriers.CarrierObject  {
     }
 
     /**
-     * Constructs a new {@link StringTemplate} using this instance's fragments and
-     * values mapped from this instance's values by the specified
-     * {@code mapper} function.
-     * {@snippet lang = java:
-     * StringTemplate st2 = st1.mapValue(v -> {
-     *      if (v instanceof Supplier<?> s) {
-     *          return s.get();
-     *      }
-     *      return v;
-     * });
-     * }
-     *
-     * @param mapper mapper function
-     * @return new {@link StringTemplate}
-     */
-    public StringTemplate mapValues(Function<Object, Object> mapper) {
-        Objects.requireNonNull(mapper, "mapper must not be null");
-        List<Object> values = values()
-            .stream()
-            .map(mapper)
-            .toList();
-        return Factory.createStringTemplate(fragments(), values);
-    }
-
-    /**
      * Test this {@link StringTemplate} against another {@link StringTemplate} for equality.
      *
      * @param other  other {@link StringTemplate}
@@ -512,6 +546,14 @@ public final class StringTemplate extends Carriers.CarrierObject  {
         private final MethodHandle joinMH;
 
         /**
+         * {@link MethodHandle} Used by {@link StringTemplate#str(StringTemplate, Function)} to produce a string.
+         * This {@link MethodHandle} is shared by all instances created at the
+         * {@link java.lang.invoke.CallSite CallSite}.
+         */
+        @Stable
+        private final MethodHandle concatMH;
+
+        /**
          * Owner of metadata. Metadata is used to cache information at a
          * {@link java.lang.invoke.CallSite CallSite} by a processor. Only one
          * cache is available, first processor to attempt wins. This is under the assumption
@@ -533,16 +575,17 @@ public final class StringTemplate extends Carriers.CarrierObject  {
          * @param type            {@link MethodType} at callsite
          * @param valuesMH        {@link MethodHandle} to produce list of values
          * @param joinMH          {@link MethodHandle} to produce interpolation
+         * @param concatMH        {@link MethodHandle} to produce mapped interpolation
          */
         SharedData(List<String> fragments, MethodType type, List<Class<?>> types,
-                                 MethodHandle valuesMH, MethodHandle joinMH) {
+                   MethodHandle valuesMH, MethodHandle joinMH, MethodHandle concatMH) {
             this.fragments = fragments;
             this.type = type;
             this.valuesMH = valuesMH;
             this.joinMH = joinMH;
+            this.concatMH = concatMH;
             this.owner = null;
             this.metaData = null;
-
         }
 
         /**
@@ -572,6 +615,14 @@ public final class StringTemplate extends Carriers.CarrierObject  {
         MethodHandle joinMH() {
             return joinMH;
         }
+
+        /**
+         * {@return MethodHandle to produce mapped interpolation }
+         */
+        MethodHandle concatMH() {
+            return concatMH;
+        }
+
 
         /**
          * Get owner meta data.
@@ -675,7 +726,8 @@ public final class StringTemplate extends Carriers.CarrierObject  {
             List<MethodHandle> filters = filterGetters(getters);
             List<Class<?>> ftypes = returnTypes(filters);
             MethodHandle joinMH = createJoinMH(fragments, ftypes, filters, permute);
-            SharedData sharedData = new SharedData(fragments, type, type.parameterList(), valuesMH, joinMH);
+            MethodHandle concatMH = createConcatMH(fragments);
+            SharedData sharedData = new SharedData(fragments, type, type.parameterList(), valuesMH, joinMH, concatMH);
             MethodHandle constructor = createConstructorMH(type, sharedData, ptypes);
             return constructor;
         }
@@ -706,7 +758,8 @@ public final class StringTemplate extends Carriers.CarrierObject  {
             List<MethodHandle> filters = filterGetters(getters);
             List<Class<?>> ftypes = returnTypes(filters);
             MethodHandle joinMH = createJoinMH(fragments, ftypes, filters, permute);
-            sharedData = new SharedData(fragments, type, type.parameterList(), valuesMH, joinMH);
+            MethodHandle concatMH = createConcatMH(fragments);
+            sharedData = new SharedData(fragments, type, type.parameterList(), valuesMH, joinMH, concatMH);
             sharedDataMap.put(fragments, sharedData);
             return new StringTemplate(values, sharedData);
         }
@@ -764,6 +817,17 @@ public final class StringTemplate extends Carriers.CarrierObject  {
                 joinMH = MethodHandles.filterArguments(joinMH, 0, filters.toArray(MethodHandle[]::new));
                 joinMH = MethodHandles.permuteArguments(joinMH, JOIN_MT, permute);
                 return joinMH;
+            } catch (StringConcatException ex) {
+                throw new InternalError("constructing internal string template", ex);
+            }
+        }
+
+        private static MethodHandle createConcatMH(List<String> fragments) {
+            try {
+                Class<?>[] ptypes = new Class<?>[fragments.size() - 1];
+                Arrays.fill(ptypes, String.class);
+                MethodHandle concatMH = StringConcatFactory.makeConcatWithTemplate(fragments, List.of(ptypes));
+                return concatMH;
             } catch (StringConcatException ex) {
                 throw new InternalError("constructing internal string template", ex);
             }

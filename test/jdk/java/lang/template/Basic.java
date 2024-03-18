@@ -42,7 +42,6 @@ public class Basic {
         componentTests();
         limitsTests();
         stringTemplateCoverage();
-        mapTests();
     }
 
     static void ASSERT(String a, String b) {
@@ -164,36 +163,14 @@ public class Basic {
         StringTemplate shape = "\{"triangle"}";
         StringTemplate statement = "This is a \{color} \{shape}.";
         ASSERT(str(StringTemplate.combine(true, statement)), "This is a red triangle.");
+        ASSERT(str(statement, v -> {
+            if (v instanceof StringTemplate st) {
+                return str(st).toUpperCase();
+
+            } else {
+                return String.valueOf(v).toUpperCase();
+            }
+         }), "This is a RED TRIANGLE.");
     }
-
-
-    /*
-     *  mapValues
-     */
-    static void mapTests() {
-        int x = 10, y = 20;
-        StringTemplate st = "The sum of \{x} and \{y} equals \{x + y}";
-        StringTemplate st1 = st.mapValues(v -> v instanceof Integer i ? i * 100 : v);
-        ASSERT(str(st1), "The sum of 1000 and 2000 equals 3000");
-    }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 }

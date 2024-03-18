@@ -33,6 +33,8 @@ import java.util.*;
 import java.util.concurrent.*;
 import java.util.function.*;
 
+import static java.lang.StringTemplate.str;
+
 public class Basic {
     public static void main(String... arg) {
         equalsHashCode();
@@ -40,7 +42,6 @@ public class Basic {
         componentTests();
         limitsTests();
         stringTemplateCoverage();
-        emptyExpressionTest();
         mapTests();
     }
 
@@ -89,8 +90,8 @@ public class Basic {
         int x = 10;
         int y = 20;
 
-        ASSERT("\{x} \{y}".join(), x + " " + y);
-        ASSERT("\{x + y}".join(), "" + (x + y));
+        ASSERT(str("\{x} \{y}"), x + " " + y);
+        ASSERT(str("\{x + y}"), "" + (x + y));
     }
 
     /*
@@ -103,7 +104,7 @@ public class Basic {
         StringTemplate st = "\{x} + \{y} = \{x + y}";
         ASSERT(st.values(), List.of(x, y, x + y));
         ASSERT(st.fragments(), List.of("", " + ", " = ", ""));
-        ASSERT(st.join(), x + " + " + y + " = " + (x + y));
+        ASSERT(str(st), x + " + " + y + " = " + (x + y));
     }
 
     /*
@@ -112,7 +113,7 @@ public class Basic {
     static void limitsTests() {
         int x = 9;
 
-        StringTemplate ts250 = """
+        StringTemplate st200 = """
              \{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x} \{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}
              \{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x} \{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}
              \{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x} \{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}
@@ -124,296 +125,56 @@ public class Basic {
              \{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x} \{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}
              \{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x} \{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}
              \{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x} \{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}
-
-             \{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x} \{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}
-             \{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x} \{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}
-             \{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}
              """;
-        ASSERT(ts250.values().size(), 250);
-        ASSERT(ts250.join(), """
-               9999999999 9999999999
-               9999999999 9999999999
-               9999999999 9999999999
-               9999999999 9999999999
-               9999999999 9999999999
-
-               9999999999 9999999999
-               9999999999 9999999999
-               9999999999 9999999999
-               9999999999 9999999999
-               9999999999 9999999999
-
-               9999999999 9999999999
-               9999999999 9999999999
-               9999999999
-               """);
-
-        StringTemplate ts251 = """
-             \{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x} \{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}
-             \{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x} \{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}
-             \{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x} \{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}
-             \{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x} \{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}
-             \{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x} \{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}
-
-             \{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x} \{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}
-             \{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x} \{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}
-             \{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x} \{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}
-             \{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x} \{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}
-             \{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x} \{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}
-
-             \{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x} \{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}
-             \{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x} \{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}
-             \{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x} \{x}
-             """;
-        ASSERT(ts251.values().size(), 251);
-        ASSERT(ts251.join(), """
-               9999999999 9999999999
-               9999999999 9999999999
-               9999999999 9999999999
-               9999999999 9999999999
-               9999999999 9999999999
-
-               9999999999 9999999999
-               9999999999 9999999999
-               9999999999 9999999999
-               9999999999 9999999999
-               9999999999 9999999999
-
-               9999999999 9999999999
-               9999999999 9999999999
-               9999999999 9
-               """);
-
-        StringTemplate ts252 = """
-             \{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x} \{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}
-             \{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x} \{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}
-             \{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x} \{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}
-             \{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x} \{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}
-             \{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x} \{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}
-
-             \{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x} \{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}
-             \{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x} \{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}
-             \{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x} \{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}
-             \{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x} \{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}
-             \{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x} \{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}
-
-             \{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x} \{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}
-             \{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x} \{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}
-             \{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x} \{x}\{x}
-             """;
-        ASSERT(ts252.values().size(), 252);
-        ASSERT(ts252.join(), """
-               9999999999 9999999999
-               9999999999 9999999999
-               9999999999 9999999999
-               9999999999 9999999999
-               9999999999 9999999999
-
-               9999999999 9999999999
-               9999999999 9999999999
-               9999999999 9999999999
-               9999999999 9999999999
-               9999999999 9999999999
-
-               9999999999 9999999999
-               9999999999 9999999999
-               9999999999 99
-               """);
-
-        StringTemplate ts253 = """
-             \{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x} \{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}
-             \{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x} \{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}
-             \{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x} \{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}
-             \{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x} \{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}
-             \{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x} \{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}
-
-             \{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x} \{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}
-             \{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x} \{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}
-             \{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x} \{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}
-             \{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x} \{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}
-             \{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x} \{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}
-
-             \{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x} \{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}
-             \{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x} \{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}
-             \{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x} \{x}\{x}\{x}
-             """;
-        ASSERT(ts253.values().size(), 253);
-        ASSERT(ts253.join(), """
-               9999999999 9999999999
-               9999999999 9999999999
-               9999999999 9999999999
-               9999999999 9999999999
-               9999999999 9999999999
-
-               9999999999 9999999999
-               9999999999 9999999999
-               9999999999 9999999999
-               9999999999 9999999999
-               9999999999 9999999999
-
-               9999999999 9999999999
-               9999999999 9999999999
-               9999999999 999
-               """);
-
-        StringTemplate ts254 = """
-             \{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x} \{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}
-             \{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x} \{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}
-             \{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x} \{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}
-             \{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x} \{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}
-             \{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x} \{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}
-
-             \{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x} \{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}
-             \{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x} \{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}
-             \{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x} \{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}
-             \{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x} \{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}
-             \{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x} \{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}
-
-             \{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x} \{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}
-             \{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x} \{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}
-             \{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x} \{x}\{x}\{x}\{x}
-             """;
-        ASSERT(ts254.values().size(), 254);
-        ASSERT(ts254.join(), """
-               9999999999 9999999999
-               9999999999 9999999999
-               9999999999 9999999999
-               9999999999 9999999999
-               9999999999 9999999999
-
-               9999999999 9999999999
-               9999999999 9999999999
-               9999999999 9999999999
-               9999999999 9999999999
-               9999999999 9999999999
-
-               9999999999 9999999999
-               9999999999 9999999999
-               9999999999 9999
-               """);
-
-        StringTemplate ts255 = """
-             \{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x} \{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}
-             \{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x} \{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}
-             \{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x} \{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}
-             \{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x} \{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}
-             \{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x} \{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}
-
-             \{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x} \{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}
-             \{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x} \{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}
-             \{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x} \{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}
-             \{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x} \{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}
-             \{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x} \{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}
-
-             \{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x} \{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}
-             \{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x} \{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}
-             \{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x} \{x}\{x}\{x}\{x}\{x}
-             """;
-        ASSERT(ts255.values().size(), 255);
-        ASSERT(ts255.join(), """
-               9999999999 9999999999
-               9999999999 9999999999
-               9999999999 9999999999
-               9999999999 9999999999
-               9999999999 9999999999
-
-               9999999999 9999999999
-               9999999999 9999999999
-               9999999999 9999999999
-               9999999999 9999999999
-               9999999999 9999999999
-
-               9999999999 9999999999
-               9999999999 9999999999
-               9999999999 99999
-               """);
-
-        StringTemplate ts256 = """
-             \{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x} \{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}
-             \{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x} \{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}
-             \{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x} \{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}
-             \{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x} \{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}
-             \{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x} \{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}
-
-             \{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x} \{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}
-             \{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x} \{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}
-             \{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x} \{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}
-             \{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x} \{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}
-             \{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x} \{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}
-
-             \{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x} \{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}
-             \{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x} \{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}
-             \{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x}\{x} \{x}\{x}\{x}\{x}\{x}\{x}
-             """;
-        ASSERT(ts256.values().size(), 256);
-        ASSERT(ts256.join(), """
-               9999999999 9999999999
-               9999999999 9999999999
-               9999999999 9999999999
-               9999999999 9999999999
-               9999999999 9999999999
-
-               9999999999 9999999999
-               9999999999 9999999999
-               9999999999 9999999999
-               9999999999 9999999999
-               9999999999 9999999999
-
-               9999999999 9999999999
-               9999999999 9999999999
-               9999999999 999999
-               """);
-
+        boolean failed = false;
+        try {
+            StringTemplate st400 = StringTemplate.combine(false, st200, st200);
+        } catch (IllegalArgumentException ex) {
+            failed = true;
+        }
+        if (!failed) {
+            throw new RuntimeException("Did not detect too many embedded expressions");
+        }
     }
 
     /*
      *  StringTemplate coverage
      */
     static void stringTemplateCoverage() {
-        StringTemplate tsNoValues = StringTemplate.of("No Values");
+        StringTemplate tsNoValues = t"No Values";
 
         ASSERT(tsNoValues.values(), List.of());
         ASSERT(tsNoValues.fragments(), List.of("No Values"));
-        ASSERT(tsNoValues.join(), "No Values");
+        ASSERT(str(tsNoValues), "No Values");
 
         int x = 10, y = 20;
         StringTemplate src = "\{x} + \{y} = \{x + y}";
-        StringTemplate tsValues = StringTemplate.of(src.fragments(), src.values());
-        ASSERT(tsValues.fragments(), List.of("", " + ", " = ", ""));
-        ASSERT(tsValues.values(), List.of(x, y, x + y));
-        ASSERT(tsValues.join(), x + " + " + y + " = " + (x + y));
-        ASSERT(StringTemplate.combine(false, src, src).join(),
-                "\{x} + \{y} = \{x + y}\{x} + \{y} = \{x + y}".join());
+        ASSERT(src.fragments(), List.of("", " + ", " = ", ""));
+        ASSERT(src.values(), List.of(x, y, x + y));
+        ASSERT(str(src), x + " + " + y + " = " + (x + y));
+        ASSERT(str(StringTemplate.combine(false, src, src)),
+                str("\{x} + \{y} = \{x + y}\{x} + \{y} = \{x + y}"));
         ASSERT(StringTemplate.combine(false, src), src);
-        ASSERT(StringTemplate.combine(false).join(), "");
-        ASSERT(StringTemplate.combine(false, List.of(src, src)).join(),
-                "\{x} + \{y} = \{x + y}\{x} + \{y} = \{x + y}".join());
-        ASSERT(StringTemplate.join(src), x + " + " + y + " = " + (x + y));
-        ASSERT("a string".asTemplate(), "\{}a string");
+        ASSERT(str(StringTemplate.combine(false)), "");
+        ASSERT(str(StringTemplate.combine(false, List.of(src, src))),
+                str("\{x} + \{y} = \{x + y}\{x} + \{y} = \{x + y}"));
+        ASSERT(str(src), x + " + " + y + " = " + (x + y));
+        ASSERT(str(t"a string"), "a string");
         StringTemplate color = "\{"red"}";
         StringTemplate shape = "\{"triangle"}";
         StringTemplate statement = "This is a \{color} \{shape}.";
-        ASSERT(StringTemplate.combine(true, statement).join(), "This is a red triangle.");
+        ASSERT(str(StringTemplate.combine(true, statement)), "This is a red triangle.");
     }
 
-    /*
-     *  Empty expression
-     */
-    static void emptyExpressionTest() {
-        ASSERT("\{}".fragments().size(), 1);
-        ASSERT("\{}".fragments().get(0), "");
-    }
 
     /*
-     *  mapFragments and mapValues
+     *  mapValues
      */
     static void mapTests() {
         int x = 10, y = 20;
         StringTemplate st = "The sum of \{x} and \{y} equals \{x + y}";
-        StringTemplate st1 = st.mapFragments(String::toUpperCase);
-        StringTemplate st2 = st.mapValues(v -> v instanceof Integer i ? i * 100 : v);
-        ASSERT(st1.join(), "THE SUM OF 10 AND 20 EQUALS 30");
-        ASSERT(st2.join(), "The sum of 1000 and 2000 equals 3000");
+        StringTemplate st1 = st.mapValues(v -> v instanceof Integer i ? i * 100 : v);
+        ASSERT(str(st1), "The sum of 1000 and 2000 equals 3000");
     }
 
 
